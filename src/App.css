@@ -1,0 +1,483 @@
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+.card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 2rem 1.75rem;
+  text-align: center;
+}
+
+.card h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.7rem;
+  letter-spacing: 0.01em;
+}
+
+.muted {
+  color: var(--grey);
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* ------------------------------------------------------------------- forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.form label {
+  font-size: 0.85rem;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.form input,
+.checkin .form textarea {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--input-bg);
+  color: var(--cream);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.checkin .form textarea {
+  resize: vertical;
+}
+
+.form input::placeholder,
+.checkin .form textarea::placeholder {
+  color: var(--grey);
+}
+
+.form input:focus,
+.checkin .form textarea:focus,
+.admin-controls input:focus {
+  outline: 2px solid var(--cream);
+  border-color: transparent;
+}
+
+/* ----------------------------------------------------------------- buttons */
+button {
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--edge);
+  background: var(--oxblood);
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--oxblood-press);
+  border-color: var(--edge-strong);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+button.google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  background: var(--white);
+  border-color: var(--white);
+  color: #1f1f1f;
+  margin-bottom: 1.25rem;
+}
+
+button.google:hover:not(:disabled) {
+  background: #f1f1f1;
+}
+
+button.secondary {
+  background: transparent;
+  border: 1px solid var(--grey);
+  color: var(--cream);
+}
+
+button.secondary:hover:not(:disabled) {
+  background: rgba(236, 230, 215, 0.06);
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: var(--grey);
+  font-weight: 400;
+  font-size: 0.9rem;
+  padding: 0.25rem;
+  text-decoration: underline;
+}
+
+button.link:hover:not(:disabled) {
+  color: var(--cream);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+  color: var(--grey);
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--hairline);
+}
+
+.email {
+  font-weight: 600;
+  margin: 0 0 1.5rem;
+  word-break: break-all;
+}
+
+.error {
+  color: var(--error);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* --------------------------------------------------- signed-in app shell */
+.screen:has(.shell) {
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.shell {
+  width: 100%;
+  max-width: 600px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.topbar .brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+}
+
+.nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.nav button {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--grey);
+  font-weight: 600;
+  padding: 0.55rem;
+}
+
+.nav button:hover:not(.on) {
+  color: var(--cream);
+}
+
+.nav button.on {
+  background: var(--oxblood);
+  border-color: var(--edge);
+  color: var(--cream);
+}
+
+.shell .card {
+  max-width: none;
+  text-align: left;
+}
+
+/* --------------------------------------------------------- Today / entry */
+.card.calm {
+  text-align: center;
+  padding: 2.5rem 1.75rem;
+}
+
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  font-size: 0.74rem;
+  color: var(--grey);
+  margin: 0 0 0.4rem;
+}
+
+.entry h1 {
+  font-size: 1.55rem;
+  line-height: 1.3;
+}
+
+.audio,
+.audio-launch {
+  width: 100%;
+  margin: 1rem 0 0.5rem;
+}
+
+.audio-launch button {
+  width: 100%;
+}
+
+.body {
+  margin-top: 1rem;
+  line-height: 1.7;
+  color: var(--cream);
+}
+
+.body p {
+  margin: 0 0 1rem;
+}
+
+/* ---------------------------------------------------------------- check-in */
+.checkin {
+  margin-top: 1.25rem;
+}
+
+.checkin h2 {
+  margin: 0 0 1rem;
+  font-size: 1.2rem;
+}
+
+.checkin.done {
+  text-align: center;
+}
+
+.choice {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.choice legend {
+  font-size: 0.85rem;
+  color: var(--cream);
+  font-weight: 500;
+  padding: 0;
+  margin-bottom: 0.5rem;
+}
+
+.choices {
+  display: flex;
+  gap: 0.6rem;
+}
+
+button.chip {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--grey);
+  color: var(--cream);
+  font-weight: 500;
+}
+
+button.chip.on {
+  background: var(--oxblood);
+  border-color: var(--edge);
+  color: var(--cream);
+}
+
+.optional {
+  color: var(--grey);
+  font-weight: 400;
+}
+
+/* ---------------------------------------------------------------- Progress */
+.progress .stats {
+  display: flex;
+  gap: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.progress .stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.1rem 1rem;
+  border-radius: 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+}
+
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--grey);
+}
+
+.streak {
+  margin: 1rem 0 0;
+}
+
+/* ------------------------------------------------------------------- Admin */
+.admin .rollups {
+  display: flex;
+  gap: 0.75rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.rollup {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.9rem;
+  border-radius: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+}
+
+.rollup-num {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.rollup-label {
+  font-size: 0.85rem;
+  color: var(--cream);
+}
+
+.rollup-hint {
+  font-size: 0.72rem;
+  color: var(--grey);
+}
+
+.admin-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-controls input[type='search'] {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: var(--input-bg);
+  color: var(--cream);
+  font: inherit;
+}
+
+.admin-controls input[type='search']::placeholder {
+  color: var(--grey);
+}
+
+.admin-controls .checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--cream);
+  white-space: nowrap;
+}
+
+.admin-controls .checkbox input {
+  accent-color: var(--oxblood);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table.men {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+table.men th,
+table.men td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+
+table.men thead th {
+  color: var(--grey);
+  font-weight: 600;
+}
+
+button.sort {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
+button.sort:hover,
+button.sort.on {
+  color: var(--cream);
+}
+
+.man-name {
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.man-email {
+  font-size: 0.75rem;
+  color: var(--grey);
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+}
+
+.badge.on {
+  background: var(--oxblood);
+  border: 1px solid var(--edge);
+  color: var(--cream);
+}
+
+.badge.off {
+  background: rgba(107, 111, 118, 0.15);
+  color: var(--grey);
+}

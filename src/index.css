@@ -1,0 +1,47 @@
+:root {
+  /* ManAlive brand palette */
+  --oxblood: #4a1f1f;   /* exact brand primary: fills, accents, active states */
+  --oxblood-press: #3d1818; /* darker oxblood for pressed/hover (never lighter/warmer) */
+  --cream: #ece6d7;     /* primary text + light surfaces */
+  --edge: rgba(236, 230, 215, 0.22); /* thin cream border: separates dark fills from bg */
+  --edge-strong: rgba(236, 230, 215, 0.5);
+  --charcoal: #2c3137;  /* app background */
+  --surface: #363c43;   /* lifted card surface */
+  --input-bg: #262b30;  /* recessed fields */
+  --grey: #6b6f76;      /* secondary/meta text, placeholders */
+  --hairline: rgba(107, 111, 118, 0.28); /* grey borders at low opacity */
+  --white: #ffffff;
+  --error: #e08d7f;
+
+  --font-display: 'Oswald', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  color-scheme: dark;
+  color: var(--cream);
+  background: var(--charcoal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+}

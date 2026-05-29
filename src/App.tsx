@@ -1,0 +1,232 @@
+import { useEffect, useState } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from './lib/supabase'
+import { Today } from './screens/Today'
+import { Progress } from './screens/Progress'
+import { Admin } from './screens/Admin'
+import { fetchMyProfile } from './lib/profile'
+import './App.css'
+
+function App() {
+  const [session, setSession] = useState<Session | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setLoading(false)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+
+    return () => listener.subscription.unsubscribe()
+  }, [])
+
+  if (loading) {
+    return (
+      <main className="screen">
+        <p className="muted">Loading…</p>
+      </main>
+    )
+  }
+
+  return (
+    <main className="screen">
+      {session ? <Shell /> : <SignIn />}
+    </main>
+  )
+}
+
+type View = 'today' | 'progress' | 'admin'
+
+function Shell() {
+  const [view, setView] = useState<View>('today')
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchMyProfile()
+      .then((p) => { if (!cancelled) setIsAdmin(p.role === 'admin') })
+      .catch(() => { /* non-fatal: just no admin tab */ })
+    return () => { cancelled = true }
+  }, [])
+
+  return (
+    <div className="shell">
+      <header className="topbar">
+        <span className="brand">ManAlive</span>
+        <button type="button" className="link" onClick={() => supabase.auth.signOut()}>
+          Sign out
+        </button>
+      </header>
+
+      <nav className="nav">
+        <button type="button" className={view === 'today' ? 'on' : ''} onClick={() => setView('today')}>
+          Today
+        </button>
+        <button type="button" className={view === 'progress' ? 'on' : ''} onClick={() => setView('progress')}>
+          Progress
+        </button>
+        {isAdmin && (
+          <button type="button" className={view === 'admin' ? 'on' : ''} onClick={() => setView('admin')}>
+            Admin
+          </button>
+        )}
+      </nav>
+
+      {view === 'today' && <Today />}
+      {view === 'progress' && <Progress />}
+      {view === 'admin' && isAdmin && <Admin />}
+    </div>
+  )
+}
+
+function SignIn() {
+  const [step, setStep] = useState<'request' | 'verify'>('request')
+  const [email, setEmail] = useState('')
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function continueWithGoogle() {
+    setBusy(true)
+    setError('')
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    // On success the browser redirects to Google; only reaches here on error.
+    if (error) {
+      setError(error.message)
+      setBusy(false)
+    }
+  }
+
+  async function sendCode(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    })
+    setBusy(false)
+    if (error) {
+      setError(error.message)
+    } else {
+      setStep('verify')
+    }
+  }
+
+  async function verifyCode(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError('')
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: 'email',
+    })
+    if (error) {
+      setError(error.message)
+      setBusy(false)
+    }
+    // On success, onAuthStateChange swaps to the signed-in view.
+  }
+
+  return (
+    <div className="card">
+      <h1>ManAlive</h1>
+
+      {step === 'request' ? (
+        <>
+          <p className="muted">Sign in to begin.</p>
+
+          <button type="button" className="google" onClick={continueWithGoogle} disabled={busy}>
+            <GoogleIcon />
+            Continue with Google
+          </button>
+
+          <div className="divider"><span>or</span></div>
+
+          <form onSubmit={sendCode} className="form">
+            <label htmlFor="email">Email me a 6-digit code</label>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="submit" className="secondary" disabled={busy}>
+              {busy ? 'Sending…' : 'Send code'}
+            </button>
+          </form>
+        </>
+      ) : (
+        <form onSubmit={verifyCode} className="form">
+          <p className="muted">
+            Enter the 6-digit code sent to <strong>{email}</strong>.
+          </p>
+          <label htmlFor="code">6-digit code</label>
+          <input
+            id="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="[0-9]*"
+            maxLength={6}
+            required
+            placeholder="123456"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+          <button type="submit" disabled={busy}>
+            {busy ? 'Verifying…' : 'Verify'}
+          </button>
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              setStep('request')
+              setCode('')
+              setError('')
+            }}
+          >
+            Use a different method
+          </button>
+        </form>
+      )}
+
+      {error && <p className="error">{error}</p>}
+    </div>
+  )
+}
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <path
+        fill="#4285F4"
+        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.89 2.68-6.62z"
+      />
+      <path
+        fill="#34A853"
+        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M3.97 10.72a5.41 5.41 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"
+      />
+      <path
+        fill="#EA4335"
+        d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"
+      />
+    </svg>
+  )
+}
+
+export default App
