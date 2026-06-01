@@ -231,8 +231,8 @@ button.link:hover:not(:disabled) {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 600;
-  font-size: 0.74rem;
-  color: var(--grey);
+  font-size: 0.82rem;
+  color: rgba(236, 230, 215, 0.62);
   margin: 0 0 0.4rem;
 }
 
@@ -282,21 +282,11 @@ button.link:hover:not(:disabled) {
   text-align: center;
 }
 
-.sit-with-it {
-  margin: 0 0 1.25rem;
-  padding: 0.85rem 1rem;
-  border-left: 3px solid var(--oxblood);
-  background: var(--input-bg);
-  border-radius: 0 8px 8px 0;
-}
-
-.sit-with-it .eyebrow {
-  margin: 0 0 0.3rem;
-}
-
-.sit-with-it p {
+.checkin .prompt {
   color: var(--cream);
-  line-height: 1.5;
+  font-weight: 500;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
 }
 
 .choice {

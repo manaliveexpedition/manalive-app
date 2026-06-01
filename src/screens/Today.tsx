@@ -210,7 +210,7 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
   if (existing) {
     return (
       <section className="card checkin done">
-        <h2>Check-in saved</h2>
+        <h2>Check-In Saved</h2>
         <p className="muted">
           {existing.sat_with_it ? 'You sat with it today.' : 'Logged for today.'} You're done here.
         </p>
@@ -220,13 +220,8 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
 
   return (
     <section className="card checkin">
-      <h2>Today's check-in</h2>
-      {prompt && (
-        <div className="sit-with-it">
-          <span className="eyebrow">Sit with it</span>
-          <p>{prompt}</p>
-        </div>
-      )}
+      <h2>Today's Check-In</h2>
+      {prompt && <p className="prompt">{prompt}</p>}
       <form onSubmit={submit} className="form">
         <fieldset className="choice">
           <legend>Did you sit with it?</legend>
