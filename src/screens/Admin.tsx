@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadAdminData, type AdminData, type ManRow } from '../lib/admin'
 
-type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'weekReached' | 'checkinsLogged' | 'listenCount'
+type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'visits' | 'audioPlays' | 'weekReached' | 'checkinsLogged' | 'listenCount'
 
 export function Admin() {
   const [data, setData] = useState<AdminData | null>(null)
@@ -74,6 +74,8 @@ export function Admin() {
               <Th label="Man" k="name" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Last active" k="lastActive" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Days" k="daysEngaged" {...{ sortKey, sortDir, toggleSort }} />
+              <Th label="Visits" k="visits" {...{ sortKey, sortDir, toggleSort }} />
+              <Th label="Listens" k="audioPlays" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
               <th>Read / Listen</th>
@@ -89,6 +91,8 @@ export function Admin() {
                 </td>
                 <td>{m.lastActive ?? '—'}</td>
                 <td>{m.daysEngaged}</td>
+                <td>{m.visits}</td>
+                <td>{m.audioPlays}</td>
                 <td>{m.weekReached ?? '—'}</td>
                 <td>{m.checkinsLogged}</td>
                 <td>{m.readCount} / {m.listenCount}</td>
@@ -96,7 +100,7 @@ export function Admin() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={7} className="muted">No men match this filter.</td></tr>
+              <tr><td colSpan={9} className="muted">No men match this filter.</td></tr>
             )}
           </tbody>
         </table>

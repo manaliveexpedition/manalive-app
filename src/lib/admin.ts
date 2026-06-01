@@ -24,6 +24,8 @@ export type ManRow = {
   weekReached: number | null
   lastActive: string | null // YYYY-MM-DD
   daysEngaged: number
+  visits: number // total app opens (opened_app) — how often he comes back
+  audioPlays: number // total audio plays (played_audio) — did he listen
   checkinsLogged: number
   readCount: number
   listenCount: number
@@ -85,6 +87,10 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const listenCount = [...openDates].filter((d) => listenDates.has(d)).length
     const readCount = openDates.size - listenCount
 
+    // Revisit + listen signals: total app opens, and total audio plays.
+    const visits = myEvents.filter((e) => e.event_type === 'opened_app').length
+    const audioPlays = myEvents.filter((e) => e.event_type === 'played_audio').length
+
     // Last active = most recent activity of any kind (every action emits an event).
     const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10))
     const lastActive = activityDates.length ? activityDates.sort().at(-1)! : null
@@ -111,6 +117,8 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       weekReached,
       lastActive,
       daysEngaged: openDates.size,
+      visits,
+      audioPlays,
       checkinsLogged: myCheckins.length,
       readCount,
       listenCount,

@@ -93,6 +93,11 @@ try {
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(1) },
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(0) },
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
+    // 3 app opens (visits) + a second audio play, to exercise the new stats.
+    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(1) },
+    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(0) },
+    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(0) },
+    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
   ])
   await admin.from('checkins').insert([
     { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(0), what_landed: 'PRIVATE-REFLECTION-ALICE', what_didnt: 'PRIVATE-2' },
@@ -123,6 +128,12 @@ try {
   const listen = [...aOpen].filter((d) => aListen.has(d)).length
   const read = aOpen.size - listen
   check('admin computes alice read/listen split (1/1)', read === 1 && listen === 1, `read=${read} listen=${listen}`)
+
+  // New stats: visits (opened_app) and audio plays (played_audio).
+  const visitsOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'opened_app').length
+  const playsOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'played_audio').length
+  check('admin computes alice visits (3) and listens (2)',
+    visitsOf(ids.alice) === 3 && playsOf(ids.alice) === 2, `visits=${visitsOf(ids.alice)} plays=${playsOf(ids.alice)}`)
 
   // The metadata select never carries reflection fields.
   const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
