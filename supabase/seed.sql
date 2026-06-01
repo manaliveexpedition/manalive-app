@@ -110,7 +110,9 @@ Step one is just noticing him. Today, catch the moment the mask goes on. Do not 
    $md$Get in the Room$md$,
    $md$Quick and practical today. You are not meant to do this alone, and there is a room full of men who get exactly what you are walking through.
 
-Apply to the ManAlive alumni group today. It takes two minutes. Open the group and tap Join: https://www.facebook.com/groups/manalivealumni
+Apply to the ManAlive alumni group today. It takes two minutes. Open the group and tap Join.
+
+[ManAlive Alumni](https://www.facebook.com/groups/manalivealumni)
 
 Do it now, not later, for one reason: approval may take a day or two, and you want to already be in there before the harder weeks hit. Getting in is not the same as posting. You do not have to say a word yet. Just get through the door.$md$,
    null, 9,

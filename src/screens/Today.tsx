@@ -90,9 +90,19 @@ function EntryView({ entry }: { entry: EntryRow }) {
 
         {entry.body_text && (
           <div className="body">
-            {entry.body_text.split('\n\n').map((para, i) => (
-              <p key={i}>{linkify(para)}</p>
-            ))}
+            {entry.body_text.split('\n\n').map((para, i) => {
+              // A paragraph that is just a markdown link, e.g.
+              // [ManAlive Alumni](https://…), renders as a CTA button.
+              const cta = para.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)
+              if (cta) {
+                return (
+                  <a key={i} className="cta" href={cta[2]} target="_blank" rel="noopener noreferrer">
+                    {cta[1]}
+                  </a>
+                )
+              }
+              return <p key={i}>{linkify(para)}</p>
+            })}
           </div>
         )}
       </article>

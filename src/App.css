@@ -268,6 +268,23 @@ button.link:hover:not(:disabled) {
   word-break: break-word;
 }
 
+.body a.cta {
+  display: inline-block;
+  margin: 0.25rem 0 1rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 10px;
+  background: var(--oxblood);
+  border: 1px solid var(--edge);
+  color: var(--cream);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.body a.cta:hover {
+  background: var(--oxblood-press);
+  border-color: var(--edge-strong);
+}
+
 /* ---------------------------------------------------------------- check-in */
 .checkin {
   margin-top: 1.25rem;
