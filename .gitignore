@@ -26,3 +26,7 @@ dist-ssr
 .env.local
 .secrets.local
 *.local
+
+# Recorded audio — pushed to Supabase storage, never committed (keep the README)
+audio-source/*
+!audio-source/README.md

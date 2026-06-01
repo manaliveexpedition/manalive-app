@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:rls": "node scripts/test-rls.mjs"
+    "test:rls": "node scripts/test-rls.mjs",
+    "upload:audio": "node scripts/upload-audio-batch.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.2",
