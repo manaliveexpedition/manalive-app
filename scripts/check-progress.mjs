@@ -1,7 +1,8 @@
 // Progress math check. Pure-function checks for the streak (grace day + gap),
 // plus a live check through a signed-in client: days-engaged counts his distinct
-// check-in days only (another member's rows excluded by RLS), and week-of derives
-// from start_date. Fixtures use the service role from .secrets.local.
+// opened-entry days only (engagement = opening the day's reading; another
+// member's events excluded by RLS), and week-of derives from start_date.
+// Fixtures use the service role from .secrets.local.
 // Run: node scripts/check-progress.mjs
 import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
@@ -73,29 +74,40 @@ async function mkUser(label, startOffsetDays) {
   if (sErr) throw new Error(`sign-in ${label}: ${sErr.message}`)
   return c
 }
-async function seedCheckins(userId, offsets) {
-  const rows = offsets.map((o) => ({ user_id: userId, entry_id: TEST_ENTRY, checkin_date: iso(o), sat_with_it: true, consumed_as: 'read' }))
-  const { error } = await admin.from('checkins').insert(rows)
-  if (error) throw new Error(`seed checkins: ${error.message}`)
+// An opened_entry event at local noon of the day `o` days ago. Noon keeps the
+// local calendar date stable across reasonable timezones when read back.
+function localNoonISO(offsetDays) {
+  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 12, 0, 0)
+  d.setDate(d.getDate() - offsetDays)
+  return d.toISOString()
+}
+function localISO(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
+}
+async function seedOpens(userId, offsets) {
+  const rows = offsets.map((o) => ({ user_id: userId, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(o) }))
+  const { error } = await admin.from('events').insert(rows)
+  if (error) throw new Error(`seed opens: ${error.message}`)
 }
 
 console.log('\nlive (his own rows only):')
 try {
-  // Alice started 16 days ago -> sortIndex 17 -> week 3. Check-ins on 4 distinct
-  // days (today, yest, day2 consecutive; plus day10) -> daysEngaged 4, streak 3.
+  // Alice started 16 days ago -> sortIndex 17 -> week 3. She OPENED the entry on
+  // 4 distinct days (today, yest, day2 consecutive; plus day10) -> daysEngaged 4,
+  // streak 3. No check-in is needed — the open is the engagement.
   const alice = await mkUser('alice', 16)
-  await seedCheckins(ids.alice, [0, 1, 2, 10])
+  await seedOpens(ids.alice, [0, 1, 2, 10])
 
-  // Bob (another member) checked in today — must NOT count toward Alice.
+  // Bob (another member) opened today — must NOT count toward Alice.
   const bob = await mkUser('bob', 5)
-  await seedCheckins(ids.bob, [0])
+  await seedOpens(ids.bob, [0])
 
-  const { data, error } = await alice.from('checkins').select('checkin_date, user_id')
+  const { data, error } = await alice.from('events').select('created_at, user_id, event_type').eq('event_type', 'opened_entry')
   if (error) throw new Error(error.message)
   const seesBob = (data ?? []).some((r) => r.user_id === ids.bob)
-  const dates = new Set((data ?? []).map((r) => r.checkin_date).filter(Boolean))
+  const dates = new Set((data ?? []).map((r) => r.created_at).filter(Boolean).map((t) => localISO(new Date(t))))
 
-  check('alice does NOT see bob check-ins', !seesBob, `rows=${data?.length}`)
+  check('alice does NOT see bob opens', !seesBob, `rows=${data?.length}`)
   check('daysEngaged = 4 distinct days', dates.size === 4, `got ${dates.size}`)
   check('current streak = 3', currentStreak(dates) === 3, `got ${currentStreak(dates)}`)
 

@@ -79,12 +79,14 @@ const users = {
   bob: { email: `rls.bob.${tag}@example.com`, role: 'member' },
   carol: { email: `rls.carol.${tag}@example.com`, role: 'admin' },
 }
-const TEST_ENTRY = 'e1000001-0001-0001-0001-000000000001'
+// A throwaway fixture entry (NOT seeded content), so the RLS test never clobbers
+// real devotional copy. sort_index 999 keeps it clear of the real days (1..30).
+const TEST_ENTRY = 'effffff2-2222-2222-2222-222222222222'
 
 async function setup() {
-  // Make sure a referenceable entry exists.
+  // Make sure the throwaway fixture entry exists (removed in teardown).
   await admin.from('entries').upsert(
-    { id: TEST_ENTRY, week: 1, day: 1, title: 'rls-test', body_text: 'x', sort_index: 1 },
+    { id: TEST_ENTRY, week: 99, day: 1, title: 'rls-test', body_text: 'x', sort_index: 999 },
     { onConflict: 'id' },
   )
 
@@ -111,6 +113,7 @@ async function teardown() {
   for (const key of Object.keys(users)) {
     if (users[key].id) await admin.auth.admin.deleteUser(users[key].id) // cascades to rows
   }
+  await admin.from('entries').delete().eq('id', TEST_ENTRY) // remove the fixture entry
 }
 
 async function run() {

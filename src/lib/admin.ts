@@ -34,9 +34,10 @@ export type ManRow = {
 export type AdminData = {
   men: ManRow[]
   cohortSize: number
-  // Same definitions as the Five-Number Dashboard so we don't fork metrics:
-  week1Activation: number | null // share of STARTED men who opened wk1 + checked in
-  week8Retention: number | null // share of men who REACHED wk8 and are still active
+  // Engagement = opening the day's reading (opened_entry), matching the
+  // man-facing Progress screen so the two views never disagree:
+  week1Activation: number | null // share of STARTED men who opened the wk1 entry
+  week8Retention: number | null // share of men who REACHED wk8 and opened during it
 }
 
 function addDays(isoDate: string, days: number): string {
@@ -49,8 +50,9 @@ function addDays(isoDate: string, days: number): string {
 export async function loadAdminData(now: Date = new Date()): Promise<AdminData> {
   const [profilesRes, checkinsRes, eventsRes, entriesRes] = await Promise.all([
     supabase.from('profiles').select('id, email, name, cohort, start_date, role'),
-    // METADATA ONLY — no what_landed / what_didnt.
-    supabase.from('checkins').select('user_id, entry_id, checkin_date, consumed_as, created_at'),
+    // METADATA ONLY — no what_landed / what_didnt. Only used to count reflections
+    // logged; engagement/read-listen now come from events.
+    supabase.from('checkins').select('user_id, created_at'),
     supabase.from('events').select('user_id, entry_id, event_type, created_at'),
     supabase.from('entries').select('id, week'),
   ])
@@ -69,28 +71,35 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const myCheckins = checkins.filter((c) => c.user_id === p.id)
     const myEvents = events.filter((e) => e.user_id === p.id)
 
-    const checkinDates = new Set(myCheckins.map((c) => c.checkin_date).filter(Boolean) as string[])
-    const readCount = myCheckins.filter((c) => c.consumed_as === 'read').length
-    const listenCount = myCheckins.filter((c) => c.consumed_as === 'listen').length
+    // Engaged days = distinct days he OPENED the reading. Within those, a day on
+    // which he also played the audio counts as "listen", otherwise "read", so
+    // readCount + listenCount = daysEngaged.
+    const openDates = new Set(
+      myEvents.filter((e) => e.event_type === 'opened_entry')
+        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10)),
+    )
+    const listenDates = new Set(
+      myEvents.filter((e) => e.event_type === 'played_audio')
+        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10)),
+    )
+    const listenCount = [...openDates].filter((d) => listenDates.has(d)).length
+    const readCount = openDates.size - listenCount
 
-    const activityDates = [
-      ...myCheckins.map((c) => c.created_at),
-      ...myEvents.map((e) => e.created_at),
-    ].filter(Boolean).map((ts: string) => ts.slice(0, 10))
+    // Last active = most recent activity of any kind (every action emits an event).
+    const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10))
     const lastActive = activityDates.length ? activityDates.sort().at(-1)! : null
 
     const sortIndex = resolveSortIndex(p.start_date, now)
     const weekReached = sortIndex === null ? null : Math.min(Math.ceil(sortIndex / 7), TOTAL_WEEKS)
     const reachedWeek8 = sortIndex !== null && sortIndex >= WEEK8_START_OFFSET + 1
 
-    // Active at week 8 = at least one CHECK-IN within week 8 specifically
-    // (days 50-56: start_date + 49 .. + 55 inclusive). Matches the Five-Number
-    // Dashboard's bounded window, not an open-ended "day 50 onward".
+    // Active at week 8 = at least one OPEN within week 8 specifically (days
+    // 50-56: start_date + 49 .. + 55 inclusive). Bounded window, open-based.
     let activeAtWeek8: boolean | null = null
     if (reachedWeek8 && p.start_date) {
       const w8Start = addDays(p.start_date, WEEK8_START_OFFSET)
       const w8End = addDays(p.start_date, WEEK8_END_OFFSET)
-      activeAtWeek8 = [...checkinDates].some((d) => d >= w8Start && d <= w8End)
+      activeAtWeek8 = [...openDates].some((d) => d >= w8Start && d <= w8End)
     }
 
     return {
@@ -101,7 +110,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       startDate: p.start_date,
       weekReached,
       lastActive,
-      daysEngaged: checkinDates.size,
+      daysEngaged: openDates.size,
       checkinsLogged: myCheckins.length,
       readCount,
       listenCount,
@@ -110,15 +119,13 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     }
   })
 
-  // Week-1 activation: opened a week-1 entry AND logged a check-in (on a week-1
-  // entry). Denominator = men who have STARTED (those still waiting don't count).
+  // Week-1 activation: opened a week-1 entry. Denominator = men who have STARTED
+  // (those still waiting don't count). No longer requires a check-in — the open
+  // is the engagement.
   const started = men.filter((m) => m.weekReached !== null)
   const activated = started.filter((m) => {
     const myEvents = events.filter((e) => e.user_id === m.userId)
-    const myCheckins = checkins.filter((c) => c.user_id === m.userId)
-    const openedW1 = myEvents.some((e) => e.event_type === 'opened_entry' && e.entry_id && week1Entries.has(e.entry_id))
-    const checkedW1 = myCheckins.some((c) => c.entry_id && week1Entries.has(c.entry_id))
-    return openedW1 && checkedW1
+    return myEvents.some((e) => e.event_type === 'opened_entry' && e.entry_id && week1Entries.has(e.entry_id))
   })
   const week1Activation = started.length ? activated.length / started.length : null
 

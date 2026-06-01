@@ -29,7 +29,9 @@ const check = (n, c, d = '') => { c ? (pass++, console.log(`  PASS  ${n}`)) : (f
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } })
 const PW = 'Test-Passw0rd!Checkin'
 const tag = Date.now()
-const TEST_ENTRY = 'e1000001-0001-0001-0001-000000000001'
+// A throwaway fixture entry (NOT seeded content), so tests never clobber real
+// devotional copy. sort_index 999 keeps it clear of the real days (1..30).
+const TEST_ENTRY = 'effffff1-1111-1111-1111-111111111111'
 const date = new Date().toISOString().slice(0, 10)
 const ids = {}
 
@@ -46,9 +48,9 @@ async function mkUser(label) {
 
 console.log('\ncheck-in flow (signed-in clients):')
 try {
-  // Ensure the referenced entry exists.
+  // Ensure the throwaway fixture entry exists (deleted in teardown).
   await admin.from('entries').upsert(
-    { id: TEST_ENTRY, week: 1, day: 1, title: 'checkin-test', body_text: 'x', sort_index: 1 },
+    { id: TEST_ENTRY, week: 99, day: 1, title: 'checkin-test', body_text: 'x', sort_index: 999 },
     { onConflict: 'id' },
   )
 
@@ -82,7 +84,9 @@ try {
   const boSeesAlEvents = (boEvents ?? []).some((r) => r.user_id === ids.al)
   check('bo cannot read al events', !boSeesAlEvents, `bo saw ${boEvents?.length} rows`)
 } finally {
+  // Delete users first (cascades their checkins/events), then the fixture entry.
   for (const id of Object.values(ids)) await admin.auth.admin.deleteUser(id)
+  await admin.from('entries').delete().eq('id', TEST_ENTRY)
 }
 
 console.log(`\n${pass} passed, ${fail} failed.`)

@@ -46,7 +46,7 @@ export function Admin() {
       <h1>Engagement</h1>
 
       <div className="rollups">
-        <Rollup label="Week-1 activation" value={data.week1Activation} hint="opened wk1 + checked in" />
+        <Rollup label="Week-1 activation" value={data.week1Activation} hint="opened the wk1 entry" />
         <Rollup label="Week-8 retention" value={data.week8Retention} hint="still active at wk8" />
         <div className="rollup">
           <span className="rollup-num">{data.cohortSize}</span>
@@ -75,7 +75,7 @@ export function Admin() {
               <Th label="Last active" k="lastActive" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Days" k="daysEngaged" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Check-ins" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
+              <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
               <th>Read / Listen</th>
               <Th label="Wk8" k="listenCount" hideSort {...{ sortKey, sortDir, toggleSort }} />
             </tr>

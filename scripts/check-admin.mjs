@@ -37,10 +37,18 @@ function addDaysISO(isoDate, days) {
   const d = new Date(`${isoDate}T00:00:00`); d.setDate(d.getDate() + days)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
-// Mirror admin.ts: active at week 8 = a check-in within start+49..start+55 incl.
-function activeAtW8(startISO, checkinISOs) {
+// Mirror admin.ts: active at week 8 = an OPEN within start+49..start+55 incl.
+function activeAtW8(startISO, openISOs) {
   const s = addDaysISO(startISO, 49), e = addDaysISO(startISO, 55)
-  return checkinISOs.some((d) => d >= s && d <= e)
+  return openISOs.some((d) => d >= s && d <= e)
+}
+// An event timestamp at local noon of `offsetDays` ago (stable local date).
+function localNoonISO(offsetDays) {
+  const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - offsetDays)
+  return d.toISOString()
+}
+function localISO(dt) {
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
 }
 
 // --- STATIC: the hard rule, enforced on the source ---------------------------
@@ -78,47 +86,55 @@ try {
   await mkUser('bob', 'member', 60)   // reached week 8; window = days 50-56
   await mkUser('dave', 'member', 60)  // reached week 8 but only active outside it
 
-  // Alice: opened wk1 entry, 1 read + 1 listen check-in, WITH reflection text.
+  // Alice: OPENED the wk1 entry on 2 days — yesterday (read) and today (also
+  // played audio -> listen) -> read/listen split 1/1. She also writes a check-in
+  // WITH reflection text, to prove the admin select never returns reflection.
   await admin.from('events').insert([
-    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry' },
+    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(1) },
+    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(0) },
+    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
   ])
   await admin.from('checkins').insert([
-    { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(1), sat_with_it: true, consumed_as: 'read', what_landed: 'PRIVATE-REFLECTION-ALICE', what_didnt: 'PRIVATE-2' },
-    { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(0), sat_with_it: true, consumed_as: 'listen' },
+    { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(0), what_landed: 'PRIVATE-REFLECTION-ALICE', what_didnt: 'PRIVATE-2' },
   ])
   // Bob started 60d ago: his week-8 window (start+49..+55) is 11..5 days ago.
-  // A check-in 8 days ago falls INSIDE the window -> active at week 8.
-  await admin.from('checkins').insert([
-    { user_id: ids.bob, entry_id: TEST_ENTRY, checkin_date: iso(8), sat_with_it: true, consumed_as: 'read' },
+  // An OPEN 8 days ago falls INSIDE the window -> active at week 8.
+  await admin.from('events').insert([
+    { user_id: ids.bob, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(8) },
   ])
-  // Dave also started 60d ago but only checked in today (day 61) -> AFTER the
+  // Dave also started 60d ago but only opened today (day 61) -> AFTER the
   // window -> NOT active at week 8 (proves the bounded upper end).
-  await admin.from('checkins').insert([
-    { user_id: ids.dave, entry_id: TEST_ENTRY, checkin_date: iso(0), sat_with_it: true, consumed_as: 'read' },
+  await admin.from('events').insert([
+    { user_id: ids.dave, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(0) },
   ])
 
-  // Admin cross-read of metadata, mirroring admin.ts SELECT lists (no reflection).
+  // Admin cross-read, mirroring admin.ts SELECT lists.
   const { data: profs } = await carol.from('profiles').select('id, email, name, role, start_date')
-  const { data: cks } = await carol.from('checkins').select('user_id, entry_id, checkin_date, consumed_as, created_at')
+  const { data: evs } = await carol.from('events').select('user_id, entry_id, event_type, created_at')
+  const { data: cks } = await carol.from('checkins').select('user_id, created_at')
   const memberIds = new Set((profs ?? []).filter((p) => p.role !== 'admin').map((p) => p.id))
   check('admin sees both alice and bob as members',
     memberIds.has(ids.alice) && memberIds.has(ids.bob), `members=${memberIds.size}`)
 
-  const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
-  const read = aliceCks.filter((c) => c.consumed_as === 'read').length
-  const listen = aliceCks.filter((c) => c.consumed_as === 'listen').length
+  // Read/listen split computed from events (open days vs days he also listened).
+  const openDatesOf = (uid) => new Set((evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'opened_entry').map((e) => localISO(new Date(e.created_at))))
+  const listenDatesOf = (uid) => new Set((evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'played_audio').map((e) => localISO(new Date(e.created_at))))
+  const aOpen = openDatesOf(ids.alice), aListen = listenDatesOf(ids.alice)
+  const listen = [...aOpen].filter((d) => aListen.has(d)).length
+  const read = aOpen.size - listen
   check('admin computes alice read/listen split (1/1)', read === 1 && listen === 1, `read=${read} listen=${listen}`)
 
   // The metadata select never carries reflection fields.
+  const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
   const anyReflection = aliceCks.some((c) => 'what_landed' in c || 'what_didnt' in c)
-  check('admin metadata rows carry no reflection fields', !anyReflection)
+  check('admin metadata rows carry no reflection fields', aliceCks.length > 0 && !anyReflection)
 
-  // Week-8 window (bounded, days 50-56). Both bob and dave started 60 days ago.
+  // Week-8 window (bounded, days 50-56), open-based. Both started 60 days ago.
   const start60 = iso(60)
-  const bobDates = (cks ?? []).filter((c) => c.user_id === ids.bob).map((c) => c.checkin_date)
-  const daveDates = (cks ?? []).filter((c) => c.user_id === ids.dave).map((c) => c.checkin_date)
-  check('bob IN-window check-in -> active at week 8', activeAtW8(start60, bobDates) === true)
-  check('dave only AFTER window -> NOT active at week 8', activeAtW8(start60, daveDates) === false)
+  const bobOpens = [...openDatesOf(ids.bob)]
+  const daveOpens = [...openDatesOf(ids.dave)]
+  check('bob IN-window open -> active at week 8', activeAtW8(start60, bobOpens) === true)
+  check('dave only AFTER window -> NOT active at week 8', activeAtW8(start60, daveOpens) === false)
 
   // A member cannot cross-read the cohort: alice sees only her own profile.
   const aliceClient = await (async () => {

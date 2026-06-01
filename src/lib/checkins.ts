@@ -28,21 +28,21 @@ export async function fetchCheckin(entryId: string, date: string): Promise<Check
 export type CheckinInput = {
   entryId: string
   date: string
-  satWithIt: boolean
   whatLanded: string
   whatDidnt: string
   consumedAs: ConsumedAs
 }
 
-// Write his check-in. user_id defaults to auth.uid() server-side. Empty
-// reflection text is stored as null rather than '' to keep the column clean.
+// Write his check-in: the optional reflection/feedback for the day. Engagement
+// is tracked by the open (see progress.ts), not by this write, so there is no
+// "did you sit with it" flag. Empty reflection text is stored as null rather
+// than '' to keep the column clean.
 export async function submitCheckin(input: CheckinInput): Promise<Checkin> {
   const { data, error } = await supabase
     .from('checkins')
     .insert({
       entry_id: input.entryId,
       checkin_date: input.date,
-      sat_with_it: input.satWithIt,
       what_landed: input.whatLanded.trim() || null,
       what_didnt: input.whatDidnt.trim() || null,
       consumed_as: input.consumedAs,

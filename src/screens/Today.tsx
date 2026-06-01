@@ -171,7 +171,6 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
   const [existing, setExisting] = useState<Checkin | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const [satWithIt, setSatWithIt] = useState<boolean | null>(null)
   const [whatLanded, setWhatLanded] = useState('')
   const [whatDidnt, setWhatDidnt] = useState('')
   const [busy, setBusy] = useState(false)
@@ -194,14 +193,12 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (satWithIt === null) { setError('Let us know whether you sat with it.'); return }
     setBusy(true)
     setError('')
     try {
       const saved = await submitCheckin({
         entryId,
         date,
-        satWithIt,
         whatLanded,
         whatDidnt,
         consumedAs: played ? 'listen' : 'read',
@@ -221,9 +218,7 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
     return (
       <section className="card checkin done">
         <h2>Check-In Saved</h2>
-        <p className="muted">
-          {existing.sat_with_it ? 'You sat with it today.' : 'Logged for today.'} You're done here.
-        </p>
+        <p className="muted">Logged for today. You're done here.</p>
       </section>
     )
   }
@@ -233,26 +228,6 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
       <h2>Today's Check-In</h2>
       {prompt && <p className="prompt">{prompt}</p>}
       <form onSubmit={submit} className="form">
-        <fieldset className="choice">
-          <legend>Did you sit with it?</legend>
-          <div className="choices">
-            <button
-              type="button"
-              className={satWithIt === true ? 'chip on' : 'chip'}
-              onClick={() => setSatWithIt(true)}
-            >
-              Yes
-            </button>
-            <button
-              type="button"
-              className={satWithIt === false ? 'chip on' : 'chip'}
-              onClick={() => setSatWithIt(false)}
-            >
-              Not yet
-            </button>
-          </div>
-        </fieldset>
-
         <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
         <textarea
           id="landed"

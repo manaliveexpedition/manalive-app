@@ -18,12 +18,23 @@ export type Progress = {
 
 // Everything here is computed from HIS OWN rows only (RLS scopes the query).
 // No cohort, no comparison, no ranking.
+//
+// Engagement = opening the day's reading. We count the distinct local days he
+// opened an entry (opened_entry events). Opening the day IS the engagement — a
+// man who reads every day is credited even if he never taps the optional
+// reflection. (We intentionally do NOT key this off check-ins.)
 export async function loadProgress(startDate: string | null, now: Date = new Date()): Promise<Progress> {
-  const { data, error } = await supabase.from('checkins').select('checkin_date')
+  const { data, error } = await supabase
+    .from('events')
+    .select('created_at')
+    .eq('event_type', 'opened_entry')
   if (error) throw error
 
   const dates = new Set(
-    (data ?? []).map((r) => r.checkin_date).filter((d): d is string => !!d),
+    (data ?? [])
+      .map((r) => r.created_at)
+      .filter((t): t is string => !!t)
+      .map((t) => localDateISO(new Date(t))),
   )
 
   const sortIndex = resolveSortIndex(startDate, now)

@@ -64,7 +64,7 @@ function StreakNote({ streak }: { streak: number }) {
   }
   return (
     <p className="streak muted">
-      {streak === 1 ? 'Checked in today.' : `${streak} days in a row.`}
+      {streak === 1 ? 'You showed up today.' : `${streak} days in a row.`}
     </p>
   )
 }
