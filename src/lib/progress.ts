@@ -24,9 +24,15 @@ export type Progress = {
 // man who reads every day is credited even if he never taps the optional
 // reflection. (We intentionally do NOT key this off check-ins.)
 export async function loadProgress(startDate: string | null, now: Date = new Date()): Promise<Progress> {
+  // Scope to his own events explicitly. RLS returns ALL events to an admin
+  // (is_admin()), so without this filter an admin would see cohort-wide numbers.
+  const { data: { session } } = await supabase.auth.getSession()
+  const uid = session?.user?.id ?? ''
+
   const { data, error } = await supabase
     .from('events')
     .select('created_at')
+    .eq('user_id', uid)
     .eq('event_type', 'opened_entry')
   if (error) throw error
 

@@ -136,6 +136,18 @@ try {
   check('bob IN-window open -> active at week 8', activeAtW8(start60, bobOpens) === true)
   check('dave only AFTER window -> NOT active at week 8', activeAtW8(start60, daveOpens) === false)
 
+  // Regression (the "Something went wrong" admin bug): member-facing "own row"
+  // queries must scope to the user explicitly, because RLS returns ALL rows to
+  // an admin. An unscoped .single() on profiles sees many rows and 406s.
+  const { data: ownProf, error: ownErr } = await carol.from('profiles').select('id').eq('id', ids.carol).single()
+  check('admin fetches OWN profile when scoped by id (no 406)', !ownErr && ownProf?.id === ids.carol, ownErr?.message)
+  const { error: unscopedErr } = await carol.from('profiles').select('id').single()
+  check('UNSCOPED admin profile .single() errors — proves the scope is needed', !!unscopedErr)
+  const { data: carolOpens } = await carol.from('events').select('id').eq('user_id', ids.carol).eq('event_type', 'opened_entry')
+  const { data: allOpens } = await carol.from('events').select('id').eq('event_type', 'opened_entry')
+  check('admin own-scoped opens exclude other men', (carolOpens?.length ?? 0) === 0 && (allOpens?.length ?? 0) > 0,
+    `own=${carolOpens?.length} all=${allOpens?.length}`)
+
   // A member cannot cross-read the cohort: alice sees only her own profile.
   const aliceClient = await (async () => {
     const c = createClient(URL_, ANON, { auth: { persistSession: false } })
