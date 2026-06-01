@@ -91,14 +91,30 @@ function EntryView({ entry }: { entry: EntryRow }) {
         {entry.body_text && (
           <div className="body">
             {entry.body_text.split('\n\n').map((para, i) => (
-              <p key={i}>{para}</p>
+              <p key={i}>{linkify(para)}</p>
             ))}
           </div>
         )}
       </article>
 
-      <CheckInCard entryId={entry.id} played={played} />
+      <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} />
     </>
+  )
+}
+
+// Turn bare URLs in entry copy into tappable links (e.g. the alumni group on
+// Day 9). The body is author-controlled content, so this is plain rendering,
+// not user input. Links open in a new tab.
+const URL_RE = /(https?:\/\/[^\s]+)/g
+function linkify(text: string) {
+  return text.split(URL_RE).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer">
+        {part}
+      </a>
+    ) : (
+      part
+    ),
   )
 }
 
@@ -140,7 +156,7 @@ function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: string;
   )
 }
 
-function CheckInCard({ entryId, played }: { entryId: string; played: boolean }) {
+function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boolean; prompt: string | null }) {
   const date = localDateISO()
   const [existing, setExisting] = useState<Checkin | null>(null)
   const [loading, setLoading] = useState(true)
@@ -205,6 +221,12 @@ function CheckInCard({ entryId, played }: { entryId: string; played: boolean }) 
   return (
     <section className="card checkin">
       <h2>Today's check-in</h2>
+      {prompt && (
+        <div className="sit-with-it">
+          <span className="eyebrow">Sit with it</span>
+          <p>{prompt}</p>
+        </div>
+      )}
       <form onSubmit={submit} className="form">
         <fieldset className="choice">
           <legend>Did you sit with it?</legend>

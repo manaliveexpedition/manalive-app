@@ -17,6 +17,7 @@ export type Entry = {
   body_text: string | null
   audio_url: string | null
   sort_index: number | null
+  reflection_prompt: string | null
 }
 
 // Resolve which entry the man should see today from his start_date.
@@ -53,7 +54,7 @@ export async function loadToday(startDate: string | null, now: Date = new Date()
 
   const { data, error } = await supabase
     .from('entries')
-    .select('id, week, day, title, body_text, audio_url, sort_index')
+    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
     .eq('sort_index', sortIndex)
     .maybeSingle()
 
