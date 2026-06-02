@@ -52,15 +52,9 @@ function localISO(dt) {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`
 }
 
-// --- STATIC: the hard rule, enforced on the source ---------------------------
-console.log('\nstatic source check (hard rule):')
-// Strip comments first: the rule is documented in comments on purpose; what we
-// must catch is the columns appearing in actual code (e.g. a .select list).
-const adminCode = readFileSync(new URL('../src/lib/admin.ts', import.meta.url), 'utf8')
-  .replace(/\/\*[\s\S]*?\*\//g, '')
-  .replace(/\/\/.*$/gm, '')
-check('admin.ts code never references what_landed', !adminCode.includes('what_landed'))
-check('admin.ts code never references what_didnt', !adminCode.includes('what_didnt'))
+// NOTE: the old "hard rule" (admin must never read what_landed/what_didnt) was
+// reversed — during the beta those two are feedback FOR John, read + aggregated
+// by the admin view. Peer privacy still holds and is tested live below.
 
 // --- LIVE --------------------------------------------------------------------
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } })
@@ -119,7 +113,7 @@ try {
   // Admin cross-read, mirroring admin.ts SELECT lists.
   const { data: profs } = await carol.from('profiles').select('id, email, name, role, start_date')
   const { data: evs } = await carol.from('events').select('user_id, entry_id, event_type, created_at')
-  const { data: cks } = await carol.from('checkins').select('user_id, created_at')
+  const { data: cks } = await carol.from('checkins').select('user_id, entry_id, created_at, what_landed, what_didnt')
   const memberIds = new Set((profs ?? []).filter((p) => p.role !== 'admin').map((p) => p.id))
   check('admin sees both alice and bob as members',
     memberIds.has(ids.alice) && memberIds.has(ids.bob), `members=${memberIds.size}`)
@@ -157,10 +151,20 @@ try {
   }
   check('admin computes alice on-time opens (1 of 2)', onTime === 1 && total === 2, `onTime=${onTime} total=${total}`)
 
-  // The metadata select never carries reflection fields.
+  // Beta feedback: the admin CAN read what_landed / what_didnt (feedback for John).
   const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
-  const anyReflection = aliceCks.some((c) => 'what_landed' in c || 'what_didnt' in c)
-  check('admin metadata rows carry no reflection fields', aliceCks.length > 0 && !anyReflection)
+  const seesFeedback = aliceCks.some((c) => c.what_landed === 'PRIVATE-REFLECTION-ALICE')
+  check('admin reads beta feedback (what_landed/what_didnt)', seesFeedback)
+
+  // Peer privacy still holds: bob (a member) cannot read alice's check-ins.
+  const bobClient = await (async () => {
+    const c = createClient(URL_, ANON, { auth: { persistSession: false } })
+    await c.auth.signInWithPassword({ email: `admin.bob.${tag}@example.com`, password: PW })
+    return c
+  })()
+  const { data: bobSeesCks } = await bobClient.from('checkins').select('user_id, what_landed')
+  check('member cannot read another member feedback', !(bobSeesCks ?? []).some((c) => c.user_id === ids.alice),
+    `bob saw ${bobSeesCks?.length} checkin rows`)
 
   // Week-8 window (bounded, days 50-56), open-based. Both started 60 days ago.
   const start60 = iso(60)

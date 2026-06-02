@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadAdminData, type AdminData, type ManRow, type EntryStat, type GroupStat } from '../lib/admin'
+import { loadAdminData, type AdminData, type ManRow, type EntryStat, type GroupStat, type DayFeedback } from '../lib/admin'
 
 type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'revisits' | 'audioPlays' | 'alumniClicks' | 'onTimeRate' | 'weekReached' | 'checkinsLogged' | 'listenCount'
 
@@ -113,6 +113,7 @@ export function Admin() {
         </table>
       </div>
 
+      <FeedbackByDay days={data.feedbackByDay} />
       <DropOff entries={data.entryStats} />
 
       <div className="group-rollups">
@@ -181,6 +182,41 @@ function Scorecard({ entries }: { entries: EntryStat[] }) {
           </tbody>
         </table>
       </div>
+    </>
+  )
+}
+
+// ----------------------------------------------------------- beta feedback
+function FeedbackByDay({ days }: { days: DayFeedback[] }) {
+  return (
+    <>
+      <h2 className="section-head">Beta feedback by day</h2>
+      <p className="rollup-hint">What testers said landed and didn't, grouped by day — your "what to change" list.</p>
+      {days.length === 0 ? (
+        <p className="muted">No feedback yet.</p>
+      ) : (
+        <div className="feedback-days">
+          {days.map((d) => (
+            <div className="feedback-day" key={d.entryId}>
+              <h3 className="feedback-day-head">
+                {d.week != null ? `Wk ${d.week} · Day ${d.day}` : `Day ${d.sortIndex}`} — {d.title ?? ''}
+              </h3>
+              {d.landed.length > 0 && (
+                <div className="fb-group">
+                  <p className="fb-label">What landed</p>
+                  <ul>{d.landed.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                </div>
+              )}
+              {d.didnt.length > 0 && (
+                <div className="fb-group">
+                  <p className="fb-label">What didn't</p>
+                  <ul>{d.didnt.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   )
 }

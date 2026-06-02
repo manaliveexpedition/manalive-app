@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { fetchMyProfile, type Profile } from '../lib/profile'
 import { loadToday, localDateISO, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
-import { fetchCheckin, submitCheckin, type Checkin } from '../lib/checkins'
+import { fetchCheckin, submitCheckin, BETA_FEEDBACK, type Checkin } from '../lib/checkins'
 
 export function Today() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -224,50 +224,51 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
 
   if (loading) return null
 
-  if (existing) {
-    return (
-      <section className="card checkin done">
-        <h2>Check-In Saved</h2>
-        <p className="muted">Logged for today. You're done here.</p>
-      </section>
-    )
-  }
-
   return (
     <>
-      {/* Box 1: the check-in prompt / instruction — stands alone. */}
+      {/* Box 1: the check-in prompt / instruction — stands alone, always shown. */}
       <section className="card checkin">
         <h2>Today's Check-In</h2>
         {prompt && <p className="prompt">{prompt}</p>}
       </section>
 
-      {/* Box 2: the reflection fields + save — their own box. */}
-      <section className="card checkin">
-        <form onSubmit={submit} className="form">
-          <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
-          <textarea
-            id="landed"
-            rows={3}
-            value={whatLanded}
-            onChange={(e) => setWhatLanded(e.target.value)}
-            placeholder="Just for you — kept private."
-          />
+      {/* Box 2: BETA-ONLY feedback for John (not private; not part of the real
+          post-camp experience — see BETA_FEEDBACK). */}
+      {BETA_FEEDBACK && (existing ? (
+        <section className="card checkin done">
+          <p className="eyebrow">Beta feedback</p>
+          <p className="muted">Thanks — your notes are in. You can close this for today.</p>
+        </section>
+      ) : (
+        <section className="card checkin">
+          <p className="eyebrow">Beta feedback</p>
+          <p className="muted feedback-note">Just for the beta — these go to John to help shape The Journey.</p>
+          <form onSubmit={submit} className="form">
+            <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
+            <textarea
+              id="landed"
+              rows={3}
+              value={whatLanded}
+              onChange={(e) => setWhatLanded(e.target.value)}
+              placeholder="What worked, hit home, or stuck with you?"
+            />
 
-          <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
-          <textarea
-            id="didnt"
-            rows={3}
-            value={whatDidnt}
-            onChange={(e) => setWhatDidnt(e.target.value)}
-            placeholder="Anything that sat wrong, or nothing at all."
-          />
+            <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
+            <textarea
+              id="didnt"
+              rows={3}
+              value={whatDidnt}
+              onChange={(e) => setWhatDidnt(e.target.value)}
+              placeholder="What missed, confused, or fell flat?"
+            />
 
-          <button type="submit" disabled={busy}>
-            {busy ? 'Saving…' : 'Save check-in'}
-          </button>
-          {error && <p className="error">{error}</p>}
-        </form>
-      </section>
+            <button type="submit" disabled={busy}>
+              {busy ? 'Sending…' : 'Send feedback'}
+            </button>
+            {error && <p className="error">{error}</p>}
+          </form>
+        </section>
+      ))}
     </>
   )
 }

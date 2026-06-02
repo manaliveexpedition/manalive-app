@@ -2,15 +2,15 @@ import { supabase } from './supabase'
 import { resolveSortIndex } from './today'
 import { TOTAL_WEEKS } from './progress'
 
-// ADMIN ENGAGEMENT — METADATA ONLY.
+// ADMIN ENGAGEMENT.
 //
-// HARD RULE: what_landed / what_didnt (the reflection text) are NEVER selected
-// here and never surfaced anywhere in the admin view. The checkins query below
-// pulls only metadata columns on purpose. Do not add reflection columns to it.
-//
-// Cross-user reads are authorized by the is_admin() branch in the RLS policies;
-// a non-admin running these queries sees only his own row, which is why the UI
-// also gates the Admin tab on role === 'admin'.
+// NOTE on what_landed / what_didnt: during the BETA these two are explicitly
+// feedback FOR the team (John), not a private reflection — so the admin view
+// reads them and aggregates them by day. They are gated client-side by
+// BETA_FEEDBACK and are not part of the real post-camp experience. Peer privacy
+// still holds: one member can never read another's rows (RLS); only the admin
+// (is_admin()) can read across the cohort, which is why the UI also gates the
+// Admin tab on role === 'admin'.
 
 const WEEK8_START_OFFSET = 49 // start_date + 49 days = day 50 (week 8 begins)
 const WEEK8_END_OFFSET = 55 // start_date + 55 days = day 56 (week 8 ends, inclusive)
@@ -65,9 +65,22 @@ export type GroupStat = {
   reflections: number
 }
 
+// Beta feedback collected per day — every tester's "what landed / what didn't"
+// for that entry, so John can see what to change.
+export type DayFeedback = {
+  entryId: string
+  sortIndex: number | null
+  week: number | null
+  day: number | null
+  title: string | null
+  landed: string[]
+  didnt: string[]
+}
+
 export type AdminData = {
   men: ManRow[]
   cohortSize: number
+  feedbackByDay: DayFeedback[] // beta feedback, grouped by day (days with comments)
   entryStats: EntryStat[] // per-entry scorecard, in journey order
   formatStats: GroupStat[] // which delivery shapes land (best avg reach first)
   phaseStats: GroupStat[] // engagement by journey phase, in journey order
@@ -87,9 +100,9 @@ function addDays(isoDate: string, days: number): string {
 export async function loadAdminData(now: Date = new Date()): Promise<AdminData> {
   const [profilesRes, checkinsRes, eventsRes, entriesRes] = await Promise.all([
     supabase.from('profiles').select('id, email, name, cohort, start_date, role'),
-    // METADATA ONLY — no what_landed / what_didnt. entry_id + user_id only, to
-    // count reflections per man and per entry. Never the reflection text.
-    supabase.from('checkins').select('user_id, entry_id, created_at'),
+    // Beta feedback: what_landed / what_didnt are read here on purpose (see the
+    // header note) so John can see per-day comments. RLS still blocks peers.
+    supabase.from('checkins').select('user_id, entry_id, created_at, what_landed, what_didnt'),
     supabase.from('events').select('user_id, entry_id, event_type, created_at'),
     supabase.from('entries').select('id, week, day, title, format, phase, sort_index'),
   ])
@@ -272,5 +285,17 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     .sort((a, b) => a.minSort - b.minSort) // journey order
     .map(({ minSort: _omit, ...g }) => g)
 
-  return { men, cohortSize: members.length, entryStats, formatStats, phaseStats, week1Activation, week8Retention }
+  // Beta feedback grouped by day (members only). Each day collects every
+  // tester's non-empty "what landed" and "what didn't" comments.
+  const feedbackByDay: DayFeedback[] = entries
+    .map((en) => {
+      const cks = checkins.filter((c) => c.entry_id === en.id && memberIds.has(c.user_id))
+      const landed = cks.map((c) => (c.what_landed || '').trim()).filter(Boolean)
+      const didnt = cks.map((c) => (c.what_didnt || '').trim()).filter(Boolean)
+      return { entryId: en.id, sortIndex: en.sort_index, week: en.week, day: en.day, title: en.title, landed, didnt }
+    })
+    .filter((d) => d.landed.length || d.didnt.length)
+    .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+
+  return { men, cohortSize: members.length, feedbackByDay, entryStats, formatStats, phaseStats, week1Activation, week8Retention }
 }

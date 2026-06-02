@@ -630,6 +630,57 @@ table.men td.nowrap {
   color: var(--grey);
 }
 
+/* beta feedback grouped by day */
+.feedback-days {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feedback-day {
+  padding: 0.85rem 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.feedback-day-head {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  color: var(--cream);
+}
+
+.fb-group {
+  margin: 0 0 0.6rem;
+}
+
+.fb-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  color: rgba(236, 230, 215, 0.6);
+  margin: 0 0 0.25rem;
+}
+
+.fb-group ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.fb-group li {
+  color: var(--cream);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 0.25rem;
+}
+
+/* Today: small note under the beta feedback heading */
+.feedback-note {
+  font-size: 0.85rem;
+  margin: 0 0 1rem;
+}
+
 /* format / phase rollups side by side on wide screens */
 .group-rollups {
   display: flex;

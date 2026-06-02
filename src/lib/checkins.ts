@@ -1,5 +1,10 @@
 import { supabase } from './supabase'
 
+// "What landed / What didn't" are BETA-ONLY feedback for John (the team), not
+// part of the real post-camp experience and NOT private to the man. Flip this
+// to false after the beta to remove the feedback box entirely.
+export const BETA_FEEDBACK = true
+
 export type ConsumedAs = 'read' | 'listen'
 
 export type Checkin = {
