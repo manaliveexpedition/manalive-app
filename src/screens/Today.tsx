@@ -80,14 +80,6 @@ function EntryView({ entry }: { entry: EntryRow }) {
         )}
         <h1>{entry.title}</h1>
 
-        {entry.audio_url && (
-          <AudioPlayer
-            entryId={entry.id}
-            path={entry.audio_url}
-            onPlay={() => setPlayed(true)}
-          />
-        )}
-
         {entry.body_text && (
           <div className="body">
             {entry.body_text.split('\n\n').map((para, i) => {
@@ -111,6 +103,16 @@ function EntryView({ entry }: { entry: EntryRow }) {
               return <p key={i}>{linkify(para)}</p>
             })}
           </div>
+        )}
+
+        {/* John's spoken commentary on the reading — comes after the text and is
+            framed as a separate "word from John", not a re-read. */}
+        {entry.audio_url && (
+          <AudioPlayer
+            entryId={entry.id}
+            path={entry.audio_url}
+            onPlay={() => setPlayed(true)}
+          />
         )}
       </article>
 
@@ -165,8 +167,9 @@ function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: string;
 
   return (
     <div className="audio-launch">
+      <p className="audio-note">From John, on today’s reading:</p>
       <button type="button" className="secondary" onClick={start} disabled={loading}>
-        {loading ? 'Loading…' : '▶ Listen'}
+        {loading ? 'Loading…' : '▶ John’s thoughts'}
       </button>
       {error && <p className="error">{error}</p>}
     </div>

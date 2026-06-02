@@ -244,7 +244,15 @@ button.link:hover:not(:disabled) {
 .audio,
 .audio-launch {
   width: 100%;
-  margin: 1rem 0 0.5rem;
+  margin: 1.5rem 0 0.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.audio-note {
+  color: var(--grey);
+  font-size: 0.9rem;
+  margin: 0 0 0.6rem;
 }
 
 .audio-launch button {
