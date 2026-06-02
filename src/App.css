@@ -513,58 +513,88 @@ button.sort.on {
   color: var(--grey);
 }
 
-/* ------------------------------------------------------- Most revisited */
-.revisited {
-  margin-top: 1.75rem;
+/* --------------------------------------------------- admin analytics */
+.admin .section-head {
+  margin: 1.75rem 0 0.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid var(--hairline);
+  font-size: 1.15rem;
 }
 
-.revisited h2 {
-  margin: 0 0 0.25rem;
-  font-size: 1.2rem;
+.admin .section-head + .rollup-hint {
+  margin: 0 0 0.85rem;
 }
 
-.revisited .rollup-hint {
-  margin: 0 0 1rem;
+table.men td.nowrap {
+  white-space: nowrap;
+  color: rgba(236, 230, 215, 0.62);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
 }
 
-.revisit-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  color: var(--cream);
+  white-space: nowrap;
+}
+
+/* drop-off bars */
+.dropoff {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
-.revisit-list li {
+.dropoff-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
-  background: var(--input-bg);
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
+  align-items: center;
+  gap: 0.6rem;
 }
 
-.revisit-day {
+.dropoff-day {
+  width: 2.5rem;
+  flex: none;
   font-family: var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   font-size: 0.72rem;
   color: rgba(236, 230, 215, 0.62);
-  white-space: nowrap;
+  text-align: right;
 }
 
-.revisit-title {
+.dropoff-track {
   flex: 1;
-  color: var(--cream);
-  font-weight: 500;
+  height: 12px;
+  background: var(--input-bg);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.revisit-count {
+.dropoff-bar {
+  height: 100%;
+  background: var(--oxblood);
+  border-radius: 6px;
+  min-width: 2px;
+}
+
+.dropoff-val {
+  width: 1.75rem;
+  flex: none;
   font-size: 0.8rem;
   color: var(--grey);
-  white-space: nowrap;
+}
+
+/* format / phase rollups side by side on wide screens */
+.group-rollups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.group-block {
+  flex: 1;
+  min-width: 280px;
 }

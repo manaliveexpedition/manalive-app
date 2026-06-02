@@ -26,6 +26,7 @@ export type ManRow = {
   daysEngaged: number
   revisits: number // times he RE-opened a day's entry (opens beyond the first per entry)
   audioPlays: number // total audio plays (played_audio) — did he listen
+  alumniClicks: number // taps on an entry CTA link (the alumni group)
   checkinsLogged: number
   readCount: number
   listenCount: number
@@ -33,21 +34,40 @@ export type ManRow = {
   activeAtWeek8: boolean | null // null when he hasn't reached week 8 yet
 }
 
-// A day's entry that men went back to, ranked so the most-revisited (likely
-// most-valuable) content surfaces. Counts members only, not admins.
-export type RevisitedEntry = {
+// Per-entry engagement scorecard (members only). One row per day's entry.
+export type EntryStat = {
   entryId: string
+  sortIndex: number | null
   week: number | null
   day: number | null
   title: string | null
-  revisits: number // total re-opens across men (opens beyond the first, per man)
-  men: number // distinct men who re-opened it
+  format: string | null
+  phase: string | null
+  reach: number // distinct men who opened it
+  opens: number // total opens
+  revisits: number // opens beyond the first, summed across men
+  reflections: number // check-ins logged for it
+  listens: number // distinct men who played its audio
+  clicks: number // link clicks from it
+}
+
+// Engagement rolled up by a content tag (Format or Phase).
+export type GroupStat = {
+  key: string
+  entries: number // # entries in the group
+  reach: number // total distinct-man opens across its entries
+  avgReach: number // reach / entries — fair comparison across groups of different size
+  revisits: number
+  listens: number
+  reflections: number
 }
 
 export type AdminData = {
   men: ManRow[]
   cohortSize: number
-  revisitedEntries: RevisitedEntry[] // which posts men went back to, most first
+  entryStats: EntryStat[] // per-entry scorecard, in journey order
+  formatStats: GroupStat[] // which delivery shapes land (best avg reach first)
+  phaseStats: GroupStat[] // engagement by journey phase, in journey order
   // Engagement = opening the day's reading (opened_entry), matching the
   // man-facing Progress screen so the two views never disagree:
   week1Activation: number | null // share of STARTED men who opened the wk1 entry
@@ -64,11 +84,11 @@ function addDays(isoDate: string, days: number): string {
 export async function loadAdminData(now: Date = new Date()): Promise<AdminData> {
   const [profilesRes, checkinsRes, eventsRes, entriesRes] = await Promise.all([
     supabase.from('profiles').select('id, email, name, cohort, start_date, role'),
-    // METADATA ONLY — no what_landed / what_didnt. Only used to count reflections
-    // logged; engagement/read-listen now come from events.
-    supabase.from('checkins').select('user_id, created_at'),
+    // METADATA ONLY — no what_landed / what_didnt. entry_id + user_id only, to
+    // count reflections per man and per entry. Never the reflection text.
+    supabase.from('checkins').select('user_id, entry_id, created_at'),
     supabase.from('events').select('user_id, entry_id, event_type, created_at'),
-    supabase.from('entries').select('id, week, day, title'),
+    supabase.from('entries').select('id, week, day, title, format, phase, sort_index'),
   ])
   const err = profilesRes.error || checkinsRes.error || eventsRes.error || entriesRes.error
   if (err) throw err
@@ -106,6 +126,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       .forEach((e) => myEntryOpens.set(e.entry_id!, (myEntryOpens.get(e.entry_id!) ?? 0) + 1))
     const revisits = [...myEntryOpens.values()].reduce((s, n) => s + Math.max(0, n - 1), 0)
     const audioPlays = myEvents.filter((e) => e.event_type === 'played_audio').length
+    const alumniClicks = myEvents.filter((e) => e.event_type === 'clicked_link').length
 
     // Last active = most recent activity of any kind (every action emits an event).
     const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10))
@@ -135,6 +156,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       daysEngaged: openDates.size,
       revisits,
       audioPlays,
+      alumniClicks,
       checkinsLogged: myCheckins.length,
       readCount,
       listenCount,
@@ -158,33 +180,69 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
   const retained8 = reached8.filter((m) => m.activeAtWeek8)
   const week8Retention = reached8.length ? retained8.length / reached8.length : null
 
-  // Which day's entries men went back to (members only). Count opens per
-  // (member, entry); any open beyond the first is a revisit of that entry.
+  // Per-entry scorecard (members only). Aggregate engagement against each entry.
   const memberIds = new Set(members.map((m) => m.id))
-  const entryById = new Map(entries.map((e) => [e.id, e]))
-  const perUserEntry = new Map<string, number>()
+  const perEntry = new Map<string, { opensByMan: Map<string, number>; listenMen: Set<string>; clicks: number }>()
   for (const e of events) {
-    if (e.event_type === 'opened_entry' && e.entry_id && memberIds.has(e.user_id)) {
-      const k = `${e.user_id}|${e.entry_id}`
-      perUserEntry.set(k, (perUserEntry.get(k) ?? 0) + 1)
-    }
+    if (!e.entry_id || !memberIds.has(e.user_id)) continue
+    let a = perEntry.get(e.entry_id)
+    if (!a) { a = { opensByMan: new Map(), listenMen: new Set(), clicks: 0 }; perEntry.set(e.entry_id, a) }
+    if (e.event_type === 'opened_entry') a.opensByMan.set(e.user_id, (a.opensByMan.get(e.user_id) ?? 0) + 1)
+    else if (e.event_type === 'played_audio') a.listenMen.add(e.user_id)
+    else if (e.event_type === 'clicked_link') a.clicks++
   }
-  const agg = new Map<string, { revisits: number; men: number }>()
-  for (const [k, count] of perUserEntry) {
-    if (count > 1) {
-      const entryId = k.slice(k.indexOf('|') + 1)
-      const a = agg.get(entryId) ?? { revisits: 0, men: 0 }
-      a.revisits += count - 1
-      a.men += 1
-      agg.set(entryId, a)
-    }
+  const reflByEntry = new Map<string, number>()
+  for (const c of checkins) {
+    if (c.entry_id && memberIds.has(c.user_id)) reflByEntry.set(c.entry_id, (reflByEntry.get(c.entry_id) ?? 0) + 1)
   }
-  const revisitedEntries: RevisitedEntry[] = [...agg.entries()]
-    .map(([entryId, a]) => {
-      const e = entryById.get(entryId)
-      return { entryId, week: e?.week ?? null, day: e?.day ?? null, title: e?.title ?? null, revisits: a.revisits, men: a.men }
-    })
-    .sort((a, b) => b.revisits - a.revisits || b.men - a.men)
 
-  return { men, cohortSize: members.length, revisitedEntries, week1Activation, week8Retention }
+  const entryStats: EntryStat[] = entries
+    .map((en) => {
+      const a = perEntry.get(en.id)
+      const opensByMan = a?.opensByMan ?? new Map<string, number>()
+      const counts = [...opensByMan.values()]
+      return {
+        entryId: en.id,
+        sortIndex: en.sort_index,
+        week: en.week,
+        day: en.day,
+        title: en.title,
+        format: en.format ?? null,
+        phase: en.phase ?? null,
+        reach: opensByMan.size,
+        opens: counts.reduce((s, n) => s + n, 0),
+        revisits: counts.reduce((s, n) => s + Math.max(0, n - 1), 0),
+        reflections: reflByEntry.get(en.id) ?? 0,
+        listens: a?.listenMen.size ?? 0,
+        clicks: a?.clicks ?? 0,
+      }
+    })
+    .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+
+  // Roll the scorecard up by a content tag (Format or Phase). avgReach lets us
+  // compare groups of different sizes fairly.
+  function groupBy(keyFn: (s: EntryStat) => string | null) {
+    const m = new Map<string, GroupStat & { minSort: number }>()
+    for (const s of entryStats) {
+      const k = keyFn(s)
+      if (!k) continue
+      const g = m.get(k) ?? { key: k, entries: 0, reach: 0, avgReach: 0, revisits: 0, listens: 0, reflections: 0, minSort: Infinity }
+      g.entries++
+      g.reach += s.reach
+      g.revisits += s.revisits
+      g.listens += s.listens
+      g.reflections += s.reflections
+      g.minSort = Math.min(g.minSort, s.sortIndex ?? Infinity)
+      m.set(k, g)
+    }
+    return [...m.values()].map((g) => ({ ...g, avgReach: g.entries ? g.reach / g.entries : 0 }))
+  }
+  const formatStats: GroupStat[] = groupBy((s) => s.format)
+    .map(({ minSort: _omit, ...g }) => g)
+    .sort((a, b) => b.avgReach - a.avgReach) // which shapes land best
+  const phaseStats: GroupStat[] = groupBy((s) => s.phase)
+    .sort((a, b) => a.minSort - b.minSort) // journey order
+    .map(({ minSort: _omit, ...g }) => g)
+
+  return { men, cohortSize: members.length, entryStats, formatStats, phaseStats, week1Activation, week8Retention }
 }

@@ -95,6 +95,8 @@ try {
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
     // She opened the SAME entry twice (above) -> 1 revisit; a 2nd audio play -> 2 listens.
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
+    // Tapped the alumni group link once.
+    { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'clicked_link', created_at: localNoonISO(0) },
   ])
   await admin.from('checkins').insert([
     { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(0), what_landed: 'PRIVATE-REFLECTION-ALICE', what_didnt: 'PRIVATE-2' },
@@ -136,6 +138,8 @@ try {
   }
   check('admin computes alice revisits (1) and listens (2)',
     revisitsOf(ids.alice) === 1 && playsOf(ids.alice) === 2, `revisits=${revisitsOf(ids.alice)} plays=${playsOf(ids.alice)}`)
+  const clicksOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'clicked_link').length
+  check('admin computes alice alumni clicks (1)', clicksOf(ids.alice) === 1, `clicks=${clicksOf(ids.alice)}`)
 
   // The metadata select never carries reflection fields.
   const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
