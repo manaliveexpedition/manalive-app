@@ -145,7 +145,7 @@ function SignIn() {
         ) : (
           <img
             className="login-logo"
-            src="/manalive-expedition.png"
+            src="/manalive-expedition-logo-cream.svg"
             alt="ManAlive Expedition"
             onError={() => setLogoFailed(true)}
           />
