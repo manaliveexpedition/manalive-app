@@ -56,10 +56,8 @@ function Shell() {
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="topbar-brand">
-          <img className="topbar-logo" src="/manalive-expedition-logo-cream.svg" alt="ManAlive Expedition" />
-          <span className="topbar-sub">The Journey</span>
-        </div>
+        <img className="topbar-logo" src="/manalive-expedition-logo-cream.svg" alt="ManAlive Expedition" />
+        <span className="topbar-sub">The Journey</span>
         <button type="button" className="link" onClick={() => supabase.auth.signOut()}>
           Sign out
         </button>

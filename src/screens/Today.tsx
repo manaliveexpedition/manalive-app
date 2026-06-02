@@ -234,33 +234,40 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
   }
 
   return (
-    <section className="card checkin">
-      <h2>Today's Check-In</h2>
-      {prompt && <p className="prompt">{prompt}</p>}
-      <form onSubmit={submit} className="form">
-        <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
-        <textarea
-          id="landed"
-          rows={3}
-          value={whatLanded}
-          onChange={(e) => setWhatLanded(e.target.value)}
-          placeholder="Just for you — kept private."
-        />
+    <>
+      {/* Box 1: the check-in prompt / instruction — stands alone. */}
+      <section className="card checkin">
+        <h2>Today's Check-In</h2>
+        {prompt && <p className="prompt">{prompt}</p>}
+      </section>
 
-        <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
-        <textarea
-          id="didnt"
-          rows={3}
-          value={whatDidnt}
-          onChange={(e) => setWhatDidnt(e.target.value)}
-          placeholder="Anything that sat wrong, or nothing at all."
-        />
+      {/* Box 2: the reflection fields + save — their own box. */}
+      <section className="card checkin">
+        <form onSubmit={submit} className="form">
+          <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
+          <textarea
+            id="landed"
+            rows={3}
+            value={whatLanded}
+            onChange={(e) => setWhatLanded(e.target.value)}
+            placeholder="Just for you — kept private."
+          />
 
-        <button type="submit" disabled={busy}>
-          {busy ? 'Saving…' : 'Save check-in'}
-        </button>
-        {error && <p className="error">{error}</p>}
-      </form>
-    </section>
+          <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
+          <textarea
+            id="didnt"
+            rows={3}
+            value={whatDidnt}
+            onChange={(e) => setWhatDidnt(e.target.value)}
+            placeholder="Anything that sat wrong, or nothing at all."
+          />
+
+          <button type="submit" disabled={busy}>
+            {busy ? 'Saving…' : 'Save check-in'}
+          </button>
+          {error && <p className="error">{error}</p>}
+        </form>
+      </section>
+    </>
   )
 }
