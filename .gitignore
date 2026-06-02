@@ -30,3 +30,10 @@ dist-ssr
 # Recorded audio — pushed to Supabase storage, never committed (keep the README)
 audio-source/*
 !audio-source/README.md
+
+# Raw recordings / large audio must never be committed to git
+*.wav
+*.mp3
+*.m4a
+*.aac
+Temp Day Recording Folder/
