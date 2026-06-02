@@ -24,7 +24,7 @@ export type ManRow = {
   weekReached: number | null
   lastActive: string | null // YYYY-MM-DD
   daysEngaged: number
-  visits: number // total app opens (opened_app) — how often he comes back
+  revisits: number // times he RE-opened a day's entry (opens beyond the first per entry)
   audioPlays: number // total audio plays (played_audio) — did he listen
   checkinsLogged: number
   readCount: number
@@ -33,9 +33,21 @@ export type ManRow = {
   activeAtWeek8: boolean | null // null when he hasn't reached week 8 yet
 }
 
+// A day's entry that men went back to, ranked so the most-revisited (likely
+// most-valuable) content surfaces. Counts members only, not admins.
+export type RevisitedEntry = {
+  entryId: string
+  week: number | null
+  day: number | null
+  title: string | null
+  revisits: number // total re-opens across men (opens beyond the first, per man)
+  men: number // distinct men who re-opened it
+}
+
 export type AdminData = {
   men: ManRow[]
   cohortSize: number
+  revisitedEntries: RevisitedEntry[] // which posts men went back to, most first
   // Engagement = opening the day's reading (opened_entry), matching the
   // man-facing Progress screen so the two views never disagree:
   week1Activation: number | null // share of STARTED men who opened the wk1 entry
@@ -56,7 +68,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     // logged; engagement/read-listen now come from events.
     supabase.from('checkins').select('user_id, created_at'),
     supabase.from('events').select('user_id, entry_id, event_type, created_at'),
-    supabase.from('entries').select('id, week'),
+    supabase.from('entries').select('id, week, day, title'),
   ])
   const err = profilesRes.error || checkinsRes.error || eventsRes.error || entriesRes.error
   if (err) throw err
@@ -87,8 +99,12 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const listenCount = [...openDates].filter((d) => listenDates.has(d)).length
     const readCount = openDates.size - listenCount
 
-    // Revisit + listen signals: total app opens, and total audio plays.
-    const visits = myEvents.filter((e) => e.event_type === 'opened_app').length
+    // Revisits = re-opens of a day's entry (every open of an entry beyond the
+    // first). Listen signal = total audio plays.
+    const myEntryOpens = new Map<string, number>()
+    myEvents.filter((e) => e.event_type === 'opened_entry' && e.entry_id)
+      .forEach((e) => myEntryOpens.set(e.entry_id!, (myEntryOpens.get(e.entry_id!) ?? 0) + 1))
+    const revisits = [...myEntryOpens.values()].reduce((s, n) => s + Math.max(0, n - 1), 0)
     const audioPlays = myEvents.filter((e) => e.event_type === 'played_audio').length
 
     // Last active = most recent activity of any kind (every action emits an event).
@@ -117,7 +133,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       weekReached,
       lastActive,
       daysEngaged: openDates.size,
-      visits,
+      revisits,
       audioPlays,
       checkinsLogged: myCheckins.length,
       readCount,
@@ -142,5 +158,33 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
   const retained8 = reached8.filter((m) => m.activeAtWeek8)
   const week8Retention = reached8.length ? retained8.length / reached8.length : null
 
-  return { men, cohortSize: members.length, week1Activation, week8Retention }
+  // Which day's entries men went back to (members only). Count opens per
+  // (member, entry); any open beyond the first is a revisit of that entry.
+  const memberIds = new Set(members.map((m) => m.id))
+  const entryById = new Map(entries.map((e) => [e.id, e]))
+  const perUserEntry = new Map<string, number>()
+  for (const e of events) {
+    if (e.event_type === 'opened_entry' && e.entry_id && memberIds.has(e.user_id)) {
+      const k = `${e.user_id}|${e.entry_id}`
+      perUserEntry.set(k, (perUserEntry.get(k) ?? 0) + 1)
+    }
+  }
+  const agg = new Map<string, { revisits: number; men: number }>()
+  for (const [k, count] of perUserEntry) {
+    if (count > 1) {
+      const entryId = k.slice(k.indexOf('|') + 1)
+      const a = agg.get(entryId) ?? { revisits: 0, men: 0 }
+      a.revisits += count - 1
+      a.men += 1
+      agg.set(entryId, a)
+    }
+  }
+  const revisitedEntries: RevisitedEntry[] = [...agg.entries()]
+    .map(([entryId, a]) => {
+      const e = entryById.get(entryId)
+      return { entryId, week: e?.week ?? null, day: e?.day ?? null, title: e?.title ?? null, revisits: a.revisits, men: a.men }
+    })
+    .sort((a, b) => b.revisits - a.revisits || b.men - a.men)
+
+  return { men, cohortSize: members.length, revisitedEntries, week1Activation, week8Retention }
 }

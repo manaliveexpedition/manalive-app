@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadAdminData, type AdminData, type ManRow } from '../lib/admin'
 
-type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'visits' | 'audioPlays' | 'weekReached' | 'checkinsLogged' | 'listenCount'
+type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'revisits' | 'audioPlays' | 'weekReached' | 'checkinsLogged' | 'listenCount'
 
 export function Admin() {
   const [data, setData] = useState<AdminData | null>(null)
@@ -74,7 +74,7 @@ export function Admin() {
               <Th label="Man" k="name" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Last active" k="lastActive" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Days" k="daysEngaged" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Visits" k="visits" {...{ sortKey, sortDir, toggleSort }} />
+              <Th label="Revisits" k="revisits" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Listens" k="audioPlays" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
@@ -91,7 +91,7 @@ export function Admin() {
                 </td>
                 <td>{m.lastActive ?? '—'}</td>
                 <td>{m.daysEngaged}</td>
-                <td>{m.visits}</td>
+                <td>{m.revisits}</td>
                 <td>{m.audioPlays}</td>
                 <td>{m.weekReached ?? '—'}</td>
                 <td>{m.checkinsLogged}</td>
@@ -104,6 +104,26 @@ export function Admin() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="revisited">
+        <h2>Most revisited</h2>
+        <p className="rollup-hint">Days men went back to — a re-open beyond their first read. The posts that pulled them back.</p>
+        {data.revisitedEntries.length === 0 ? (
+          <p className="muted">No revisits yet.</p>
+        ) : (
+          <ol className="revisit-list">
+            {data.revisitedEntries.slice(0, 10).map((e) => (
+              <li key={e.entryId}>
+                <span className="revisit-day">{e.week != null ? `Wk ${e.week} · Day ${e.day}` : '—'}</span>
+                <span className="revisit-title">{e.title ?? '—'}</span>
+                <span className="revisit-count">
+                  {e.revisits} revisit{e.revisits === 1 ? '' : 's'} · {e.men} {e.men === 1 ? 'man' : 'men'}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
     </section>
   )

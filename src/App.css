@@ -512,3 +512,59 @@ button.sort.on {
   background: rgba(107, 111, 118, 0.15);
   color: var(--grey);
 }
+
+/* ------------------------------------------------------- Most revisited */
+.revisited {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.revisited h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.revisited .rollup-hint {
+  margin: 0 0 1rem;
+}
+
+.revisit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.revisit-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+}
+
+.revisit-day {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+  color: rgba(236, 230, 215, 0.62);
+  white-space: nowrap;
+}
+
+.revisit-title {
+  flex: 1;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.revisit-count {
+  font-size: 0.8rem;
+  color: var(--grey);
+  white-space: nowrap;
+}

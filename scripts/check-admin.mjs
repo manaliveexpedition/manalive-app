@@ -93,10 +93,7 @@ try {
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(1) },
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(0) },
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
-    // 3 app opens (visits) + a second audio play, to exercise the new stats.
-    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(1) },
-    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(0) },
-    { user_id: ids.alice, event_type: 'opened_app', created_at: localNoonISO(0) },
+    // She opened the SAME entry twice (above) -> 1 revisit; a 2nd audio play -> 2 listens.
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
   ])
   await admin.from('checkins').insert([
@@ -129,11 +126,16 @@ try {
   const read = aOpen.size - listen
   check('admin computes alice read/listen split (1/1)', read === 1 && listen === 1, `read=${read} listen=${listen}`)
 
-  // New stats: visits (opened_app) and audio plays (played_audio).
-  const visitsOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'opened_app').length
+  // New stats: revisits (re-opens of a day's entry) and audio plays.
   const playsOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'played_audio').length
-  check('admin computes alice visits (3) and listens (2)',
-    visitsOf(ids.alice) === 3 && playsOf(ids.alice) === 2, `visits=${visitsOf(ids.alice)} plays=${playsOf(ids.alice)}`)
+  const revisitsOf = (uid) => {
+    const m = new Map()
+    ;(evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'opened_entry' && e.entry_id)
+      .forEach((e) => m.set(e.entry_id, (m.get(e.entry_id) ?? 0) + 1))
+    return [...m.values()].reduce((s, n) => s + Math.max(0, n - 1), 0)
+  }
+  check('admin computes alice revisits (1) and listens (2)',
+    revisitsOf(ids.alice) === 1 && playsOf(ids.alice) === 2, `revisits=${revisitsOf(ids.alice)} plays=${playsOf(ids.alice)}`)
 
   // The metadata select never carries reflection fields.
   const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)
