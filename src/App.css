@@ -205,9 +205,11 @@ button.link:hover:not(:disabled) {
   border-bottom: 1px solid var(--hairline);
 }
 
+/* Logo and Sign-out are the SAME width so "The Journey" sits dead center with
+   equal margins (matters most on mobile). The logo shrinks to match — that's ok. */
 .topbar-logo {
-  height: 30px;
-  width: auto;
+  width: 72px;
+  height: auto;
   justify-self: start;
 }
 
@@ -223,6 +225,9 @@ button.link:hover:not(:disabled) {
 
 .topbar .link {
   justify-self: end;
+  width: 72px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .nav {
