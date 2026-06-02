@@ -23,6 +23,29 @@
   letter-spacing: 0.01em;
 }
 
+/* Sign-in brand lockup: ManAlive Expedition logo + "The Journey" */
+.brand-lockup {
+  margin: 0 0 1.5rem;
+}
+
+.login-logo {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  margin: 0 auto 0.5rem;
+}
+
+.login-sub {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(236, 230, 215, 0.7);
+  margin: 0;
+}
+
 .muted {
   color: var(--grey);
   margin: 0 0 1.5rem;

@@ -89,6 +89,7 @@ function SignIn() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [logoFailed, setLogoFailed] = useState(false)
 
   async function continueWithGoogle() {
     setBusy(true)
@@ -137,8 +138,20 @@ function SignIn() {
   }
 
   return (
-    <div className="card">
-      <h1>ManAlive</h1>
+    <div className="card signin">
+      <div className="brand-lockup">
+        {logoFailed ? (
+          <h1>ManAlive</h1>
+        ) : (
+          <img
+            className="login-logo"
+            src="/manalive-expedition.png"
+            alt="ManAlive Expedition"
+            onError={() => setLogoFailed(true)}
+          />
+        )}
+        <p className="login-sub">The Journey</p>
+      </div>
 
       {step === 'request' ? (
         <>
