@@ -25,7 +25,8 @@ const ANON = getval('VITE_SUPABASE_ANON_KEY', '.env.local')
 const SERVICE = getval('SUPABASE_SERVICE_ROLE_KEY', '.secrets.local')
 if (!URL_ || !ANON || !SERVICE) { console.error('Missing env (.env.local / .secrets.local).'); process.exit(1) }
 
-const TEST_ENTRY = 'e1000001-0001-0001-0001-000000000001' // week 1, day 1
+const TEST_ENTRY = 'e1000001-0001-0001-0001-000000000001' // week 1, day 1 (sortIndex 1)
+const DAY17_ENTRY = 'e1000001-0001-0001-0001-000000000017' // sortIndex 17 (for habit/on-time)
 let pass = 0, fail = 0
 const check = (n, c, d = '') => { c ? (pass++, console.log(`  PASS  ${n}`)) : (fail++, console.log(`  FAIL  ${n}${d ? ` — ${d}` : ''}`)) }
 
@@ -97,6 +98,9 @@ try {
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'played_audio', created_at: localNoonISO(0) },
     // Tapped the alumni group link once.
     { user_id: ids.alice, entry_id: TEST_ENTRY, event_type: 'clicked_link', created_at: localNoonISO(0) },
+    // Alice started 16 days ago, so the day-17 entry is scheduled for TODAY. She
+    // opens it today -> ON TIME; her day-1 opens (above) are LATE. So 1 of 2 on time.
+    { user_id: ids.alice, entry_id: DAY17_ENTRY, event_type: 'opened_entry', created_at: localNoonISO(0) },
   ])
   await admin.from('checkins').insert([
     { user_id: ids.alice, entry_id: TEST_ENTRY, checkin_date: iso(0), what_landed: 'PRIVATE-REFLECTION-ALICE', what_didnt: 'PRIVATE-2' },
@@ -140,6 +144,18 @@ try {
     revisitsOf(ids.alice) === 1 && playsOf(ids.alice) === 2, `revisits=${revisitsOf(ids.alice)} plays=${playsOf(ids.alice)}`)
   const clicksOf = (uid) => (evs ?? []).filter((e) => e.user_id === uid && e.event_type === 'clicked_link').length
   check('admin computes alice alumni clicks (1)', clicksOf(ids.alice) === 1, `clicks=${clicksOf(ids.alice)}`)
+
+  // Habit: first-open vs scheduled day (start + sortIndex-1). Alice start = iso(16).
+  const sortByEntry = { [TEST_ENTRY]: 1, [DAY17_ENTRY]: 17 }
+  const firstOpen = {}
+  ;(evs ?? []).filter((e) => e.user_id === ids.alice && e.event_type === 'opened_entry' && e.entry_id)
+    .forEach((e) => { const d = e.created_at.slice(0, 10); if (!firstOpen[e.entry_id] || d < firstOpen[e.entry_id]) firstOpen[e.entry_id] = d })
+  let onTime = 0, total = 0
+  for (const [eid, d] of Object.entries(firstOpen)) {
+    const si = sortByEntry[eid]; if (si == null) continue
+    total++; if (d === addDaysISO(iso(16), si - 1)) onTime++
+  }
+  check('admin computes alice on-time opens (1 of 2)', onTime === 1 && total === 2, `onTime=${onTime} total=${total}`)
 
   // The metadata select never carries reflection fields.
   const aliceCks = (cks ?? []).filter((c) => c.user_id === ids.alice)

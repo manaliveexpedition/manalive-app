@@ -27,6 +27,9 @@ export type ManRow = {
   revisits: number // times he RE-opened a day's entry (opens beyond the first per entry)
   audioPlays: number // total audio plays (played_audio) — did he listen
   alumniClicks: number // taps on an entry CTA link (the alumni group)
+  onTimeOpens: number // entries he first opened on their scheduled day
+  onTimeTotal: number // entries he opened at all (basis for the rate)
+  onTimeRate: number | null // onTimeOpens / onTimeTotal — habit/rhythm, null if none
   checkinsLogged: number
   readCount: number
   listenCount: number
@@ -99,6 +102,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
   const entries = entriesRes.data ?? []
 
   const week1Entries = new Set(entries.filter((e) => e.week === 1).map((e) => e.id))
+  const entrySortById = new Map(entries.map((e) => [e.id, e.sort_index]))
   const members = profiles.filter((p) => p.role !== 'admin')
 
   const men: ManRow[] = members.map((p) => {
@@ -127,6 +131,27 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const revisits = [...myEntryOpens.values()].reduce((s, n) => s + Math.max(0, n - 1), 0)
     const audioPlays = myEvents.filter((e) => e.event_type === 'played_audio').length
     const alumniClicks = myEvents.filter((e) => e.event_type === 'clicked_link').length
+
+    // Habit: of the entries he opened, how many he FIRST opened on their
+    // scheduled day (start_date + sortIndex-1) vs late. Daily-rhythm signal.
+    const firstOpenByEntry = new Map<string, string>()
+    myEvents.filter((e) => e.event_type === 'opened_entry' && e.entry_id && e.created_at)
+      .forEach((e) => {
+        const d = (e.created_at as string).slice(0, 10)
+        const cur = firstOpenByEntry.get(e.entry_id!)
+        if (!cur || d < cur) firstOpenByEntry.set(e.entry_id!, d)
+      })
+    let onTimeOpens = 0
+    let onTimeTotal = 0
+    if (p.start_date) {
+      for (const [eid, d] of firstOpenByEntry) {
+        const si = entrySortById.get(eid)
+        if (si == null) continue
+        onTimeTotal++
+        if (d === addDays(p.start_date, si - 1)) onTimeOpens++
+      }
+    }
+    const onTimeRate = onTimeTotal ? onTimeOpens / onTimeTotal : null
 
     // Last active = most recent activity of any kind (every action emits an event).
     const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10))
@@ -157,6 +182,9 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       revisits,
       audioPlays,
       alumniClicks,
+      onTimeOpens,
+      onTimeTotal,
+      onTimeRate,
       checkinsLogged: myCheckins.length,
       readCount,
       listenCount,

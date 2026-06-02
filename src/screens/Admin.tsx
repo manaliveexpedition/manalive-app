@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { loadAdminData, type AdminData, type ManRow, type EntryStat, type GroupStat } from '../lib/admin'
 
-type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'revisits' | 'audioPlays' | 'alumniClicks' | 'weekReached' | 'checkinsLogged' | 'listenCount'
+type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'revisits' | 'audioPlays' | 'alumniClicks' | 'onTimeRate' | 'weekReached' | 'checkinsLogged' | 'listenCount'
 
 export function Admin() {
   const [data, setData] = useState<AdminData | null>(null)
@@ -78,6 +78,7 @@ export function Admin() {
               <Th label="Revisits" k="revisits" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Listens" k="audioPlays" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Group" k="alumniClicks" {...{ sortKey, sortDir, toggleSort }} />
+              <Th label="On-time" k="onTimeRate" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
               <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
               <th>Read / Listen</th>
@@ -96,6 +97,9 @@ export function Admin() {
                 <td>{m.revisits}</td>
                 <td>{m.audioPlays}</td>
                 <td>{m.alumniClicks}</td>
+                <td title={`${m.onTimeOpens}/${m.onTimeTotal} opened on their day`}>
+                  {m.onTimeRate == null ? '—' : `${Math.round(m.onTimeRate * 100)}%`}
+                </td>
                 <td>{m.weekReached ?? '—'}</td>
                 <td>{m.checkinsLogged}</td>
                 <td>{m.readCount} / {m.listenCount}</td>
@@ -103,7 +107,7 @@ export function Admin() {
               </tr>
             ))}
             {rows.length === 0 && (
-              <tr><td colSpan={10} className="muted">No men match this filter.</td></tr>
+              <tr><td colSpan={11} className="muted">No men match this filter.</td></tr>
             )}
           </tbody>
         </table>

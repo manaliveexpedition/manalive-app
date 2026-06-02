@@ -40,7 +40,10 @@ const check = (n, c, d = '') => { c ? (pass++, console.log(`  PASS  ${n}`)) : (f
 // --- unit checks on the pure resolver ----------------------------------------
 console.log('\nresolveSortIndex (pure):')
 const today = new Date()
-const iso = (d) => d.toISOString().slice(0, 10)
+// LOCAL date (not toISOString/UTC) to match resolveSortIndex, which compares
+// local midnights. Using UTC here off-by-ones whenever local has not yet rolled
+// to the same calendar day as UTC.
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const minus = (n) => { const d = new Date(today); d.setDate(d.getDate() - n); return iso(d) }
 const plus = (n) => { const d = new Date(today); d.setDate(d.getDate() + n); return iso(d) }
 check('null start -> null', resolveSortIndex(null) === null)
