@@ -25,7 +25,7 @@ const SERVICE = getval('SUPABASE_SERVICE_ROLE_KEY', '.secrets.local')
 if (!URL_ || !ANON || !SERVICE) { console.error('Missing env (.env.local / .secrets.local).'); process.exit(1) }
 
 const BUCKET = 'daily-audio'
-const OBJECT_PATH = 'week-01/day-03.wav'
+const OBJECT_PATH = 'day-01.mp3' // a real uploaded recording (Day 1)
 const DAY3_ENTRY = 'e1000001-0001-0001-0001-000000000003'
 
 let pass = 0, fail = 0
