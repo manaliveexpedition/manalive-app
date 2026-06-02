@@ -89,18 +89,18 @@ export function Admin() {
             {rows.map((m) => (
               <tr key={m.userId}>
                 <td>
-                  <div className="man-name">{m.name || '—'}</div>
+                  <div className="man-name">{m.name || '-'}</div>
                   <div className="man-email">{m.email}</div>
                 </td>
-                <td>{m.lastActive ?? '—'}</td>
+                <td>{m.lastActive ?? '-'}</td>
                 <td>{m.daysEngaged}</td>
                 <td>{m.revisits}</td>
                 <td>{m.audioPlays}</td>
                 <td>{m.alumniClicks}</td>
                 <td title={`${m.onTimeOpens}/${m.onTimeTotal} opened on their day`}>
-                  {m.onTimeRate == null ? '—' : `${Math.round(m.onTimeRate * 100)}%`}
+                  {m.onTimeRate == null ? '-' : `${Math.round(m.onTimeRate * 100)}%`}
                 </td>
-                <td>{m.weekReached ?? '—'}</td>
+                <td>{m.weekReached ?? '-'}</td>
                 <td>{m.checkinsLogged}</td>
                 <td>{m.readCount} / {m.listenCount}</td>
                 <td><Week8Badge row={m} /></td>
@@ -169,9 +169,9 @@ function Scorecard({ entries }: { entries: EntryStat[] }) {
           <tbody>
             {sorted.map((e) => (
               <tr key={e.entryId}>
-                <td className="nowrap">{e.week != null ? `Wk ${e.week}·D${e.day}` : '—'}</td>
-                <td className="man-name">{e.title ?? '—'}</td>
-                <td>{e.format ? <span className="tag">{e.format}</span> : '—'}</td>
+                <td className="nowrap">{e.week != null ? `Wk ${e.week}·D${e.day}` : '-'}</td>
+                <td className="man-name">{e.title ?? '-'}</td>
+                <td>{e.format ? <span className="tag">{e.format}</span> : '-'}</td>
                 <td>{e.reach}</td>
                 <td>{e.revisits}</td>
                 <td>{e.reflections}</td>
@@ -191,7 +191,7 @@ function FeedbackByDay({ days }: { days: DayFeedback[] }) {
   return (
     <>
       <h2 className="section-head">Beta feedback by day</h2>
-      <p className="rollup-hint">What testers said landed and didn't, grouped by day — your "what to change" list.</p>
+      <p className="rollup-hint">What testers said landed and didn't, grouped by day. Your "what to change" list.</p>
       {days.length === 0 ? (
         <p className="muted">No feedback yet.</p>
       ) : (
@@ -199,7 +199,7 @@ function FeedbackByDay({ days }: { days: DayFeedback[] }) {
           {days.map((d) => (
             <div className="feedback-day" key={d.entryId}>
               <h3 className="feedback-day-head">
-                {d.week != null ? `Wk ${d.week} · Day ${d.day}` : `Day ${d.sortIndex}`} — {d.title ?? ''}
+                {d.week != null ? `Wk ${d.week} · Day ${d.day}` : `Day ${d.sortIndex}`}: {d.title ?? ''}
               </h3>
               {d.landed.length > 0 && (
                 <div className="fb-group">
@@ -228,7 +228,7 @@ function DropOff({ entries }: { entries: EntryStat[] }) {
   return (
     <>
       <h2 className="section-head">Drop-off by day</h2>
-      <p className="rollup-hint">Reach per journey day. Watch where the bars fall off — that's where men disengage.</p>
+      <p className="rollup-hint">Reach per journey day. Watch where the bars fall off. That's where men disengage.</p>
       {!anyOpens ? (
         <p className="muted">No opens yet.</p>
       ) : (
@@ -309,7 +309,7 @@ function Th({ label, k, sortKey, sortDir, toggleSort, hideSort }: {
 }
 
 function Week8Badge({ row }: { row: ManRow }) {
-  if (!row.reachedWeek8) return <span className="muted">—</span>
+  if (!row.reachedWeek8) return <span className="muted">-</span>
   return row.activeAtWeek8
     ? <span className="badge on">active</span>
     : <span className="badge off">quiet</span>
@@ -318,7 +318,7 @@ function Week8Badge({ row }: { row: ManRow }) {
 function Rollup({ label, value, hint }: { label: string; value: number | null; hint: string }) {
   return (
     <div className="rollup">
-      <span className="rollup-num">{value === null ? '—' : `${Math.round(value * 100)}%`}</span>
+      <span className="rollup-num">{value === null ? '-' : `${Math.round(value * 100)}%`}</span>
       <span className="rollup-label">{label}</span>
       <span className="rollup-hint">{hint}</span>
     </div>

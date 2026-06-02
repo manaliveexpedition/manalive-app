@@ -237,12 +237,12 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
       {BETA_FEEDBACK && (existing ? (
         <section className="card checkin done">
           <p className="eyebrow">Beta feedback</p>
-          <p className="muted">Thanks — your notes are in. You can close this for today.</p>
+          <p className="muted">Thanks. Your notes are in, you can close this for today.</p>
         </section>
       ) : (
         <section className="card checkin">
           <p className="eyebrow">Beta feedback</p>
-          <p className="muted feedback-note">Just for the beta — these go to John to help shape The Journey.</p>
+          <p className="muted feedback-note">Just for the beta. These go to John to help shape The Journey.</p>
           <form onSubmit={submit} className="form">
             <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
             <textarea
