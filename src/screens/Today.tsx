@@ -96,7 +96,14 @@ function EntryView({ entry }: { entry: EntryRow }) {
               const cta = para.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)
               if (cta) {
                 return (
-                  <a key={i} className="cta" href={cta[2]} target="_blank" rel="noopener noreferrer">
+                  <a
+                    key={i}
+                    className="cta"
+                    href={cta[2]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => logEvent('clicked_link', entry.id)}
+                  >
                     {cta[1]}
                   </a>
                 )

@@ -5,6 +5,7 @@ export type EventType =
   | 'opened_entry'
   | 'played_audio'
   | 'submitted_checkin'
+  | 'clicked_link' // tapped an outbound link in the entry copy (e.g. the alumni group)
 
 // Fire-and-forget engagement logging. user_id defaults to auth.uid() server-side,
 // so we never pass it from the client. Failures are swallowed — a missed event

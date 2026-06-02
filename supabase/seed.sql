@@ -361,3 +361,41 @@ on conflict (id) do update set
   audio_url         = excluded.audio_url,
   sort_index        = excluded.sort_index,
   reflection_prompt = excluded.reflection_prompt;
+
+-- Format + Phase tags from the 84-Day Map (kept separate from the content rows
+-- so re-seeding doesn't require rewriting every entry tuple). Format is the
+-- per-day delivery shape; Phase is the journey stretch.
+update public.entries e set format = v.format, phase = v.phase
+from (values
+  (1,  'Anchor',    'Re-entry'),
+  (2,  'Question',  'Re-entry'),
+  (3,  'Listen',    'Re-entry'),
+  (4,  'Truth',     'Re-entry'),
+  (5,  'Challenge', 'Re-entry'),
+  (6,  'Truth',     'Re-entry'),
+  (7,  'Pause',     'Re-entry'),
+  (8,  'Anchor',    'The drift'),
+  (9,  'Challenge', 'The drift'),
+  (10, 'Truth',     'The drift'),
+  (11, 'Story',     'The drift'),
+  (12, 'Question',  'The drift'),
+  (13, 'Listen',    'The drift'),
+  (14, 'Pause',     'The drift'),
+  (15, 'Anchor',    'The drift'),
+  (16, 'Truth',     'The drift'),
+  (17, 'Truth',     'The drift'),
+  (18, 'Question',  'The drift'),
+  (19, 'Truth',     'The drift'),
+  (20, 'Challenge', 'The drift'),
+  (21, 'Pause',     'The drift'),
+  (22, 'Anchor',    'The drift'),
+  (23, 'Truth',     'The drift'),
+  (24, 'Question',  'The drift'),
+  (25, 'Story',     'The drift'),
+  (26, 'Listen',    'The drift'),
+  (27, 'Challenge', 'The drift'),
+  (28, 'Pause',     'The drift'),
+  (29, 'Anchor',    'The cliff'),
+  (30, 'Truth',     'The cliff')
+) as v(sort_index, format, phase)
+where e.sort_index = v.sort_index;

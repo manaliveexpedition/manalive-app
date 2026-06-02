@@ -30,7 +30,7 @@ const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } })
 console.log('\ncontent load (Days 1-30):')
 const { data, error } = await admin
   .from('entries')
-  .select('week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+  .select('week, day, title, body_text, audio_url, sort_index, reflection_prompt, format, phase')
   .order('sort_index', { ascending: true })
 if (error) { console.error(error.message); process.exit(1) }
 
@@ -53,6 +53,14 @@ check('titles carry no "Day N:" prefix', titlesClean)
 
 const allAudioNull = data.every((e) => e.audio_url === null)
 check('audio_url null on all (audio not recorded yet)', allAudioNull)
+
+const FORMATS = new Set(['Anchor', 'Question', 'Truth', 'Story', 'Listen', 'Challenge', 'Pause'])
+const allTagged = data.every((e) => FORMATS.has(e.format) && (e.phase || '').length > 0)
+check('every entry has a valid Format + a Phase', allTagged)
+const d1tag = data.find((e) => e.sort_index === 1)
+check('Day 1 tagged Anchor / Re-entry', d1tag?.format === 'Anchor' && d1tag?.phase === 'Re-entry', `${d1tag?.format}/${d1tag?.phase}`)
+const d11tag = data.find((e) => e.sort_index === 11)
+check('Day 11 tagged Story / The drift', d11tag?.format === 'Story' && d11tag?.phase === 'The drift', `${d11tag?.format}/${d11tag?.phase}`)
 
 // Spot-check a couple of known days.
 const d1 = data.find((e) => e.sort_index === 1)
