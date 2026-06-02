@@ -113,13 +113,15 @@ export function Admin() {
         </table>
       </div>
 
-      <Scorecard entries={data.entryStats} />
       <DropOff entries={data.entryStats} />
 
       <div className="group-rollups">
         <GroupTable title="By format" hint="Which delivery shapes reach men. Best avg reach first." groups={data.formatStats} />
         <GroupTable title="By phase" hint="Engagement across the journey, in order." groups={data.phaseStats} />
       </div>
+
+      {/* Full per-day scorecard last — it's the longest table. */}
+      <Scorecard entries={data.entryStats} />
     </section>
   )
 }
