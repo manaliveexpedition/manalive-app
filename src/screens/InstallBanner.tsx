@@ -3,14 +3,16 @@ import { getInstallPrompt, clearInstallPrompt, subscribeInstall, isStandalone, i
 
 const DISMISS_KEY = 'a2hs-dismissed'
 
-// A dismissible "Add to Home Screen" banner. On Android/desktop it triggers the
-// native install prompt; on iOS it shows the Share -> Add to Home Screen steps.
-// After install it tells the man where to find the icon (in case his home
-// screen is full and the icon lands in the app drawer / App Library).
+// "Install the app" call to action. Always offers an install path so it works
+// from the first screen:
+//   - native one-tap prompt when the browser has signaled it's ready (Android/desktop Chrome)
+//   - iOS Safari steps (Apple has no install API)
+//   - otherwise, generic "use the browser menu" steps as a fallback
+// Hidden once the app is installed (running standalone) or dismissed.
 export function InstallBanner() {
   const [prompt, setPrompt] = useState(getInstallPrompt())
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISS_KEY) === '1')
-  const [showIosHelp, setShowIosHelp] = useState(false)
+  const [showSteps, setShowSteps] = useState(false)
   const [installed, setInstalled] = useState(false)
 
   useEffect(() => subscribeInstall(() => setPrompt(getInstallPrompt())), [])
@@ -22,14 +24,17 @@ export function InstallBanner() {
     setDismissed(true)
   }
 
-  async function install() {
-    if (ios) { setShowIosHelp((v) => !v); return }
-    if (!prompt) return
-    await prompt.prompt()
-    const { outcome } = await prompt.userChoice
-    clearInstallPrompt()
-    setPrompt(null)
-    if (outcome === 'accepted') setInstalled(true)
+  async function clickInstall() {
+    if (prompt) {
+      await prompt.prompt()
+      const { outcome } = await prompt.userChoice
+      clearInstallPrompt()
+      setPrompt(null)
+      if (outcome === 'accepted') setInstalled(true)
+      return
+    }
+    // No native prompt available yet: reveal manual steps.
+    setShowSteps((v) => !v)
   }
 
   if (isStandalone() || dismissed) return null
@@ -39,27 +44,27 @@ export function InstallBanner() {
       <div className="install-banner">
         <button type="button" className="install-x" onClick={dismiss} aria-label="Dismiss">×</button>
         <p className="install-text">
-          Added. If you don't see it on your home screen, check your app drawer (Android) or
-          App Library (iPhone) — your home screen may be full.
+          Installed. Open <strong>The Journey</strong> from your home screen or app drawer to keep going
+          — if it's not on your home screen, your screen may be full and it's in the app drawer / App Library.
         </p>
       </div>
     )
   }
 
-  // Nothing to offer on a non-iOS browser that hasn't signaled installability.
-  if (!ios && !prompt) return null
-
   return (
     <div className="install-banner">
       <button type="button" className="install-x" onClick={dismiss} aria-label="Dismiss">×</button>
-      <p className="install-text">Put The Journey on your home screen so it opens like an app.</p>
-      <button type="button" className="install-cta" onClick={install}>
-        {ios ? 'How to add it' : 'Add to Home Screen'}
+      <p className="install-text">Install The Journey on your phone so it opens like an app.</p>
+      <button type="button" className="install-cta" onClick={clickInstall}>
+        Install the app
       </button>
-      {ios && showIosHelp && (
+      {showSteps && (
         <p className="install-ios">
-          In Safari, tap the Share icon (the square with an up arrow), then choose{' '}
-          <strong>Add to Home Screen</strong>. If your home screen is full it goes to your App Library.
+          {ios ? (
+            <>In Safari, tap the Share icon (the square with an up arrow), then choose <strong>Add to Home Screen</strong>.</>
+          ) : (
+            <>Open your browser menu (⋮) and choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</>
+          )}
         </p>
       )}
     </div>

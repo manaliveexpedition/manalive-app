@@ -157,6 +157,8 @@ function SignIn() {
         <p className="login-sub">The Journey</p>
       </div>
 
+      <InstallBanner />
+
       {step === 'request' ? (
         <>
           <p className="muted">Sign in to begin.</p>
