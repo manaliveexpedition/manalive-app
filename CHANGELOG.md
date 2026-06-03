@@ -2,6 +2,38 @@
 
 A running log of notable changes to the ManAlive "The Journey" app.
 
+## 2026-06-03
+
+**Content & audio**
+- Re-uploaded Days 1–10 (trimmed dead space) and added Days 11–20. Days 1–20 now
+  have John's audio; 21–30 pending recording.
+
+**Navigation**
+- "View previous days": men can revisit any day they've reached (read + listen),
+  and leave feedback on it if they're catching up late. Future days stay locked.
+- Admin-only "Library" tab: all 30 Dailies, read/listen, John's reference shelf.
+- Fixed the device/browser Back button so it unwinds day → list → today (and in
+  the Library). Verified live on the deployed site.
+
+**Onboarding / install**
+- New signups auto-start on the upcoming Monday (each invite wave begins together).
+- "Install the app" flow, featured on the sign-in screen: native install on
+  Android / desktop Chrome+Edge, Share→Add steps on iOS; post-install guidance
+  (app drawer / App Library); works on phone and computer.
+
+**Beta feedback**
+- "What landed / What didn't" reframed as beta feedback FOR John (no longer
+  "private"); new Admin "Beta feedback by day" section aggregating every tester's
+  comments per day. Peers still can't read each other's. Gated by BETA_FEEDBACK.
+
+**Branding & polish**
+- New app icon: the MANALIVE / JOURNEY tile (replaced the squished wordmark) + a
+  proper maskable variant.
+- Header rebalanced: logo left, "THE JOURNEY" centered, sign-out right; sides
+  equal-width and narrowed ~20% so the wordmark is truly centered.
+- Check-in split into two standalone boxes (prompt, then feedback).
+- Removed every em dash from visible copy.
+
 ## 2026-06-02
 
 **Audio (Days 1–10)**
