@@ -72,3 +72,20 @@ export async function loadToday(startDate: string | null, now: Date = new Date()
 
   return { kind: 'entry', entry: data as Entry }
 }
+
+// Every entry the man has reached so far (day 1 .. his current day), full data,
+// most-recent first — for the "previous days" list and re-reading. Future days
+// are excluded (no spoilers). Empty if his journey hasn't started.
+export async function loadReachedEntries(startDate: string | null, now: Date = new Date()): Promise<Entry[]> {
+  const current = resolveSortIndex(startDate, now)
+  if (current === null) return []
+
+  const { data, error } = await supabase
+    .from('entries')
+    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+    .gte('sort_index', 1)
+    .lte('sort_index', current)
+    .order('sort_index', { ascending: false })
+  if (error) throw error
+  return (data as Entry[]) ?? []
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { fetchMyProfile, type Profile } from '../lib/profile'
-import { loadToday, localDateISO, type Entry as EntryRow, type TodayState } from '../lib/today'
+import { loadToday, loadReachedEntries, localDateISO, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { fetchCheckin, submitCheckin, BETA_FEEDBACK, type Checkin } from '../lib/checkins'
 
@@ -9,6 +9,7 @@ export function Today() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [state, setState] = useState<TodayState | null>(null)
   const [error, setError] = useState('')
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -36,6 +37,14 @@ export function Today() {
       logEvent('opened_entry', state.entry.id)
     }
   }, [state])
+
+  // Show the history button only when there's at least one earlier day to revisit.
+  const hasPrevious = (state?.kind === 'entry' && (state.entry.sort_index ?? 0) > 1)
+    || state?.kind === 'caught_up'
+
+  if (showHistory) {
+    return <PreviousDays startDate={profile?.start_date ?? null} onBack={() => setShowHistory(false)} />
+  }
 
   return (
     <>
@@ -65,6 +74,12 @@ export function Today() {
       {!error && state?.kind === 'entry' && (
         <EntryView entry={state.entry} />
       )}
+
+      {!error && hasPrevious && (
+        <button type="button" className="secondary previous-days-btn" onClick={() => setShowHistory(true)}>
+          View previous days
+        </button>
+      )}
     </>
   )
 }
@@ -80,33 +95,9 @@ function EntryView({ entry }: { entry: EntryRow }) {
         )}
         <h1>{entry.title}</h1>
 
-        {entry.body_text && (
-          <div className="body">
-            {entry.body_text.split('\n\n').map((para, i) => {
-              // A paragraph that is just a markdown link, e.g.
-              // [ManAlive Alumni](https://…), renders as a CTA button.
-              const cta = para.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)
-              if (cta) {
-                return (
-                  <a
-                    key={i}
-                    className="cta"
-                    href={cta[2]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => logEvent('clicked_link', entry.id)}
-                  >
-                    {cta[1]}
-                  </a>
-                )
-              }
-              return <p key={i}>{linkify(para)}</p>
-            })}
-          </div>
-        )}
+        <EntryBody entry={entry} />
 
-        {/* John's spoken commentary on the reading — comes after the text and is
-            framed as a separate "word from John", not a re-read. */}
+        {/* John's spoken commentary on the reading, after the text. */}
         {entry.audio_url && (
           <AudioPlayer
             entryId={entry.id}
@@ -118,6 +109,90 @@ function EntryView({ entry }: { entry: EntryRow }) {
 
       <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} />
     </>
+  )
+}
+
+// One day's reading body: paragraphs, with standalone markdown CTA links and
+// bare-URL linkify. Shared by today's entry and the previous-days view.
+function EntryBody({ entry }: { entry: EntryRow }) {
+  if (!entry.body_text) return null
+  return (
+    <div className="body">
+      {entry.body_text.split('\n\n').map((para, i) => {
+        const cta = para.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)
+        if (cta) {
+          return (
+            <a key={i} className="cta" href={cta[2]} target="_blank" rel="noopener noreferrer"
+               onClick={() => logEvent('clicked_link', entry.id)}>
+              {cta[1]}
+            </a>
+          )
+        }
+        return <p key={i}>{linkify(para)}</p>
+      })}
+    </div>
+  )
+}
+
+// The days the man has reached so far, plus a read-only view of any past day.
+function PreviousDays({ startDate, onBack }: { startDate: string | null; onBack: () => void }) {
+  const [entries, setEntries] = useState<EntryRow[] | null>(null)
+  const [error, setError] = useState('')
+  const [selected, setSelected] = useState<EntryRow | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    loadReachedEntries(startDate)
+      .then((e) => { if (!cancelled) setEntries(e) })
+      .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load your days.') })
+    return () => { cancelled = true }
+  }, [startDate])
+
+  if (selected) {
+    return <PastEntryView entry={selected} onBack={() => setSelected(null)} />
+  }
+
+  return (
+    <section className="card">
+      <button type="button" className="link back-link" onClick={onBack}>‹ Back to today</button>
+      <h1>Your days so far</h1>
+      {error && <p className="error">{error}</p>}
+      {!error && !entries && <p className="muted">Loading…</p>}
+      {entries && entries.length === 0 && <p className="muted">Nothing here yet.</p>}
+      {entries && entries.length > 0 && (
+        <ul className="day-list">
+          {entries.map((e) => (
+            <li key={e.id}>
+              <button type="button" className="day-item" onClick={() => setSelected(e)}>
+                <span className="eyebrow">{e.week != null ? `Week ${e.week} · Day ${e.day}` : `Day ${e.sort_index}`}</span>
+                <span className="day-title">{e.title}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  )
+}
+
+// A read-only view of a past day (no check-in/feedback). Re-opening it logs
+// opened_entry, so it counts as a revisit in the admin view.
+function PastEntryView({ entry, onBack }: { entry: EntryRow; onBack: () => void }) {
+  useEffect(() => { logEvent('opened_entry', entry.id) }, [entry.id])
+
+  return (
+    <article className="card entry">
+      <button type="button" className="link back-link" onClick={onBack}>‹ Back to your days</button>
+      {(entry.week != null && entry.day != null) && (
+        <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
+      )}
+      <h1>{entry.title}</h1>
+      <EntryBody entry={entry} />
+      {entry.audio_url && (
+        <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => {}} />
+      )}
+      {entry.reflection_prompt && <p className="past-prompt">{entry.reflection_prompt}</p>}
+    </article>
   )
 }
 

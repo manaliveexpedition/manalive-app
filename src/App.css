@@ -384,6 +384,69 @@ button.link:hover:not(:disabled) {
   border-color: var(--edge-strong);
 }
 
+/* ----------------------------------------------------- previous days */
+.previous-days-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding-left: 0;
+  text-decoration: none;
+  color: var(--grey);
+}
+
+.back-link:hover:not(:disabled) {
+  color: var(--cream);
+}
+
+.day-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.day-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: flex-start;
+  text-align: left;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  color: var(--cream);
+  padding: 0.7rem 0.85rem;
+}
+
+.day-item:hover:not(:disabled) {
+  border-color: var(--edge-strong);
+  background: var(--input-bg);
+}
+
+.day-item .eyebrow {
+  margin: 0;
+}
+
+.day-title {
+  font-weight: 600;
+  color: var(--cream);
+}
+
+.past-prompt {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--grey);
+  font-style: italic;
+  line-height: 1.5;
+}
+
 /* ---------------------------------------------------------------- check-in */
 .checkin {
   margin-top: 1.25rem;
