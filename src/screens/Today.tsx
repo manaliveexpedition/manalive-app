@@ -175,24 +175,29 @@ function PreviousDays({ startDate, onBack }: { startDate: string | null; onBack:
   )
 }
 
-// A read-only view of a past day (no check-in/feedback). Re-opening it logs
-// opened_entry, so it counts as a revisit in the admin view.
+// A past day's entry. Re-opening it logs opened_entry (counts as a revisit), and
+// a man catching up late can still leave feedback on it (keyed by entry, so it
+// shows "done" if he already did). Same content as today, minus the today framing.
 function PastEntryView({ entry, onBack }: { entry: EntryRow; onBack: () => void }) {
+  const [played, setPlayed] = useState(false)
   useEffect(() => { logEvent('opened_entry', entry.id) }, [entry.id])
 
   return (
-    <article className="card entry">
-      <button type="button" className="link back-link" onClick={onBack}>‹ Back to your days</button>
-      {(entry.week != null && entry.day != null) && (
-        <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
-      )}
-      <h1>{entry.title}</h1>
-      <EntryBody entry={entry} />
-      {entry.audio_url && (
-        <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => {}} />
-      )}
-      {entry.reflection_prompt && <p className="past-prompt">{entry.reflection_prompt}</p>}
-    </article>
+    <>
+      <article className="card entry">
+        <button type="button" className="link back-link" onClick={onBack}>‹ Back to your days</button>
+        {(entry.week != null && entry.day != null) && (
+          <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
+        )}
+        <h1>{entry.title}</h1>
+        <EntryBody entry={entry} />
+        {entry.audio_url && (
+          <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => setPlayed(true)} />
+        )}
+      </article>
+
+      <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} heading="Check-In" />
+    </>
   )
 }
 
@@ -251,7 +256,7 @@ function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: string;
   )
 }
 
-function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boolean; prompt: string | null }) {
+function CheckInCard({ entryId, played, prompt, heading = "Today's Check-In" }: { entryId: string; played: boolean; prompt: string | null; heading?: string }) {
   const date = localDateISO()
   const [existing, setExisting] = useState<Checkin | null>(null)
   const [loading, setLoading] = useState(true)
@@ -265,7 +270,7 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
     let cancelled = false
     ;(async () => {
       try {
-        const c = await fetchCheckin(entryId, date)
+        const c = await fetchCheckin(entryId)
         if (!cancelled) setExisting(c)
       } catch {
         /* a failed lookup just shows the form; the insert is the source of truth */
@@ -274,7 +279,7 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
       }
     })()
     return () => { cancelled = true }
-  }, [entryId, date])
+  }, [entryId])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -301,9 +306,9 @@ function CheckInCard({ entryId, played, prompt }: { entryId: string; played: boo
 
   return (
     <>
-      {/* Box 1: the check-in prompt / instruction — stands alone, always shown. */}
+      {/* Box 1: the check-in prompt / instruction, stands alone, always shown. */}
       <section className="card checkin">
-        <h2>Today's Check-In</h2>
+        <h2>{heading}</h2>
         {prompt && <p className="prompt">{prompt}</p>}
       </section>
 

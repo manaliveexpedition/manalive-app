@@ -19,9 +19,10 @@ export type Checkin = {
 
 // Today's check-in for this entry, if he's already logged one. RLS scopes this
 // to his own rows, so no user_id filter is needed.
-export async function fetchCheckin(entryId: string, date: string): Promise<Checkin | null> {
-  // Scope to his own row explicitly: RLS returns all men's check-ins to an
-  // admin, so without this an admin could match several rows and 406.
+// His most recent check-in for this ENTRY (any date), so revisiting a day he
+// already gave feedback on shows the "done" state instead of a fresh form.
+// Scoped to his own row explicitly (RLS returns all rows to an admin).
+export async function fetchCheckin(entryId: string): Promise<Checkin | null> {
   const { data: { session } } = await supabase.auth.getSession()
   const uid = session?.user?.id ?? ''
 
@@ -30,7 +31,8 @@ export async function fetchCheckin(entryId: string, date: string): Promise<Check
     .select('id, entry_id, checkin_date, sat_with_it, what_landed, what_didnt, consumed_as')
     .eq('user_id', uid)
     .eq('entry_id', entryId)
-    .eq('checkin_date', date)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .maybeSingle()
   if (error) throw error
   return (data as Checkin) ?? null
