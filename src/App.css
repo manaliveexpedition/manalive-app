@@ -231,6 +231,56 @@ button.link:hover:not(:disabled) {
   white-space: nowrap;
 }
 
+/* Add-to-Home-Screen banner */
+.install-banner {
+  position: relative;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  padding: 0.85rem 2.25rem 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.install-text {
+  color: var(--cream);
+  font-size: 0.9rem;
+  margin: 0 0 0.6rem;
+}
+
+.install-cta {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.9rem;
+}
+
+.install-ios {
+  color: var(--grey);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.6rem 0 0;
+}
+
+.install-ios strong {
+  color: var(--cream);
+}
+
+.install-x {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--grey);
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+}
+
+.install-x:hover:not(:disabled) {
+  color: var(--cream);
+  background: none;
+}
+
 .nav {
   display: flex;
   gap: 0.5rem;

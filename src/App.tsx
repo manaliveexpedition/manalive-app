@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import { Today } from './screens/Today'
 import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
+import { InstallBanner } from './screens/InstallBanner'
 import { fetchMyProfile } from './lib/profile'
 import './App.css'
 
@@ -62,6 +63,8 @@ function Shell() {
           Sign out
         </button>
       </header>
+
+      <InstallBanner />
 
       <nav className="nav">
         <button type="button" className={view === 'today' ? 'on' : ''} onClick={() => setView('today')}>
