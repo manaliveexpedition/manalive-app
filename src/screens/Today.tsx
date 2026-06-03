@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '../lib/supabase'
 import { fetchMyProfile, type Profile } from '../lib/profile'
-import { loadToday, loadReachedEntries, localDateISO, type Entry as EntryRow, type TodayState } from '../lib/today'
+import { loadToday, loadReachedEntries, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
-import { fetchCheckin, submitCheckin, BETA_FEEDBACK, type Checkin } from '../lib/checkins'
+import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
+import { DayBrowser } from './DayBrowser'
 
 export function Today() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -43,7 +43,14 @@ export function Today() {
     || state?.kind === 'caught_up'
 
   if (showHistory) {
-    return <PreviousDays startDate={profile?.start_date ?? null} onBack={() => setShowHistory(false)} />
+    return (
+      <DayBrowser
+        title="Your days so far"
+        loadEntries={() => loadReachedEntries(profile?.start_date ?? null)}
+        feedback
+        onExit={() => setShowHistory(false)}
+      />
+    )
   }
 
   return (
@@ -108,247 +115,6 @@ function EntryView({ entry }: { entry: EntryRow }) {
       </article>
 
       <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} />
-    </>
-  )
-}
-
-// One day's reading body: paragraphs, with standalone markdown CTA links and
-// bare-URL linkify. Shared by today's entry and the previous-days view.
-function EntryBody({ entry }: { entry: EntryRow }) {
-  if (!entry.body_text) return null
-  return (
-    <div className="body">
-      {entry.body_text.split('\n\n').map((para, i) => {
-        const cta = para.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/)
-        if (cta) {
-          return (
-            <a key={i} className="cta" href={cta[2]} target="_blank" rel="noopener noreferrer"
-               onClick={() => logEvent('clicked_link', entry.id)}>
-              {cta[1]}
-            </a>
-          )
-        }
-        return <p key={i}>{linkify(para)}</p>
-      })}
-    </div>
-  )
-}
-
-// The days the man has reached so far, plus a read-only view of any past day.
-function PreviousDays({ startDate, onBack }: { startDate: string | null; onBack: () => void }) {
-  const [entries, setEntries] = useState<EntryRow[] | null>(null)
-  const [error, setError] = useState('')
-  const [selected, setSelected] = useState<EntryRow | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    loadReachedEntries(startDate)
-      .then((e) => { if (!cancelled) setEntries(e) })
-      .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load your days.') })
-    return () => { cancelled = true }
-  }, [startDate])
-
-  if (selected) {
-    return <PastEntryView entry={selected} onBack={() => setSelected(null)} />
-  }
-
-  return (
-    <section className="card">
-      <button type="button" className="link back-link" onClick={onBack}>‹ Back to today</button>
-      <h1>Your days so far</h1>
-      {error && <p className="error">{error}</p>}
-      {!error && !entries && <p className="muted">Loading…</p>}
-      {entries && entries.length === 0 && <p className="muted">Nothing here yet.</p>}
-      {entries && entries.length > 0 && (
-        <ul className="day-list">
-          {entries.map((e) => (
-            <li key={e.id}>
-              <button type="button" className="day-item" onClick={() => setSelected(e)}>
-                <span className="eyebrow">{e.week != null ? `Week ${e.week} · Day ${e.day}` : `Day ${e.sort_index}`}</span>
-                <span className="day-title">{e.title}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
-// A past day's entry. Re-opening it logs opened_entry (counts as a revisit), and
-// a man catching up late can still leave feedback on it (keyed by entry, so it
-// shows "done" if he already did). Same content as today, minus the today framing.
-function PastEntryView({ entry, onBack }: { entry: EntryRow; onBack: () => void }) {
-  const [played, setPlayed] = useState(false)
-  useEffect(() => { logEvent('opened_entry', entry.id) }, [entry.id])
-
-  return (
-    <>
-      <article className="card entry">
-        <button type="button" className="link back-link" onClick={onBack}>‹ Back to your days</button>
-        {(entry.week != null && entry.day != null) && (
-          <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
-        )}
-        <h1>{entry.title}</h1>
-        <EntryBody entry={entry} />
-        {entry.audio_url && (
-          <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => setPlayed(true)} />
-        )}
-      </article>
-
-      <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} heading="Check-In" />
-    </>
-  )
-}
-
-// Turn bare URLs in entry copy into tappable links (e.g. the alumni group on
-// Day 9). The body is author-controlled content, so this is plain rendering,
-// not user input. Links open in a new tab.
-const URL_RE = /(https?:\/\/[^\s]+)/g
-function linkify(text: string) {
-  return text.split(URL_RE).map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a key={i} href={part} target="_blank" rel="noopener noreferrer">
-        {part}
-      </a>
-    ) : (
-      part
-    ),
-  )
-}
-
-const AUDIO_BUCKET = 'daily-audio'
-
-// The bucket is private, so we mint a short-lived signed URL at play time
-// (not getPublicUrl). createSignedUrl is authorized by the storage SELECT
-// policy for the signed-in user; an anonymous caller is rejected.
-function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: string; onPlay: () => void }) {
-  const [url, setUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-
-  async function start() {
-    setLoading(true)
-    setError('')
-    const { data, error } = await supabase.storage.from(AUDIO_BUCKET).createSignedUrl(path, 3600)
-    setLoading(false)
-    if (error || !data?.signedUrl) {
-      setError('Audio is unavailable right now.')
-      return
-    }
-    setUrl(data.signedUrl)
-    onPlay()
-    logEvent('played_audio', entryId)
-  }
-
-  if (url) {
-    return <audio className="audio" controls autoPlay src={url} />
-  }
-
-  return (
-    <div className="audio-launch">
-      <p className="audio-note">From John, on today’s reading:</p>
-      <button type="button" className="secondary" onClick={start} disabled={loading}>
-        {loading ? 'Loading…' : '▶ John’s thoughts'}
-      </button>
-      {error && <p className="error">{error}</p>}
-    </div>
-  )
-}
-
-function CheckInCard({ entryId, played, prompt, heading = "Today's Check-In" }: { entryId: string; played: boolean; prompt: string | null; heading?: string }) {
-  const date = localDateISO()
-  const [existing, setExisting] = useState<Checkin | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  const [whatLanded, setWhatLanded] = useState('')
-  const [whatDidnt, setWhatDidnt] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      try {
-        const c = await fetchCheckin(entryId)
-        if (!cancelled) setExisting(c)
-      } catch {
-        /* a failed lookup just shows the form; the insert is the source of truth */
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
-    return () => { cancelled = true }
-  }, [entryId])
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    setBusy(true)
-    setError('')
-    try {
-      const saved = await submitCheckin({
-        entryId,
-        date,
-        whatLanded,
-        whatDidnt,
-        consumedAs: played ? 'listen' : 'read',
-      })
-      await logEvent('submitted_checkin', entryId)
-      setExisting(saved)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save your check-in.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  if (loading) return null
-
-  return (
-    <>
-      {/* Box 1: the check-in prompt / instruction, stands alone, always shown. */}
-      <section className="card checkin">
-        <h2>{heading}</h2>
-        {prompt && <p className="prompt">{prompt}</p>}
-      </section>
-
-      {/* Box 2: BETA-ONLY feedback for John (not private; not part of the real
-          post-camp experience — see BETA_FEEDBACK). */}
-      {BETA_FEEDBACK && (existing ? (
-        <section className="card checkin done">
-          <p className="eyebrow">Beta feedback</p>
-          <p className="muted">Thanks. Your notes are in, you can close this for today.</p>
-        </section>
-      ) : (
-        <section className="card checkin">
-          <p className="eyebrow">Beta feedback</p>
-          <p className="muted feedback-note">Just for the beta. These go to John to help shape The Journey.</p>
-          <form onSubmit={submit} className="form">
-            <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
-            <textarea
-              id="landed"
-              rows={3}
-              value={whatLanded}
-              onChange={(e) => setWhatLanded(e.target.value)}
-              placeholder="What worked, hit home, or stuck with you?"
-            />
-
-            <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
-            <textarea
-              id="didnt"
-              rows={3}
-              value={whatDidnt}
-              onChange={(e) => setWhatDidnt(e.target.value)}
-              placeholder="What missed, confused, or fell flat?"
-            />
-
-            <button type="submit" disabled={busy}>
-              {busy ? 'Sending…' : 'Send feedback'}
-            </button>
-            {error && <p className="error">{error}</p>}
-          </form>
-        </section>
-      ))}
     </>
   )
 }

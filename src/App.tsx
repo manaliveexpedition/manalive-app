@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 import { Today } from './screens/Today'
 import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
+import { Library } from './screens/Library'
 import { InstallBanner } from './screens/InstallBanner'
 import { fetchMyProfile } from './lib/profile'
 import './App.css'
@@ -40,7 +41,7 @@ function App() {
   )
 }
 
-type View = 'today' | 'progress' | 'admin'
+type View = 'today' | 'progress' | 'admin' | 'library'
 
 function Shell() {
   const [view, setView] = useState<View>('today')
@@ -78,11 +79,17 @@ function Shell() {
             Admin
           </button>
         )}
+        {isAdmin && (
+          <button type="button" className={view === 'library' ? 'on' : ''} onClick={() => setView('library')}>
+            Library
+          </button>
+        )}
       </nav>
 
       {view === 'today' && <Today />}
       {view === 'progress' && <Progress />}
       {view === 'admin' && isAdmin && <Admin />}
+      {view === 'library' && isAdmin && <Library />}
     </div>
   )
 }

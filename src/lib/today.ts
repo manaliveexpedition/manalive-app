@@ -89,3 +89,15 @@ export async function loadReachedEntries(startDate: string | null, now: Date = n
   if (error) throw error
   return (data as Entry[]) ?? []
 }
+
+// EVERY entry (no start_date gate), in journey order — for the admin-only
+// library. RLS already restricts the Admin tab to admins; entries are readable
+// by any signed-in member, so the gate is at the UI level.
+export async function loadAllEntries(): Promise<Entry[]> {
+  const { data, error } = await supabase
+    .from('entries')
+    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+    .order('sort_index', { ascending: true })
+  if (error) throw error
+  return (data as Entry[]) ?? []
+}

@@ -51,12 +51,13 @@ check('every entry has a reflection_prompt (sit with it)', allHavePrompt)
 const titlesClean = data.every((e) => !/^day\s*\d+\s*[:\-]/i.test((e.title || '').trim()))
 check('titles carry no "Day N:" prefix', titlesClean)
 
-// Audio so far: Days 1-10 recorded (mp3); 11-30 not yet. Update the expected
+// Audio so far: Days 1-20 recorded (mp3); 21-30 not yet. Update the expected
 // list as more days are recorded.
 const audioDays = data.filter((e) => e.audio_url).map((e) => e.sort_index).sort((a, b) => a - b)
 const allMp3 = data.filter((e) => e.audio_url).every((e) => (e.audio_url || '').endsWith('.mp3'))
-check('Days 1-10 have mp3 audio; 11-30 still null',
-  JSON.stringify(audioDays) === JSON.stringify([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) && allMp3,
+const expected = Array.from({ length: 20 }, (_, i) => i + 1)
+check('Days 1-20 have mp3 audio; 21-30 still null',
+  JSON.stringify(audioDays) === JSON.stringify(expected) && allMp3,
   `audioDays=${audioDays.join(',')}`)
 
 const FORMATS = new Set(['Anchor', 'Question', 'Truth', 'Story', 'Listen', 'Challenge', 'Pause'])
