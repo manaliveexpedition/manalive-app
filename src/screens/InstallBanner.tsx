@@ -44,8 +44,8 @@ export function InstallBanner() {
       <div className="install-banner">
         <button type="button" className="install-x" onClick={dismiss} aria-label="Dismiss">×</button>
         <p className="install-text">
-          Installed. Open <strong>The Journey</strong> from your home screen or app drawer to keep going
-          — if it's not on your home screen, your screen may be full and it's in the app drawer / App Library.
+          Installed. Open <strong>The Journey</strong> from your home screen, app drawer, or applications to
+          keep going. If you don't see it, your home screen may be full and it's in the app drawer or App Library.
         </p>
       </div>
     )
@@ -54,7 +54,7 @@ export function InstallBanner() {
   return (
     <div className="install-banner">
       <button type="button" className="install-x" onClick={dismiss} aria-label="Dismiss">×</button>
-      <p className="install-text">Install The Journey on your phone so it opens like an app.</p>
+      <p className="install-text">Install The Journey so it opens like an app, on your phone or computer.</p>
       <button type="button" className="install-cta" onClick={clickInstall}>
         Install the app
       </button>
