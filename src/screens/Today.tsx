@@ -89,8 +89,8 @@ export function Today() {
         </button>
       )}
 
-      {/* Beta-only: quiet install nudge, week one only (real app comes later). */}
-      {!error && state?.kind === 'entry' && (state.entry.sort_index ?? 99) <= 7 && <InstallLink />}
+      {/* Beta-only install nudge: while waiting to start, and during week one. */}
+      {!error && (state?.kind === 'not_started' || (state?.kind === 'entry' && (state.entry.sort_index ?? 99) <= 7)) && <InstallLink />}
     </>
   )
 }
