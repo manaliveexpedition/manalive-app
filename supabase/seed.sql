@@ -358,7 +358,9 @@ on conflict (id) do update set
   day               = excluded.day,
   title             = excluded.title,
   body_text         = excluded.body_text,
-  audio_url         = excluded.audio_url,
+  -- audio_url intentionally NOT overwritten: it's set out-of-band by
+  -- scripts/upload-audio-batch.mjs (npm run upload:audio). Re-seeding content
+  -- must leave existing audio links intact, never reset them to the null above.
   sort_index        = excluded.sort_index,
   reflection_prompt = excluded.reflection_prompt;
 
