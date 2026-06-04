@@ -8,7 +8,9 @@
   --charcoal: #2c3137;  /* app background */
   --surface: #363c43;   /* lifted card surface */
   --input-bg: #262b30;  /* recessed fields */
-  --grey: #6b6f76;      /* secondary/meta text, placeholders */
+  --grey: #a3a9b0;      /* secondary/meta text, placeholders. Lightened from #6b6f76
+                           so grey text clears WCAG AA (~4.7:1 on --surface, ~5.5:1 on
+                           --charcoal); the old value was ~2.2:1 and hard to read. */
   --hairline: rgba(107, 111, 118, 0.28); /* grey borders at low opacity */
   --white: #ffffff;
   --error: #e08d7f;
