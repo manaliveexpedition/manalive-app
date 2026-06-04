@@ -5,7 +5,6 @@ import { Today } from './screens/Today'
 import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
 import { Library } from './screens/Library'
-import { InstallBanner } from './screens/InstallBanner'
 import { fetchMyProfile } from './lib/profile'
 import './App.css'
 
@@ -64,8 +63,6 @@ function Shell() {
           Sign out
         </button>
       </header>
-
-      <InstallBanner />
 
       <nav className="nav">
         <button type="button" className={view === 'today' ? 'on' : ''} onClick={() => setView('today')}>
@@ -163,8 +160,6 @@ function SignIn() {
         )}
         <p className="login-sub">The Journey</p>
       </div>
-
-      <InstallBanner />
 
       {step === 'request' ? (
         <>

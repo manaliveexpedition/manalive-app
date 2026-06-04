@@ -4,6 +4,7 @@ import { loadToday, loadReachedEntries, type Entry as EntryRow, type TodayState 
 import { logEvent } from '../lib/events'
 import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
 import { DayBrowser } from './DayBrowser'
+import { InstallLink } from './InstallBanner'
 
 export function Today() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -87,6 +88,9 @@ export function Today() {
           View previous days
         </button>
       )}
+
+      {/* Beta-only: quiet install nudge, week one only (real app comes later). */}
+      {!error && state?.kind === 'entry' && (state.entry.sort_index ?? 99) <= 7 && <InstallLink />}
     </>
   )
 }

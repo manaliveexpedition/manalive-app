@@ -281,6 +281,20 @@ button.link:hover:not(:disabled) {
   background: none;
 }
 
+/* small, optional install link at the bottom of the daily page (week one) */
+.install-link-wrap {
+  text-align: center;
+  margin-top: 1.25rem;
+}
+
+.install-link {
+  font-size: 0.85rem;
+}
+
+.install-link-wrap .install-ios {
+  margin-top: 0.5rem;
+}
+
 .nav {
   display: flex;
   gap: 0.5rem;
