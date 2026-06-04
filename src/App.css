@@ -3,7 +3,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem;
+  /* Base 1.5rem gutter PLUS the iOS safe-area insets, so on iPhone the content
+     (esp. the top bar) clears the status bar / notch and the home indicator.
+     env(safe-area-inset-*) is 0 on Android/desktop, so this is a no-op there. */
+  padding: calc(1.5rem + env(safe-area-inset-top)) calc(1.5rem + env(safe-area-inset-right))
+           calc(1.5rem + env(safe-area-inset-bottom)) calc(1.5rem + env(safe-area-inset-left));
 }
 
 /* ---------------------------------------------------------------- surfaces */
