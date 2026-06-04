@@ -287,8 +287,9 @@ button.link:hover:not(:disabled) {
   margin-top: 1.25rem;
 }
 
-.install-link {
+.install-link-wrap .install-link {
   font-size: 0.85rem;
+  color: var(--cream);
 }
 
 .install-link-wrap .install-ios {
@@ -329,6 +330,11 @@ button.link:hover:not(:disabled) {
 .card.calm {
   text-align: center;
   padding: 2.5rem 1.75rem;
+}
+
+/* The waiting / caught-up message reads as primary text, not faint grey. */
+.card.calm .muted {
+  color: var(--cream);
 }
 
 .eyebrow {
