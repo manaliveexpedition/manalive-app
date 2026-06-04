@@ -9,6 +9,22 @@ export function localDateISO(now: Date = new Date()): string {
   return `${y}-${m}-${d}`
 }
 
+// Friendly start date for the waiting screen, e.g. "Monday, June 8th". Parsed
+// as local midnight (same as resolveSortIndex) so the weekday never shifts a day
+// in a negative timezone. Returns null if start_date is missing/unparseable, so
+// the caller can fall back to generic copy.
+export function formatStartDate(startDate: string | null): string | null {
+  if (!startDate) return null
+  const d = new Date(`${startDate}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return null
+  const weekday = d.toLocaleDateString('en-US', { weekday: 'long' })
+  const month = d.toLocaleDateString('en-US', { month: 'long' })
+  const day = d.getDate()
+  const v = day % 100
+  const suffix = ['th', 'st', 'nd', 'rd'][(v - 20) % 10] || ['th', 'st', 'nd', 'rd'][v] || 'th'
+  return `${weekday}, ${month} ${day}${suffix}`
+}
+
 export type Entry = {
   id: string
   week: number | null

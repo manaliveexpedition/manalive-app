@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchMyProfile, type Profile } from '../lib/profile'
-import { loadToday, loadReachedEntries, type Entry as EntryRow, type TodayState } from '../lib/today'
+import { loadToday, loadReachedEntries, formatStartDate, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
 import { DayBrowser } from './DayBrowser'
@@ -65,7 +65,9 @@ export function Today() {
           <h1>Your journey starts soon</h1>
           <p className="muted">
             {profile?.name ? `${profile.name}, your` : 'Your'} first daily will be
-            here when it begins. There's nothing you need to do yet.
+            here {formatStartDate(profile?.start_date ?? null)
+              ? `on ${formatStartDate(profile?.start_date ?? null)}`
+              : 'when it begins'}. There's nothing you need to do yet.
           </p>
         </section>
       )}
