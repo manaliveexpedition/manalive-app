@@ -27,11 +27,19 @@ await sharp(Buffer.from(bg)).composite([{ input: art, gravity: 'center' }]).png(
 console.log('  wrote icon-maskable-512.png')
 
 // Notification small-icon: Android renders it as a white silhouette via the
-// alpha channel, so a colored icon becomes a white box. This must be flat white
-// on transparent. Simple peak/expedition mark (placeholder for a designed glyph).
-const NOTIF = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
-  <path d="M10 76 L34 32 L50 58 L62 40 L86 76 Z" fill="#ffffff"/>
-</svg>`
-await sharp(Buffer.from(NOTIF)).png().toFile(join(outDir, 'notification.png'))
+// alpha channel, so a colored icon becomes a white box. It must be flat white on
+// transparent. Pull the cream MANALIVE / JOURNEY lettering off the oxblood tile
+// by luminance threshold and paint it white, keeping the tile (dark) transparent.
+const NW = 96
+const NH = 96
+const mask = await sharp(source).resize(NW, NH).removeAlpha().grayscale().threshold(120).raw().toBuffer()
+const wm = Buffer.alloc(NW * NH * 4)
+for (let i = 0; i < NW * NH; i++) {
+  wm[i * 4] = 255
+  wm[i * 4 + 1] = 255
+  wm[i * 4 + 2] = 255
+  wm[i * 4 + 3] = mask[i] // cream -> opaque white, oxblood tile -> transparent
+}
+await sharp(wm, { raw: { width: NW, height: NH, channels: 4 } }).png().toFile(join(outDir, 'notification.png'))
 console.log('  wrote notification.png')
 console.log('Done.')
