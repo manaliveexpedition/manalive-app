@@ -55,6 +55,17 @@ function Shell() {
     return () => { cancelled = true }
   }, [])
 
+  // Tapping a push notification asks the app to jump to Today (the new day).
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
+    const handler = (e: MessageEvent) => {
+      const data = e.data as { type?: string; view?: View } | null
+      if (data?.type === 'navigate' && data.view) setView(data.view)
+    }
+    navigator.serviceWorker.addEventListener('message', handler)
+    return () => navigator.serviceWorker.removeEventListener('message', handler)
+  }, [])
+
   return (
     <div className="shell">
       <header className="topbar">

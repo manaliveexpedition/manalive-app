@@ -25,4 +25,13 @@ const art = await sharp(source).resize(inner, inner).png().toBuffer()
 const bg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect width="512" height="512" fill="${OXBLOOD}"/></svg>`
 await sharp(Buffer.from(bg)).composite([{ input: art, gravity: 'center' }]).png().toFile(join(outDir, 'icon-maskable-512.png'))
 console.log('  wrote icon-maskable-512.png')
+
+// Notification small-icon: Android renders it as a white silhouette via the
+// alpha channel, so a colored icon becomes a white box. This must be flat white
+// on transparent. Simple peak/expedition mark (placeholder for a designed glyph).
+const NOTIF = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+  <path d="M10 76 L34 32 L50 58 L62 40 L86 76 Z" fill="#ffffff"/>
+</svg>`
+await sharp(Buffer.from(NOTIF)).png().toFile(join(outDir, 'notification.png'))
+console.log('  wrote notification.png')
 console.log('Done.')

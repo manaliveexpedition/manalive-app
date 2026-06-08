@@ -136,11 +136,6 @@ export function Settings() {
 
       {mode === 'ok' && (
         <>
-          <p className="muted">
-            A gentle daily nudge, only on days you have not opened yet. You will also get a quiet dot
-            on the app icon when a new day is ready. Off by default. No counts, no pressure.
-          </p>
-
           {msg && <p className="error settings-msg">{msg}</p>}
 
           <div className="toggle-row">

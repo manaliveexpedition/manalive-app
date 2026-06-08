@@ -56,14 +56,16 @@ self.addEventListener('push', (event) => {
       await self.registration.showNotification(payload.title ?? 'ManAlive', {
         body: payload.body ?? 'A new day is ready.',
         icon: '/icons/icon-192.png',
-        badge: '/icons/icon-192.png',
+        badge: '/icons/notification.png', // flat white silhouette (Android small icon)
         tag: payload.tag ?? 'daily', // same tag replaces, never stacks
       })
     })(),
   )
 })
 
-// --- Click: focus an existing window, otherwise open the app on Today ---
+// --- Click: take the man to today's day. If a window is open (maybe on another
+// tab/screen), focus it and tell the app to switch to Today; otherwise open the
+// app fresh (which lands on Today by default). ---
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   event.waitUntil(
@@ -72,6 +74,7 @@ self.addEventListener('notificationclick', (event) => {
       const open = windows.find((c): c is WindowClient => 'focus' in c)
       if (open) {
         await open.focus()
+        open.postMessage({ type: 'navigate', view: 'today' })
         return
       }
       await self.clients.openWindow('/')
