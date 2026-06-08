@@ -52,11 +52,10 @@ Deno.serve(async (req) => {
       .select('id, endpoint, p256dh, auth')
       .eq('user_id', row.user_id)
 
-    // Reminder-on gets the nudge copy; dot-only still shows a minimal notice
-    // (iOS requires a visible notification on every push). The badge flag is
-    // honoured by the service worker so the dot only appears if dot is enabled.
-    const body = row.reminder_enabled ? 'A new day is ready when you are.' : 'A new day is ready.'
-    const payload = JSON.stringify({ title: 'ManAlive', body, tag: 'daily', badge: row.dot_enabled })
+    // The new-day dot is automatic, so every push sets the badge (badge: true).
+    // A visible notification is always shown (iOS requires one per push).
+    const body = 'A new day is ready when you are.'
+    const payload = JSON.stringify({ title: 'ManAlive', body, tag: 'daily', badge: true })
 
     let userSent = 0
     for (const s of subs ?? []) {

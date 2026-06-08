@@ -5,22 +5,27 @@ import { supabase } from './supabase'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 
+// The new-day dot is automatic (it rides every push), so it is NOT a user
+// setting. The only thing a man chooses is whether to get the daily reminder,
+// and at what time.
 export type NotificationPrefs = {
-  dot_enabled: boolean
   reminder_enabled: boolean
   reminder_time: string // 'HH:MM' (DB stores time; we trim seconds)
-  dot_time: string
   timezone: string
 }
 
 export function defaultPrefs(): NotificationPrefs {
   return {
-    dot_enabled: false,
     reminder_enabled: false,
     reminder_time: '08:00',
-    dot_time: '07:00',
     timezone: localTimezone(),
   }
+}
+
+// Current notification permission, or 'unsupported' if the browser lacks the API.
+export function notificationPermission(): NotificationPermission | 'unsupported' {
+  if (!pushSupported()) return 'unsupported'
+  return Notification.permission
 }
 
 function localTimezone(): string {
@@ -53,16 +58,14 @@ export async function loadPrefs(): Promise<NotificationPrefs> {
   const uid = await getUid()
   const { data, error } = await supabase
     .from('notification_prefs')
-    .select('dot_enabled, reminder_enabled, reminder_time, dot_time, timezone')
+    .select('reminder_enabled, reminder_time, timezone')
     .eq('user_id', uid)
     .maybeSingle()
   if (error) throw error
   if (!data) return defaultPrefs()
   return {
-    dot_enabled: data.dot_enabled,
     reminder_enabled: data.reminder_enabled,
     reminder_time: hhmm(data.reminder_time),
-    dot_time: hhmm(data.dot_time),
     timezone: data.timezone,
   }
 }
@@ -73,10 +76,8 @@ export async function savePrefs(prefs: NotificationPrefs): Promise<void> {
   const { error } = await supabase.from('notification_prefs').upsert(
     {
       user_id: uid,
-      dot_enabled: prefs.dot_enabled,
       reminder_enabled: prefs.reminder_enabled,
       reminder_time: prefs.reminder_time,
-      dot_time: prefs.dot_time,
       timezone: localTimezone(),
       updated_at: new Date().toISOString(),
     },
