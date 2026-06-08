@@ -122,7 +122,7 @@ async function run() {
   // 1) Anonymous requests must return empty for every table.
   console.log('1. Anonymous (unauthenticated) requests:')
   const anon = anonClient()
-  for (const table of ['profiles', 'entries', 'checkins', 'events']) {
+  for (const table of ['profiles', 'entries', 'checkins', 'events', 'push_subscriptions', 'notification_prefs']) {
     const { data, error } = await anon.from(table).select('*')
     check(`anon ${table} -> empty`, !error && Array.isArray(data) && data.length === 0,
       error ? error.message : `got ${data?.length} rows`)
@@ -229,6 +229,63 @@ async function run() {
     const { data: after } = await admin.from('profiles').select('start_date').eq('id', users.alice.id).single()
     check('member cannot set own start_date', !!error || after?.start_date === '2026-05-01',
       error ? `(rejected: ${error.message})` : `start_date is now ${after?.start_date}`)
+  }
+
+  // 9) Push subscriptions: a man manages only his own (also proves the explicit
+  //    table GRANT — a missing grant surfaces here as permission-denied/empty).
+  console.log('\n9. Push subscriptions are per-man:')
+  {
+    const { data, error } = await alice.from('push_subscriptions')
+      .insert({ endpoint: `https://push.example/alice-${tag}`, p256dh: 'p256', auth: 'authk', ua_label: 'test' })
+      .select('id, user_id').single()
+    check('alice insert + read own push sub', !error && data?.user_id === users.alice.id, error?.message)
+  }
+  {
+    const { data, error } = await bob.from('push_subscriptions').select('id, user_id')
+    const seesAlice = (data ?? []).some((r) => r.user_id === users.alice.id)
+    check('bob does NOT see alice push subs', !error && !seesAlice,
+      error ? error.message : `bob saw ${data?.length} rows`)
+  }
+  {
+    const { data, error } = await bob.from('push_subscriptions')
+      .insert({ user_id: users.alice.id, endpoint: `https://push.example/bobasalice-${tag}`, p256dh: 'p', auth: 'a' })
+      .select('id')
+    check('bob insert sub as alice -> rejected', !!error || (data?.length ?? 0) === 0,
+      error ? `(rejected: ${error.message})` : 'insert unexpectedly succeeded')
+  }
+
+  // 10) Notification prefs: per-man read/write; admin may read.
+  console.log('\n10. Notification prefs are per-man:')
+  {
+    const { data, error } = await alice.from('notification_prefs')
+      .insert({ reminder_enabled: true, reminder_time: '08:00', timezone: 'America/Chicago' })
+      .select('user_id, reminder_enabled').single()
+    check('alice insert + read own prefs', !error && data?.user_id === users.alice.id && data?.reminder_enabled === true,
+      error?.message)
+  }
+  {
+    const { data, error } = await bob.from('notification_prefs').select('user_id')
+    const seesAlice = (data ?? []).some((r) => r.user_id === users.alice.id)
+    check('bob does NOT see alice prefs', !error && !seesAlice,
+      error ? error.message : `bob saw ${data?.length} rows`)
+  }
+  {
+    const { data, error } = await carol.from('notification_prefs').select('user_id')
+    const seesAlice = (data ?? []).some((r) => r.user_id === users.alice.id)
+    check('admin sees alice prefs', !error && seesAlice,
+      error ? error.message : `admin saw ${data?.length} rows`)
+  }
+
+  // 11) reminders_due_now() is service-role only (not callable by a member).
+  console.log('\n11. reminders_due_now() is locked to the service role:')
+  {
+    const { error } = await alice.rpc('reminders_due_now')
+    check('member cannot call reminders_due_now', !!error,
+      error ? `(rejected: ${error.message})` : 'unexpectedly allowed')
+  }
+  {
+    const { error } = await admin.rpc('reminders_due_now')
+    check('service role can call reminders_due_now', !error, error?.message)
   }
 }
 
