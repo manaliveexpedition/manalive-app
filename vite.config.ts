@@ -8,6 +8,15 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Custom service worker (src/sw.ts) so we can handle Web Push + the badge
+      // dot. Output filename stays sw.ts -> dist/sw.js, so the auto-injected
+      // registration (which registers /sw.js) is unchanged.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+      },
       manifest: {
         name: 'ManAlive',
         short_name: 'ManAlive',
