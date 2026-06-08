@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { fetchMyProfile, type Profile } from '../lib/profile'
 import { loadToday, loadReachedEntries, formatStartDate, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
+import { clearBadge } from '../lib/push'
 import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
 import { DayBrowser } from './DayBrowser'
 import { InstallLink } from './InstallBanner'
@@ -36,6 +37,8 @@ export function Today() {
     if (state?.kind === 'entry' && loggedEntryId.current !== state.entry.id) {
       loggedEntryId.current = state.entry.id
       logEvent('opened_entry', state.entry.id)
+      // He has seen today's day, so clear the new-day badge dot.
+      clearBadge()
     }
   }, [state])
 

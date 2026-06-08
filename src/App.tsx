@@ -5,6 +5,7 @@ import { Today } from './screens/Today'
 import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
 import { Library } from './screens/Library'
+import { Settings } from './screens/Settings'
 import { fetchMyProfile } from './lib/profile'
 import './App.css'
 
@@ -40,7 +41,7 @@ function App() {
   )
 }
 
-type View = 'today' | 'progress' | 'admin' | 'library'
+type View = 'today' | 'progress' | 'settings' | 'admin' | 'library'
 
 function Shell() {
   const [view, setView] = useState<View>('today')
@@ -71,6 +72,9 @@ function Shell() {
         <button type="button" className={view === 'progress' ? 'on' : ''} onClick={() => setView('progress')}>
           Progress
         </button>
+        <button type="button" className={view === 'settings' ? 'on' : ''} onClick={() => setView('settings')}>
+          Settings
+        </button>
         {isAdmin && (
           <button type="button" className={view === 'admin' ? 'on' : ''} onClick={() => setView('admin')}>
             Admin
@@ -85,6 +89,7 @@ function Shell() {
 
       {view === 'today' && <Today />}
       {view === 'progress' && <Progress />}
+      {view === 'settings' && <Settings />}
       {view === 'admin' && isAdmin && <Admin />}
       {view === 'library' && isAdmin && <Library />}
     </div>
