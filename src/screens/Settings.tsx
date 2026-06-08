@@ -138,6 +138,13 @@ export function Settings() {
         <>
           {msg && <p className="error settings-msg">{msg}</p>}
 
+          {notificationPermission() === 'default' && !prefs.reminder_enabled && (
+            <p className="settings-note">
+              Heads up: when you switch this on, your phone will ask to allow notifications.
+              Tap <strong>Allow</strong>.
+            </p>
+          )}
+
           <div className="toggle-row">
             <span className="toggle-text">
               <strong>Daily reminder</strong>
