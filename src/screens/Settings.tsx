@@ -11,6 +11,28 @@ import {
   type NotificationPrefs,
 } from '../lib/push'
 
+// 12-hour label for an 'HH:MM' value, e.g. '08:30' -> '8:30 AM'.
+function label12(value: string): string {
+  const [hStr, mStr] = value.split(':')
+  const h = Number(hStr)
+  const ampm = h < 12 ? 'AM' : 'PM'
+  const h12 = h % 12 === 0 ? 12 : h % 12
+  return `${h12}:${mStr} ${ampm}`
+}
+
+// Half-hour options for the reminder dropdown, plus the man's current value if
+// it happens to fall off the grid (e.g. set earlier with the old picker).
+function buildTimeOptions(current: string): { value: string; label: string }[] {
+  const values = new Set<string>()
+  for (let h = 0; h < 24; h++) {
+    for (const m of [0, 30]) {
+      values.add(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
+    }
+  }
+  if (current) values.add(current)
+  return [...values].sort().map((v) => ({ value: v, label: label12(v) }))
+}
+
 export function Settings() {
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
   const [busy, setBusy] = useState(false)
@@ -137,12 +159,16 @@ export function Settings() {
           {prefs.reminder_enabled && (
             <label className="time-row">
               <span>Remind me at</span>
-              <input
-                type="time"
+              <select
+                className="time-select"
                 value={prefs.reminder_time.slice(0, 5)}
                 disabled={busy}
                 onChange={(e) => setReminderTime(e.target.value)}
-              />
+              >
+                {buildTimeOptions(prefs.reminder_time.slice(0, 5)).map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
             </label>
           )}
         </>

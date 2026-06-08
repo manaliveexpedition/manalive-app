@@ -887,13 +887,14 @@ table.men td.nowrap {
   padding: 0.25rem 0 0.5rem;
 }
 
-.time-row input[type='time'] {
+.time-row .time-select {
   background: var(--input-bg);
   border: 1px solid var(--hairline);
   color: var(--cream);
   border-radius: 8px;
-  padding: 0.45rem 0.6rem;
+  padding: 0.5rem 0.6rem;
   font: inherit;
+  min-width: 7.5rem;
 }
 
 .settings-msg {
