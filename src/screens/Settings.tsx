@@ -143,33 +143,44 @@ export function Settings() {
 
           {msg && <p className="error settings-msg">{msg}</p>}
 
-          <label className="toggle-row">
+          <div className="toggle-row">
             <span className="toggle-text">
               <strong>Daily reminder</strong>
-              <span className="muted">A nudge at a time you choose.</span>
+              <span className="muted">{prefs.reminder_enabled ? 'On' : 'Off'}</span>
             </span>
-            <input
-              type="checkbox"
-              checked={prefs.reminder_enabled}
-              disabled={busy}
-              onChange={(e) => toggleReminder(e.target.checked)}
-            />
-          </label>
+            <label className="switch">
+              <input
+                type="checkbox"
+                aria-label="Daily reminder"
+                checked={prefs.reminder_enabled}
+                disabled={busy}
+                onChange={(e) => toggleReminder(e.target.checked)}
+              />
+              <span className="track"><span className="thumb" /></span>
+            </label>
+          </div>
 
           {prefs.reminder_enabled && (
-            <label className="time-row">
-              <span>Remind me at</span>
-              <select
-                className="time-select"
-                value={prefs.reminder_time.slice(0, 5)}
-                disabled={busy}
-                onChange={(e) => setReminderTime(e.target.value)}
-              >
-                {buildTimeOptions(prefs.reminder_time.slice(0, 5)).map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </select>
-            </label>
+            <div className="reminder-status">
+              <p className="reminder-on">Reminder on</p>
+              <div className="reminder-time">
+                <span>Each day at</span>
+                <select
+                  className="time-select"
+                  value={prefs.reminder_time.slice(0, 5)}
+                  disabled={busy}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                >
+                  {buildTimeOptions(prefs.reminder_time.slice(0, 5)).map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+              <p className="muted reminder-note">
+                We will nudge you only on days you have not opened yet. Change the time above, or
+                switch it off anytime.
+              </p>
+            </div>
           )}
         </>
       )}
