@@ -31,20 +31,25 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   event.waitUntil(
     (async () => {
-      let payload: { title?: string; body?: string; tag?: string } = {}
+      let payload: { title?: string; body?: string; tag?: string; badge?: boolean } = {}
       try {
         payload = event.data?.json() ?? {}
       } catch {
         // non-JSON or empty payload: fall back to defaults below
       }
 
-      // The Badging API is not typed on WorkerNavigator; probe it defensively.
-      const nav = self.navigator as { setAppBadge?: () => Promise<void> }
-      if (typeof nav.setAppBadge === 'function') {
-        try {
-          await nav.setAppBadge()
-        } catch {
-          // badge not supported / not installed: ignore
+      // Set the app-icon dot only when the sender asks for it (the man's
+      // "new-day dot" toggle). Default to true for payloads without the flag
+      // (e.g. the manual test script). The Badging API is not typed on
+      // WorkerNavigator, so probe it defensively.
+      if (payload.badge !== false) {
+        const nav = self.navigator as { setAppBadge?: () => Promise<void> }
+        if (typeof nav.setAppBadge === 'function') {
+          try {
+            await nav.setAppBadge()
+          } catch {
+            // badge not supported / not installed: ignore
+          }
         }
       }
 

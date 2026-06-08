@@ -385,6 +385,11 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# send-reminders is called by pg_cron (not a logged-in user), so it does its own
+# auth via the x-cron-secret header instead of a Supabase JWT.
+[functions.send-reminders]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
