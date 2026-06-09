@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { type Entry as EntryRow } from '../lib/today'
 import { logEvent } from '../lib/events'
-import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
+import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
 
 // A list of days + a detail view of one day, with browser-history-aware back:
 // the device/browser Back button (and the in-app back link) unwind day -> list,
@@ -89,6 +89,7 @@ function DayDetail({ entry, feedback, onBack }: { entry: EntryRow; feedback: boo
           <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => setPlayed(true)} />
         )}
       </article>
+      {feedback && <NotesCard entryId={entry.id} />}
       {feedback && (
         <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} heading="Check-In" />
       )}

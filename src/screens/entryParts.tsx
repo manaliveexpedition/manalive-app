@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { localDateISO, type Entry as EntryRow } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { fetchCheckin, submitCheckin, BETA_FEEDBACK, type Checkin } from '../lib/checkins'
+import { loadNote, saveNote } from '../lib/notes'
 
 // Turn bare URLs in entry copy into tappable links (e.g. the alumni group on
 // Day 9). Author-controlled content, so this is plain rendering, not user input.
@@ -144,17 +145,17 @@ export function CheckInCard({ entryId, played, prompt, heading = "Today's Check-
       ) : (
         <section className="card checkin">
           <p className="eyebrow">Beta feedback</p>
-          <p className="muted feedback-note">Just for the beta. These go to John to help shape The Journey.</p>
+          <p className="muted feedback-note">Feedback on the beta itself, not today's reflection. It goes to John to help shape The Journey.</p>
           <form onSubmit={submit} className="form">
-            <label htmlFor="landed">What landed? <span className="optional">(optional)</span></label>
+            <label htmlFor="landed">What worked about today's reading? <span className="optional">(optional)</span></label>
             <textarea id="landed" rows={3} value={whatLanded}
               onChange={(e) => setWhatLanded(e.target.value)}
-              placeholder="What worked, hit home, or stuck with you?" />
+              placeholder="What was clear, hit home, or felt right?" />
 
-            <label htmlFor="didnt">What didn't? <span className="optional">(optional)</span></label>
+            <label htmlFor="didnt">What was confusing or fell flat? <span className="optional">(optional)</span></label>
             <textarea id="didnt" rows={3} value={whatDidnt}
               onChange={(e) => setWhatDidnt(e.target.value)}
-              placeholder="What missed, confused, or fell flat?" />
+              placeholder="Anything unclear, clunky, or that missed?" />
 
             <button type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send feedback'}</button>
             {error && <p className="error">{error}</p>}
@@ -162,5 +163,56 @@ export function CheckInCard({ entryId, played, prompt, heading = "Today's Check-
         </section>
       ))}
     </>
+  )
+}
+
+// A man's PRIVATE notes for the day (reading + audio). Not seen by John or anyone
+// else, that's the whole point. Loads any saved note, saves on blur and on the
+// Save button.
+export function NotesCard({ entryId }: { entryId: string }) {
+  const [body, setBody] = useState('')
+  const [loaded, setLoaded] = useState(false)
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+
+  useEffect(() => {
+    let cancelled = false
+    loadNote(entryId)
+      .then((b) => { if (!cancelled) { setBody(b); setLoaded(true) } })
+      .catch(() => { if (!cancelled) setLoaded(true) })
+    return () => { cancelled = true }
+  }, [entryId])
+
+  async function save() {
+    if (status === 'saving') return
+    setStatus('saving')
+    try {
+      await saveNote(entryId, body)
+      setStatus('saved')
+    } catch {
+      setStatus('idle')
+    }
+  }
+
+  if (!loaded) return null
+
+  return (
+    <section className="card notes">
+      <h2>Your notes</h2>
+      <p className="muted">Private to you. Capture anything you want to remember from the reading or the audio.</p>
+      <textarea
+        className="notes-input"
+        rows={5}
+        value={body}
+        onChange={(e) => { setBody(e.target.value); if (status === 'saved') setStatus('idle') }}
+        onBlur={save}
+        placeholder="Write whatever stood out today…"
+      />
+      <div className="notes-actions">
+        <button type="button" onClick={save} disabled={status === 'saving'}>
+          {status === 'saving' ? 'Saving…' : 'Save notes'}
+        </button>
+        {status === 'saved' && <span className="muted notes-saved">Saved</span>}
+      </div>
+    </section>
   )
 }

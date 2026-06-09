@@ -981,3 +981,45 @@ table.men td.nowrap {
 .settings-msg {
   margin: 0.75rem 0 0;
 }
+
+/* --------------------------------------------------------------- Notes */
+.card.notes h2 {
+  margin: 0 0 0.3rem;
+}
+
+.card.notes .muted {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.notes-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--input-bg);
+  color: var(--cream);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.notes-input::placeholder {
+  color: var(--grey);
+}
+
+.notes-input:focus {
+  outline: 2px solid var(--cream);
+  border-color: transparent;
+}
+
+.notes-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.notes-saved {
+  font-size: 0.85rem;
+}

@@ -122,7 +122,7 @@ async function run() {
   // 1) Anonymous requests must return empty for every table.
   console.log('1. Anonymous (unauthenticated) requests:')
   const anon = anonClient()
-  for (const table of ['profiles', 'entries', 'checkins', 'events', 'push_subscriptions', 'notification_prefs']) {
+  for (const table of ['profiles', 'entries', 'checkins', 'events', 'push_subscriptions', 'notification_prefs', 'notes']) {
     const { data, error } = await anon.from(table).select('*')
     check(`anon ${table} -> empty`, !error && Array.isArray(data) && data.length === 0,
       error ? error.message : `got ${data?.length} rows`)
@@ -286,6 +286,28 @@ async function run() {
   {
     const { error } = await admin.rpc('reminders_due_now')
     check('service role can call reminders_due_now', !error, error?.message)
+  }
+
+  // 12) Notes are PRIVATE to the man — not other members, and NOT even admin.
+  console.log('\n12. Notes are private (admin cannot read them):')
+  {
+    const { data, error } = await alice.from('notes')
+      .insert({ entry_id: TEST_ENTRY, body: 'alice private note' })
+      .select('id, user_id, body').single()
+    check('alice insert + read own note', !error && data?.user_id === users.alice.id && data?.body === 'alice private note',
+      error?.message)
+  }
+  {
+    const { data, error } = await bob.from('notes').select('id, user_id')
+    const seesAlice = (data ?? []).some((r) => r.user_id === users.alice.id)
+    check('bob does NOT see alice notes', !error && !seesAlice,
+      error ? error.message : `bob saw ${data?.length} rows`)
+  }
+  {
+    const { data, error } = await carol.from('notes').select('id, user_id, body')
+    const seesAlice = (data ?? []).some((r) => r.user_id === users.alice.id)
+    check('ADMIN does NOT see alice notes', !error && !seesAlice,
+      error ? error.message : `admin saw ${data?.length} note rows`)
   }
 }
 

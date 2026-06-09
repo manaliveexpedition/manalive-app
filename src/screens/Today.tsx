@@ -3,7 +3,7 @@ import { fetchMyProfile, type Profile } from '../lib/profile'
 import { loadToday, loadReachedEntries, formatStartDate, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { clearBadge } from '../lib/push'
-import { EntryBody, AudioPlayer, CheckInCard } from './entryParts'
+import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
 import { DayBrowser } from './DayBrowser'
 import { InstallLink } from './InstallBanner'
 
@@ -122,6 +122,8 @@ function EntryView({ entry }: { entry: EntryRow }) {
           />
         )}
       </article>
+
+      <NotesCard entryId={entry.id} />
 
       <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} />
     </>
