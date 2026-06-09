@@ -27,15 +27,23 @@ await sharp(Buffer.from(bg)).composite([{ input: art, gravity: 'center' }]).png(
 console.log('  wrote icon-maskable-512.png')
 
 // Notification small-icon: Android masks it to its alpha channel, so it must be
-// flat white on transparent. The "Lively" campfire: a multi-tongue flame over
-// crossed logs.
-const LIVELY = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+// flat white on transparent. The "Lively" campfire (multi-tongue flame over
+// crossed logs), scaled to fill the icon area as large as possible: render big,
+// trim the transparent margin, then fit it into 96px with a small safe gap.
+const LIVELY = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="384" height="384">
   <path d="M48 12 C50 22 56 26 55 35 C60 33 60 28 58 25 C64 35 61 45 60 53 C65 50 64 45 63 42 C67 53 58 60 48 60 C38 60 29 53 34 43 C34 48 38 49 40 46 C36 38 41 34 44 36 C43 29 46 26 46 21 C48 25 50 23 48 12 Z" fill="#ffffff"/>
   <g stroke="#ffffff" stroke-width="7" stroke-linecap="round">
     <line x1="24" y1="82" x2="72" y2="70"/>
     <line x1="24" y1="70" x2="72" y2="82"/>
   </g>
 </svg>`
-await sharp(Buffer.from(LIVELY)).png().toFile(join(outDir, 'notification.png'))
-console.log('  wrote notification.png (lively)')
+const livelyTrimmed = await sharp(Buffer.from(LIVELY)).png().toBuffer().then((b) => sharp(b).trim().toBuffer())
+const livelyScaled = await sharp(livelyTrimmed)
+  .resize(90, 90, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  .toBuffer()
+await sharp({ create: { width: 96, height: 96, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+  .composite([{ input: livelyScaled, gravity: 'center' }])
+  .png()
+  .toFile(join(outDir, 'notification.png'))
+console.log('  wrote notification.png (lively, enlarged)')
 console.log('Done.')
