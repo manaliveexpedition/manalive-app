@@ -27,18 +27,15 @@ await sharp(Buffer.from(bg)).composite([{ input: art, gravity: 'center' }]).png(
 console.log('  wrote icon-maskable-512.png')
 
 // Notification small-icon: Android masks it to its alpha channel, so it must be
-// flat white on transparent. The "Sparks" campfire the guys picked: a bonfire
-// flame + rising embers over crossed logs.
-const SPARKS = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
-  <path d="M34 60 C29 50 35 44 37 50 C35 40 33 35 41 27 C42 34 46 33 45 27 C44 18 41 17 48 9 C52 18 49 26 53 31 C56 35 60 32 58 25 C64 35 60 43 61 51 C64 47 67 50 63 60 Z" fill="#ffffff"/>
-  <circle cx="62" cy="22" r="3" fill="#ffffff"/>
-  <circle cx="37" cy="18" r="2.5" fill="#ffffff"/>
-  <circle cx="66" cy="38" r="2.5" fill="#ffffff"/>
+// flat white on transparent. The "Lively" campfire: a multi-tongue flame over
+// crossed logs.
+const LIVELY = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+  <path d="M48 12 C50 22 56 26 55 35 C60 33 60 28 58 25 C64 35 61 45 60 53 C65 50 64 45 63 42 C67 53 58 60 48 60 C38 60 29 53 34 43 C34 48 38 49 40 46 C36 38 41 34 44 36 C43 29 46 26 46 21 C48 25 50 23 48 12 Z" fill="#ffffff"/>
   <g stroke="#ffffff" stroke-width="7" stroke-linecap="round">
     <line x1="24" y1="82" x2="72" y2="70"/>
     <line x1="24" y1="70" x2="72" y2="82"/>
   </g>
 </svg>`
-await sharp(Buffer.from(SPARKS)).png().toFile(join(outDir, 'notification.png'))
-console.log('  wrote notification.png (sparks)')
+await sharp(Buffer.from(LIVELY)).png().toFile(join(outDir, 'notification.png'))
+console.log('  wrote notification.png (lively)')
 console.log('Done.')
