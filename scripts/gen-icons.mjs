@@ -26,20 +26,19 @@ const bg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><re
 await sharp(Buffer.from(bg)).composite([{ input: art, gravity: 'center' }]).png().toFile(join(outDir, 'icon-maskable-512.png'))
 console.log('  wrote icon-maskable-512.png')
 
-// Notification small-icon: Android renders it as a white silhouette via the
-// alpha channel, so a colored icon becomes a white box. It must be flat white on
-// transparent. Pull the cream MANALIVE / JOURNEY lettering off the oxblood tile
-// by luminance threshold and paint it white, keeping the tile (dark) transparent.
-const NW = 96
-const NH = 96
-const mask = await sharp(source).resize(NW, NH).removeAlpha().grayscale().threshold(120).raw().toBuffer()
-const wm = Buffer.alloc(NW * NH * 4)
-for (let i = 0; i < NW * NH; i++) {
-  wm[i * 4] = 255
-  wm[i * 4 + 1] = 255
-  wm[i * 4 + 2] = 255
-  wm[i * 4 + 3] = mask[i] // cream -> opaque white, oxblood tile -> transparent
-}
-await sharp(wm, { raw: { width: NW, height: NH, channels: 4 } }).png().toFile(join(outDir, 'notification.png'))
-console.log('  wrote notification.png')
+// Notification small-icon: Android masks it to its alpha channel, so it must be
+// flat white on transparent. The "Sparks" campfire the guys picked: a bonfire
+// flame + rising embers over crossed logs.
+const SPARKS = `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
+  <path d="M34 60 C29 50 35 44 37 50 C35 40 33 35 41 27 C42 34 46 33 45 27 C44 18 41 17 48 9 C52 18 49 26 53 31 C56 35 60 32 58 25 C64 35 60 43 61 51 C64 47 67 50 63 60 Z" fill="#ffffff"/>
+  <circle cx="62" cy="22" r="3" fill="#ffffff"/>
+  <circle cx="37" cy="18" r="2.5" fill="#ffffff"/>
+  <circle cx="66" cy="38" r="2.5" fill="#ffffff"/>
+  <g stroke="#ffffff" stroke-width="7" stroke-linecap="round">
+    <line x1="24" y1="82" x2="72" y2="70"/>
+    <line x1="24" y1="70" x2="72" y2="82"/>
+  </g>
+</svg>`
+await sharp(Buffer.from(SPARKS)).png().toFile(join(outDir, 'notification.png'))
+console.log('  wrote notification.png (sparks)')
 console.log('Done.')
