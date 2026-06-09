@@ -20,7 +20,7 @@ values
 
 Something happened to you this weekend. It was real. God met you and said something true about who you are. The plan against you right now is simple: make you forget it by Thursday.
 
-So do not trust your memory. Write down the one thing. What God let you know about who you really are. Maybe that came as a name, maybe as something he said to you, maybe just a knowing. Whatever form it took, get it down. And the moment you would tell a friend about if you were not worried he would think you had gone soft.
+So do not trust your memory. Write down the one thing. What God let you know about who you really are. Maybe that came as a name, maybe as something he said to you, maybe just a knowing. Whatever form it took, get it down. Even the part that feels too good to say out loud.
 
 Put it where you will see it. Phone lock screen. Truck dash. Bathroom mirror. Today that is the only job.$md$,
    null, 1,
