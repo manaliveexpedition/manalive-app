@@ -390,6 +390,10 @@ deno_version = 2
 [functions.send-reminders]
 verify_jwt = false
 
+# send-weekly-digest is also called by pg_cron, not a logged-in user.
+[functions.send-weekly-digest]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
