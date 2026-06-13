@@ -9,11 +9,12 @@ import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
 // the base screen (e.g. a nav tab), so only the day level uses history.
 //   feedback = true  -> the detail shows the check-in/feedback box (the man).
 //   feedback = false -> read-only (the admin library).
-export function DayBrowser({ title, loadEntries, feedback, onExit }: {
+export function DayBrowser({ title, loadEntries, feedback, onExit, initialDay }: {
   title: string
   loadEntries: () => Promise<EntryRow[]>
   feedback: boolean
   onExit?: () => void
+  initialDay?: number // sort_index to open straight to (e.g. from an email link)
 }) {
   const [entries, setEntries] = useState<EntryRow[] | null>(null)
   const [error, setError] = useState('')
@@ -22,11 +23,24 @@ export function DayBrowser({ title, loadEntries, feedback, onExit }: {
   const selRef = useRef<EntryRow | null>(null); selRef.current = selected
   const onExitRef = useRef(onExit); onExitRef.current = onExit
   const loadRef = useRef(loadEntries); loadRef.current = loadEntries
+  const initialDayRef = useRef(initialDay); initialDayRef.current = initialDay
 
   useEffect(() => {
     let cancelled = false
     loadRef.current()
-      .then((e) => { if (!cancelled) setEntries(e) })
+      .then((e) => {
+        if (cancelled) return
+        setEntries(e)
+        // Deep link (email "Reread Day N"): open straight to that day once loaded.
+        // Only reached days are in the list, so future days are unreachable here.
+        const target = initialDayRef.current != null
+          ? e.find((x) => x.sort_index === initialDayRef.current)
+          : null
+        if (target) {
+          setSelected(target)
+          window.history.pushState({ ml: 'day' }, '')
+        }
+      })
       .catch((e) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load the days.') })
     return () => { cancelled = true }
   }, [])

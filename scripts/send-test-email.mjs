@@ -42,14 +42,16 @@ function build({ weekNumber, days, name }) {
   const subject = `Week ${weekWord(weekNumber)} is in the books. You're caught up.`
   const dayOf = (si) => ((si - 1) % 7) + 1
 
-  const dayText = days.map((d) => `Day ${dayOf(d.sort_index)}, ${d.title}. ${d.recap_line ?? ''}`).join('\n\n')
+  const BASE = 'https://manalive-app.vercel.app'
+  const dayText = days.map((d) => {
+    const n = dayOf(d.sort_index)
+    return `Day ${n}, ${d.title}. ${d.recap_line ?? ''}\nReread Day ${n}: ${BASE}/#day/${d.sort_index}`
+  }).join('\n\n')
   const text = `${greet}
 
 One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.
 
 ${dayText}
-
-Reread any day in the app: https://manalive-app.vercel.app/#days
 
 That is the week. If you just read that, you are caught up. Tomorrow we start fresh.
 
@@ -66,14 +68,15 @@ Strength and Honor,
 Pulley`
 
   const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-  const dayHtml = days.map((d) =>
-    `<p style="margin:0 0 14px"><strong>Day ${dayOf(d.sort_index)}, ${esc(d.title)}.</strong> ${esc(d.recap_line)}</p>`).join('\n')
+  const dayHtml = days.map((d) => {
+    const n = dayOf(d.sort_index)
+    return `<p style="margin:0 0 14px"><strong>Day ${n}, ${esc(d.title)}.</strong> ${esc(d.recap_line)} <a href="${BASE}/#day/${d.sort_index}" style="color:#8a3a2e;font-weight:600;text-decoration:none;white-space:nowrap">Reread Day ${n} &rsaquo;</a></p>`
+  }).join('\n')
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:#2c3137;max-width:560px">
 <p style="margin:0 0 14px">${esc(greet)}</p>
 <p style="margin:0 0 14px">One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.</p>
 ${dayHtml}
-<p style="margin:14px 0 16px"><a href="https://manalive-app.vercel.app/#days" style="color:#8a3a2e;font-weight:600;text-decoration:none">Reread any day in the app &rsaquo;</a></p>
-<p style="margin:0 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
+<p style="margin:18px 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
 <p style="margin:0 0 8px"><strong>One thing that helps:</strong> if you keep forgetting to check in, set a daily reminder in the app. Gentle nudge, no guilt.</p>
 <ol style="margin:0 0 14px;padding-left:22px">
 <li>Open The Journey and tap <strong>Settings</strong>.</li>

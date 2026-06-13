@@ -12,6 +12,7 @@ export function Today() {
   const [state, setState] = useState<TodayState | null>(null)
   const [error, setError] = useState('')
   const [showHistory, setShowHistory] = useState(false)
+  const [historyDay, setHistoryDay] = useState<number | undefined>(undefined)
 
   useEffect(() => {
     let cancelled = false
@@ -24,9 +25,13 @@ export function Today() {
         const s = await loadToday(p.start_date)
         if (cancelled) return
         setState(s)
-        // Deep link from the weekly email: #days opens the previous-days view
-        // (after the profile loads, so the list has his start_date to work from).
-        if (window.location.hash.toLowerCase() === '#days') {
+        // Deep links from the weekly email (after the profile loads so the list
+        // has his start_date): #days opens the previous-days list; #day/N opens
+        // straight to that day's reading.
+        const hash = window.location.hash.toLowerCase()
+        const dayMatch = hash.match(/^#day\/(\d+)$/)
+        if (hash === '#days' || dayMatch) {
+          if (dayMatch) setHistoryDay(Number(dayMatch[1]))
           setShowHistory(true)
           window.history.replaceState(null, '', window.location.pathname + window.location.search)
         }
@@ -58,6 +63,7 @@ export function Today() {
         title="Your days so far"
         loadEntries={() => loadReachedEntries(profile?.start_date ?? null)}
         feedback
+        initialDay={historyDay}
         onExit={() => setShowHistory(false)}
       />
     )
@@ -95,7 +101,7 @@ export function Today() {
       )}
 
       {!error && hasPrevious && (
-        <button type="button" className="secondary previous-days-btn" onClick={() => setShowHistory(true)}>
+        <button type="button" className="secondary previous-days-btn" onClick={() => { setHistoryDay(undefined); setShowHistory(true) }}>
           View previous days
         </button>
       )}
