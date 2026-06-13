@@ -6,7 +6,7 @@ import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
 import { Library } from './screens/Library'
 import { Settings } from './screens/Settings'
-import { fetchMyProfile } from './lib/profile'
+import { fetchMyProfile, saveName, type Profile } from './lib/profile'
 import './App.css'
 
 function App() {
@@ -45,15 +45,17 @@ type View = 'today' | 'progress' | 'settings' | 'admin' | 'library'
 
 function Shell() {
   const [view, setView] = useState<View>('today')
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [profile, setProfile] = useState<Profile | null>(null)
 
   useEffect(() => {
     let cancelled = false
     fetchMyProfile()
-      .then((p) => { if (!cancelled) setIsAdmin(p.role === 'admin') })
-      .catch(() => { /* non-fatal: just no admin tab */ })
+      .then((p) => { if (!cancelled) setProfile(p) })
+      .catch(() => { /* non-fatal: just no admin tab + no name gate */ })
     return () => { cancelled = true }
   }, [])
+
+  const isAdmin = profile?.role === 'admin'
 
   // Tapping a push notification asks the app to jump to Today (the new day).
   useEffect(() => {
@@ -65,6 +67,11 @@ function Shell() {
     navigator.serviceWorker.addEventListener('message', handler)
     return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
+
+  // First run: ask every man what he goes by before showing the app.
+  if (profile && !profile.name_confirmed) {
+    return <NameSetup profile={profile} onDone={(p) => setProfile(p)} />
+  }
 
   return (
     <div className="shell">
@@ -239,6 +246,47 @@ function SignIn() {
       )}
 
       {error && <p className="error">{error}</p>}
+    </div>
+  )
+}
+
+function NameSetup({ profile, onDone }: { profile: Profile; onDone: (p: Profile) => void }) {
+  const [name, setName] = useState(profile.name ?? '')
+  const [lastName, setLastName] = useState(profile.last_name ?? '')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name.trim()) {
+      setError('Just your first name, or whatever you go by.')
+      return
+    }
+    setBusy(true)
+    setError('')
+    try {
+      const updated = await saveName(name, lastName)
+      onDone(updated)
+    } catch {
+      setError('Could not save that. Please try again.')
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="card signin name-setup">
+      <h1>What do you go by?</h1>
+      <p className="muted">Just so we know what to call you. You can change it anytime in Settings.</p>
+      <form onSubmit={submit} className="form">
+        <label htmlFor="pref">What you go by</label>
+        <input id="pref" autoFocus autoComplete="given-name" value={name}
+          onChange={(e) => setName(e.target.value)} placeholder="e.g. Hershey" />
+        <label htmlFor="last">Last name <span className="optional">(optional)</span></label>
+        <input id="last" autoComplete="family-name" value={lastName}
+          onChange={(e) => setLastName(e.target.value)} placeholder="e.g. Hershberger" />
+        <button type="submit" disabled={busy}>{busy ? 'Saving…' : "That's me"}</button>
+        {error && <p className="error">{error}</p>}
+      </form>
     </div>
   )
 }

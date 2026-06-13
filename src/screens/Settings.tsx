@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { isStandalone, isIOS } from '../lib/install'
 import { InstallLink } from './InstallBanner'
+import { fetchMyProfile, saveName } from '../lib/profile'
 import {
   pushSupported,
   notificationPermission,
@@ -31,6 +32,54 @@ function buildTimeOptions(current: string): { value: string; label: string }[] {
   }
   if (current) values.add(current)
   return [...values].sort().map((v) => ({ value: v, label: label12(v) }))
+}
+
+function NameCard() {
+  const [name, setName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [loaded, setLoaded] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchMyProfile()
+      .then((p) => { if (!cancelled) { setName(p.name ?? ''); setLastName(p.last_name ?? '') } })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoaded(true) })
+    return () => { cancelled = true }
+  }, [])
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setSaved(false)
+    try {
+      await saveName(name, lastName)
+      setSaved(true)
+    } catch {
+      /* leave the form as-is; he can retry */
+    }
+    setBusy(false)
+  }
+
+  if (!loaded) return null
+
+  return (
+    <section className="card entry settings">
+      <h1>Your name</h1>
+      <form onSubmit={save} className="form">
+        <label htmlFor="sname">What you go by</label>
+        <input id="sname" value={name} onChange={(e) => { setName(e.target.value); setSaved(false) }} />
+        <label htmlFor="slast">Last name <span className="optional">(optional)</span></label>
+        <input id="slast" value={lastName} onChange={(e) => { setLastName(e.target.value); setSaved(false) }} />
+        <div className="notes-actions">
+          <button type="submit" disabled={busy || !name.trim()}>{busy ? 'Saving…' : 'Save name'}</button>
+          {saved && <span className="muted notes-saved">Saved</span>}
+        </div>
+      </form>
+    </section>
+  )
 }
 
 export function Settings() {
@@ -97,6 +146,8 @@ export function Settings() {
         : 'ok'
 
   return (
+    <>
+    <NameCard />
     <section className="card entry settings">
       <h1>Notifications</h1>
 
@@ -187,5 +238,6 @@ export function Settings() {
         </>
       )}
     </section>
+    </>
   )
 }
