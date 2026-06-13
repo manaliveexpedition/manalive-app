@@ -24,6 +24,12 @@ export function Today() {
         const s = await loadToday(p.start_date)
         if (cancelled) return
         setState(s)
+        // Deep link from the weekly email: #days opens the previous-days view
+        // (after the profile loads, so the list has his start_date to work from).
+        if (window.location.hash.toLowerCase() === '#days') {
+          setShowHistory(true)
+          window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Something went wrong.')
       }

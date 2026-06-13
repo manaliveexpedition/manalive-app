@@ -49,6 +49,8 @@ One week down. Maybe you read every day, maybe you missed a few and doubted the 
 
 ${dayText}
 
+Reread any day in the app: https://manalive-app.vercel.app/#days
+
 That is the week. If you just read that, you are caught up. Tomorrow we start fresh.
 
 One thing that helps: if you keep forgetting to check in, set a daily reminder in the app. Gentle nudge, no guilt.
@@ -70,7 +72,8 @@ Pulley`
 <p style="margin:0 0 14px">${esc(greet)}</p>
 <p style="margin:0 0 14px">One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.</p>
 ${dayHtml}
-<p style="margin:18px 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
+<p style="margin:14px 0 16px"><a href="https://manalive-app.vercel.app/#days" style="color:#8a3a2e;font-weight:600;text-decoration:none">Reread any day in the app &rsaquo;</a></p>
+<p style="margin:0 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
 <p style="margin:0 0 8px"><strong>One thing that helps:</strong> if you keep forgetting to check in, set a daily reminder in the app. Gentle nudge, no guilt.</p>
 <ol style="margin:0 0 14px;padding-left:22px">
 <li>Open The Journey and tap <strong>Settings</strong>.</li>
