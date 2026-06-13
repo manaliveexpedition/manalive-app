@@ -68,6 +68,14 @@ function Shell() {
     return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
 
+  // Deep link from the weekly email: open straight to Settings.
+  useEffect(() => {
+    if (window.location.hash.toLowerCase() === '#settings') {
+      setView('settings')
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  }, [])
+
   // First run: ask every man what he goes by before showing the app.
   if (profile && !profile.name_confirmed) {
     return <NameSetup profile={profile} onDone={(p) => setProfile(p)} />

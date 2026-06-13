@@ -55,13 +55,11 @@ ${dayText}
 
 That is the week. If you just read that, you are caught up. Tomorrow we start fresh.
 
-One thing that helps: if you keep forgetting to check in, set a daily reminder in the app. Gentle nudge, no guilt.
+One thing that helps: if you keep forgetting to check in, set a daily reminder. Gentle nudge, no guilt.
 
-1. Open The Journey and tap Settings.
-2. Turn on Daily reminder and pick your time.
-3. Tap Allow when your phone asks.
+Set your reminder: ${BASE}/#settings
 
-(iPhone: add the app to your home screen first.)
+Flip on Daily reminder, pick your time, and tap Allow when your phone asks. (iPhone: add the app to your home screen first.)
 
 Strength and Honor,
 
@@ -77,13 +75,9 @@ Pulley`
 <p style="margin:0 0 14px">One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.</p>
 ${dayHtml}
 <p style="margin:18px 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
-<p style="margin:0 0 8px"><strong>One thing that helps:</strong> if you keep forgetting to check in, set a daily reminder in the app. Gentle nudge, no guilt.</p>
-<ol style="margin:0 0 14px;padding-left:22px">
-<li>Open The Journey and tap <strong>Settings</strong>.</li>
-<li>Turn on <strong>Daily reminder</strong> and pick your time.</li>
-<li>Tap <strong>Allow</strong> when your phone asks.</li>
-</ol>
-<p style="margin:0 0 14px">(iPhone: add the app to your home screen first.)</p>
+<p style="margin:0 0 12px"><strong>One thing that helps:</strong> if you keep forgetting to check in, set a daily reminder. Gentle nudge, no guilt.</p>
+<p style="margin:0 0 12px"><a href="${BASE}/#settings" style="display:inline-block;background:#8a3a2e;color:#ece6d7;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600">Set your reminder &rsaquo;</a></p>
+<p style="margin:0 0 14px;font-size:14px;color:#6b6f76">Flip on Daily reminder, pick your time, and tap Allow when your phone asks. (iPhone: add the app to your home screen first.)</p>
 <p style="margin:0 0 14px">Strength and Honor,</p>
 <p style="margin:0">Pulley</p>
 </div>`
