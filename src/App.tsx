@@ -68,12 +68,19 @@ function Shell() {
     return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
 
-  // Deep link from the weekly email: open straight to Settings.
+  // Deep link from the weekly email: open straight to Settings. Handle both a
+  // fresh load (hash already present) AND a tap while the app is already open
+  // (the URL hash changes but the app does not remount), via hashchange.
   useEffect(() => {
-    if (window.location.hash.toLowerCase() === '#settings') {
-      setView('settings')
-      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    function routeSettings() {
+      if (window.location.hash.toLowerCase() === '#settings') {
+        setView('settings')
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
     }
+    routeSettings()
+    window.addEventListener('hashchange', routeSettings)
+    return () => window.removeEventListener('hashchange', routeSettings)
   }, [])
 
   // First run: ask every man what he goes by before showing the app.

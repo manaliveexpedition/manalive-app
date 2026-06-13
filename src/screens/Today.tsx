@@ -42,6 +42,22 @@ export function Today() {
     return () => { cancelled = true }
   }, [])
 
+  // React to email deep links (#days / #day/N) even when the app is already open
+  // (a hashchange does not remount Today, so the load-time parse above misses it).
+  useEffect(() => {
+    function routeHistory() {
+      const hash = window.location.hash.toLowerCase()
+      const m = hash.match(/^#day\/(\d+)$/)
+      if (hash === '#days' || m) {
+        setHistoryDay(m ? Number(m[1]) : undefined)
+        setShowHistory(true)
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+    }
+    window.addEventListener('hashchange', routeHistory)
+    return () => window.removeEventListener('hashchange', routeHistory)
+  }, [])
+
   // Log opened_entry once, when an actual entry resolves.
   const loggedEntryId = useRef<string | null>(null)
   useEffect(() => {

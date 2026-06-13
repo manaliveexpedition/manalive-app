@@ -147,7 +147,6 @@ export function Settings() {
 
   return (
     <>
-    <NameCard />
     <section className="card entry settings">
       <h1>Notifications</h1>
 
@@ -238,6 +237,7 @@ export function Settings() {
         </>
       )}
     </section>
+    <NameCard />
     </>
   )
 }
