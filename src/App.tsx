@@ -7,11 +7,16 @@ import { Admin } from './screens/Admin'
 import { Library } from './screens/Library'
 import { Settings } from './screens/Settings'
 import { fetchMyProfile, saveName, type Profile } from './lib/profile'
+import { captureDeepLink, consumeDeepLink, isSettingsLink } from './lib/deeplink'
 import './App.css'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Stash any email deep-link target NOW, before a Google sign-in redirect can
+  // drop the #hash; the Shell/Today consume it after login.
+  useEffect(() => { captureDeepLink() }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -68,19 +73,16 @@ function Shell() {
     return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
 
-  // Deep link from the weekly email: open straight to Settings. Handle both a
-  // fresh load (hash already present) AND a tap while the app is already open
-  // (the URL hash changes but the app does not remount), via hashchange.
+  // Open straight to Settings from the email link: on mount (covers a fresh load
+  // AND the post-login return, where the target was stashed before the redirect)
+  // and on hashchange (tap while the app is already open).
   useEffect(() => {
-    function routeSettings() {
-      if (window.location.hash.toLowerCase() === '#settings') {
-        setView('settings')
-        window.history.replaceState(null, '', window.location.pathname + window.location.search)
-      }
+    function route() {
+      if (consumeDeepLink(isSettingsLink)) setView('settings')
     }
-    routeSettings()
-    window.addEventListener('hashchange', routeSettings)
-    return () => window.removeEventListener('hashchange', routeSettings)
+    route()
+    window.addEventListener('hashchange', route)
+    return () => window.removeEventListener('hashchange', route)
   }, [])
 
   // First run: ask every man what he goes by before showing the app.

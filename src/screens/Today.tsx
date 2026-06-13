@@ -3,6 +3,7 @@ import { fetchMyProfile, type Profile } from '../lib/profile'
 import { loadToday, loadReachedEntries, formatStartDate, type Entry as EntryRow, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { clearBadge } from '../lib/push'
+import { consumeDeepLink, isHistoryLink, dayFromLink } from '../lib/deeplink'
 import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
 import { DayBrowser } from './DayBrowser'
 import { InstallLink } from './InstallBanner'
@@ -27,13 +28,11 @@ export function Today() {
         setState(s)
         // Deep links from the weekly email (after the profile loads so the list
         // has his start_date): #days opens the previous-days list; #day/N opens
-        // straight to that day's reading.
-        const hash = window.location.hash.toLowerCase()
-        const dayMatch = hash.match(/^#day\/(\d+)$/)
-        if (hash === '#days' || dayMatch) {
-          if (dayMatch) setHistoryDay(Number(dayMatch[1]))
+        // straight to that day's reading. Consumes a stash too (post-login).
+        const target = consumeDeepLink(isHistoryLink)
+        if (target) {
+          setHistoryDay(dayFromLink(target))
           setShowHistory(true)
-          window.history.replaceState(null, '', window.location.pathname + window.location.search)
         }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Something went wrong.')
@@ -46,12 +45,10 @@ export function Today() {
   // (a hashchange does not remount Today, so the load-time parse above misses it).
   useEffect(() => {
     function routeHistory() {
-      const hash = window.location.hash.toLowerCase()
-      const m = hash.match(/^#day\/(\d+)$/)
-      if (hash === '#days' || m) {
-        setHistoryDay(m ? Number(m[1]) : undefined)
+      const target = consumeDeepLink(isHistoryLink)
+      if (target) {
+        setHistoryDay(dayFromLink(target))
         setShowHistory(true)
-        window.history.replaceState(null, '', window.location.pathname + window.location.search)
       }
     }
     window.addEventListener('hashchange', routeHistory)
