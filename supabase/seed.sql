@@ -406,12 +406,12 @@ where e.sort_index = v.sort_index;
 -- digest email. Added per week as content is finalized; Week 1 (Days 1-7) below.
 update public.entries e set recap_line = v.line
 from (values
-  (1, $md$Something real happened to you this weekend. God told you who you actually are. The whole game now is not letting normal life bury it, so we got it down before it could leak away.$md$),
-  (2, $md$By Monday it is already fading. That is normal, not proof it was fake. So you go back and say who he said you are out loud, even if part of you cannot believe it yet. "Not yet" is allowed.$md$),
-  (3, $md$The high wears off and a voice says maybe nothing really changed. That is just gravity. Every man has to walk back down the mountain. Who God says you are did not change with your mood.$md$),
-  (4, $md$If you keep one thing from this week, keep this: you are a son, not a hired hand trying to earn his keep. Dad was after you long before you cleaned anything up. You can stop performing.$md$),
-  (5, $md$At camp you had room to hear him. Now you have to make it. Five minutes, one honest question, then stop talking and listen. Most of us cannot remember the last time we were that quiet. That is the point.$md$),
-  (6, $md$The ordinary day, the errands and the kids and the yard, is not a break from the story. It is the story. You are not killing time until the next big moment. You have a part to play right where you stand.$md$),
-  (7, $md$You did not do it perfectly. You missed a day, doubted it on Wednesday. Does not matter. You are here. That alone is more than most men do with what they felt at camp. You stayed, and it counts.$md$)
+  (1, $md$God told you who you really are this weekend. The job was to write it down before the week could bury it.$md$),
+  (2, $md$It is already fading. That is normal, not fake. Say who he said you are again, even if you cannot fully believe it yet.$md$),
+  (3, $md$The high wears off. That is gravity, not proof it was fake. Who he says you are did not change with your mood.$md$),
+  (4, $md$The one to keep: you are a son, not a hired hand earning his keep. You can stop performing.$md$),
+  (5, $md$Make five minutes, ask God one question, then stop talking and listen.$md$),
+  (6, $md$The ordinary day is not a break from the story. It is the story, and you have a part to play in it.$md$),
+  (7, $md$You were not perfect. Does not matter. You showed up, and that is the whole win.$md$)
 ) as v(si, line)
 where e.sort_index = v.si;
