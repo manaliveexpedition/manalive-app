@@ -117,8 +117,8 @@ export function Admin() {
       <DropOff entries={data.entryStats} />
 
       <div className="group-rollups">
-        <GroupTable title="By format" hint="Which delivery shapes reach men. Best avg reach first." groups={data.formatStats} />
-        <GroupTable title="By phase" hint="Engagement across the journey, in order." groups={data.phaseStats} />
+        <GroupTable title="By format" hint="Opened = of the men who reached a shape's days, the share who opened it. Apples-to-apples, best first." groups={data.formatStats} />
+        <GroupTable title="By phase" hint="Opened = share of men who opened, among days they've reached. In journey order." groups={data.phaseStats} />
       </div>
 
       {/* Full per-day scorecard last — it's the longest table. */}
@@ -260,7 +260,7 @@ function GroupTable({ title, hint, groups }: { title: string; hint: string; grou
             <tr>
               <th>Tag</th>
               <th>Entries</th>
-              <th>Avg reach</th>
+              <th>Opened</th>
               <th>Revisits</th>
               <th>Listens</th>
               <th>Reflections</th>
@@ -271,7 +271,7 @@ function GroupTable({ title, hint, groups }: { title: string; hint: string; grou
               <tr key={g.key}>
                 <td><span className="tag">{g.key}</span></td>
                 <td>{g.entries}</td>
-                <td>{g.avgReach.toFixed(1)}</td>
+                <td>{g.reachedEntries > 0 ? `${Math.round(g.openRate * 100)}%` : '-'}</td>
                 <td>{g.revisits}</td>
                 <td>{g.listens}</td>
                 <td>{g.reflections}</td>

@@ -52,6 +52,7 @@ export type EntryStat = {
   reflections: number // check-ins logged for it
   listens: number // distinct men who played its audio
   clicks: number // link clicks from it
+  menReached: number // members whose journey has reached this day (the fair denominator)
 }
 
 // Engagement rolled up by a content tag (Format or Phase).
@@ -59,7 +60,9 @@ export type GroupStat = {
   key: string
   entries: number // # entries in the group
   reach: number // total distinct-man opens across its entries
-  avgReach: number // reach / entries — fair comparison across groups of different size
+  avgReach: number // reach / entries — biased by journey position; prefer openRate
+  reachedEntries: number // entries at least one man has reached
+  openRate: number // 0..1: distinct-man opens / men-reached-opportunities, over reached entries (apples-to-apples)
   revisits: number
   listens: number
   reflections: number
@@ -237,6 +240,12 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     if (c.entry_id && memberIds.has(c.user_id)) reflByEntry.set(c.entry_id, (reflByEntry.get(c.entry_id) ?? 0) + 1)
   }
 
+  // Each member's current day, so we know which entries they've actually reached
+  // (an entry no one has reached yet is not a fair miss, it's just future).
+  const memberSortIndexes = members
+    .map((p) => resolveSortIndex(p.start_date, now))
+    .filter((x): x is number => x != null)
+
   const entryStats: EntryStat[] = entries
     .map((en) => {
       const a = perEntry.get(en.id)
@@ -256,6 +265,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
         reflections: reflByEntry.get(en.id) ?? 0,
         listens: a?.listenMen.size ?? 0,
         clicks: a?.clicks ?? 0,
+        menReached: memberSortIndexes.filter((x) => x >= (en.sort_index ?? Infinity)).length,
       }
     })
     .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
@@ -263,24 +273,30 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
   // Roll the scorecard up by a content tag (Format or Phase). avgReach lets us
   // compare groups of different sizes fairly.
   function groupBy(keyFn: (s: EntryStat) => string | null) {
-    const m = new Map<string, GroupStat & { minSort: number }>()
+    type Acc = GroupStat & { minSort: number; opensReached: number; opps: number }
+    const m = new Map<string, Acc>()
     for (const s of entryStats) {
       const k = keyFn(s)
       if (!k) continue
-      const g = m.get(k) ?? { key: k, entries: 0, reach: 0, avgReach: 0, revisits: 0, listens: 0, reflections: 0, minSort: Infinity }
+      const g = m.get(k) ?? { key: k, entries: 0, reach: 0, avgReach: 0, reachedEntries: 0, openRate: 0, revisits: 0, listens: 0, reflections: 0, minSort: Infinity, opensReached: 0, opps: 0 }
       g.entries++
       g.reach += s.reach
       g.revisits += s.revisits
       g.listens += s.listens
       g.reflections += s.reflections
       g.minSort = Math.min(g.minSort, s.sortIndex ?? Infinity)
+      if (s.menReached > 0) { g.reachedEntries++; g.opensReached += s.reach; g.opps += s.menReached } // only days men have reached
       m.set(k, g)
     }
-    return [...m.values()].map((g) => ({ ...g, avgReach: g.entries ? g.reach / g.entries : 0 }))
+    return [...m.values()].map(({ opensReached, opps, ...g }) => ({
+      ...g,
+      avgReach: g.entries ? g.reach / g.entries : 0,
+      openRate: opps ? opensReached / opps : 0,
+    }))
   }
   const formatStats: GroupStat[] = groupBy((s) => s.format)
     .map(({ minSort: _omit, ...g }) => g)
-    .sort((a, b) => b.avgReach - a.avgReach) // which shapes land best
+    .sort((a, b) => b.openRate - a.openRate) // which shapes land best (fair, reached-only)
   const phaseStats: GroupStat[] = groupBy((s) => s.phase)
     .sort((a, b) => a.minSort - b.minSort) // journey order
     .map(({ minSort: _omit, ...g }) => g)
