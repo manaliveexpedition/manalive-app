@@ -46,8 +46,8 @@ export type EntryStat = {
   title: string | null
   format: string | null
   phase: string | null
-  reach: number // distinct men who opened it
-  opens: number // total opens
+  reach: number // distinct men who engaged with it (open / audio / link / check-in), robust to lost open pings
+  opens: number // total opened_entry pings (can undercount on flaky connections)
   revisits: number // opens beyond the first, summed across men
   reflections: number // check-ins logged for it
   listens: number // distinct men who played its audio
@@ -225,19 +225,31 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
   const week8Retention = reached8.length ? retained8.length / reached8.length : null
 
   // Per-entry scorecard (members only). Aggregate engagement against each entry.
+  // engagedMen = distinct men with ANY footprint on the day (open / audio / link /
+  // check-in). The opened_entry "ping" is fire-and-forget and gets dropped on flaky
+  // connections (content filters / offline), so it alone undercounts; a check-in or
+  // audio play proves the man was on the day even when his open ping was lost.
   const memberIds = new Set(members.map((m) => m.id))
-  const perEntry = new Map<string, { opensByMan: Map<string, number>; listenMen: Set<string>; clicks: number }>()
+  type EntryAgg = { opensByMan: Map<string, number>; listenMen: Set<string>; clicks: number; engagedMen: Set<string> }
+  const perEntry = new Map<string, EntryAgg>()
+  const ensureEntry = (eid: string) => {
+    let a = perEntry.get(eid)
+    if (!a) { a = { opensByMan: new Map(), listenMen: new Set(), clicks: 0, engagedMen: new Set() }; perEntry.set(eid, a) }
+    return a
+  }
   for (const e of events) {
     if (!e.entry_id || !memberIds.has(e.user_id)) continue
-    let a = perEntry.get(e.entry_id)
-    if (!a) { a = { opensByMan: new Map(), listenMen: new Set(), clicks: 0 }; perEntry.set(e.entry_id, a) }
-    if (e.event_type === 'opened_entry') a.opensByMan.set(e.user_id, (a.opensByMan.get(e.user_id) ?? 0) + 1)
-    else if (e.event_type === 'played_audio') a.listenMen.add(e.user_id)
-    else if (e.event_type === 'clicked_link') a.clicks++
+    const a = ensureEntry(e.entry_id)
+    if (e.event_type === 'opened_entry') { a.opensByMan.set(e.user_id, (a.opensByMan.get(e.user_id) ?? 0) + 1); a.engagedMen.add(e.user_id) }
+    else if (e.event_type === 'played_audio') { a.listenMen.add(e.user_id); a.engagedMen.add(e.user_id) }
+    else if (e.event_type === 'clicked_link') { a.clicks++; a.engagedMen.add(e.user_id) }
   }
   const reflByEntry = new Map<string, number>()
   for (const c of checkins) {
-    if (c.entry_id && memberIds.has(c.user_id)) reflByEntry.set(c.entry_id, (reflByEntry.get(c.entry_id) ?? 0) + 1)
+    if (c.entry_id && memberIds.has(c.user_id)) {
+      reflByEntry.set(c.entry_id, (reflByEntry.get(c.entry_id) ?? 0) + 1)
+      ensureEntry(c.entry_id).engagedMen.add(c.user_id) // a check-in proves he opened the day
+    }
   }
 
   // Each member's current day, so we know which entries they've actually reached
@@ -259,7 +271,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
         title: en.title,
         format: en.format ?? null,
         phase: en.phase ?? null,
-        reach: opensByMan.size,
+        reach: a?.engagedMen.size ?? 0,
         opens: counts.reduce((s, n) => s + n, 0),
         revisits: counts.reduce((s, n) => s + Math.max(0, n - 1), 0),
         reflections: reflByEntry.get(en.id) ?? 0,
