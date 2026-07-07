@@ -403,7 +403,7 @@ from (values
 where e.sort_index = v.sort_index;
 
 -- End-of-week recap "heart" lines (per day), used to auto-assemble the weekly
--- digest email. Added per week as content is finalized; Week 1 (Days 1-7) below.
+-- digest email. Added per week as content is finalized; Weeks 1-5 (Days 1-30) below.
 update public.entries e set recap_line = v.line
 from (values
   (1, $md$God told you who you really are this weekend. The job was to write it down before the week could bury it.$md$),
@@ -412,6 +412,96 @@ from (values
   (4, $md$The one to keep: you are a son, not a hired hand earning his keep. You can stop performing.$md$),
   (5, $md$Make five minutes, ask God one question, then stop talking and listen.$md$),
   (6, $md$The ordinary day is not a break from the story. It is the story, and you have a part to play in it.$md$),
-  (7, $md$You were not perfect. Does not matter. You showed up, and that is the whole win.$md$)
+  (7, $md$You were not perfect. Does not matter. You showed up, and that is the whole win.$md$),
+  (8, $md$The mask probably went on with the work boots this morning. Step one is not fighting the poser. It is catching the exact moment he shows up.$md$),
+  (9, $md$You were not built to do this alone. Two minutes: apply to the alumni group and get through the door before the harder weeks hit.$md$),
+  (10, $md$The poser kept you safe once, but a mask cannot be loved. People only love what they can see. You do not have to take him off all at once. Just know he is not you.$md$),
+  (11, $md$Telling one man the truth does not cost you respect. It costs you the loneliness. The thing you are protecting is usually the thing killing you.$md$),
+  (12, $md$The "I'm good" when you were not. The opinion you swallowed. Naming one place you wore the mask is how the grip starts to loosen.$md$),
+  (13, $md$Today was my story, in my voice instead of off a screen. The one thing you fear would make men walk if they knew. Naming that it is there is the start.$md$),
+  (14, $md$Two weeks. This was the week you went after the poser. If all you did was start noticing him, that is the win. Most men never catch the act once.$md$),
+  (15, $md$Two costumes men hide behind: the lone wolf and the social butterfly. Opposite looks, same move. Both keep people from seeing you. Figure out which one is yours.$md$),
+  (16, $md$Independence looks like strength. It is mostly fear wearing armor. The strongest thing a wolf can do is let one man get close enough to actually help.$md$),
+  (17, $md$Loved everywhere, known nowhere. The charm is a defense. Being liked is not the same as being known, and known is what you came here for.$md$),
+  (18, $md$When the bottom drops out, who actually gets in the truck and drives over? Be honest with the number. That number is what these next weeks are about changing.$md$),
+  (19, $md$Wolf and butterfly run the same engine: self-protection, one with walls, one with charm. Neither gives you life. It was a decision, and decisions can be unmade.$md$),
+  (20, $md$One man, one message. Not for help, not a confession. Just crack a door you usually keep shut.$md$),
+  (21, $md$Three weeks. You named your costume and what it has cost you. If it left you raw, that is the work doing its job. Next week we go underneath the mask.$md$),
+  (22, $md$Putting the mask down does not mean you have it all fixed. Honesty comes first, healing comes after. Lower the bar from perfect to honest.$md$),
+  (23, $md$Until you know a man's story, you do not know the man. Knowing his stats is not knowing him. Real connection only happens at the level of story.$md$),
+  (24, $md$Is there one man alive who has heard your whole story and stayed? Carrying a story no one knows is its own kind of heavy. You were not built to carry it alone.$md$),
+  (25, $md$Eight men, a fire, the truth finally told, and not one man rejected for it. When men trade real stories they stop being strangers. That fire is where this whole thing was born.$md$),
+  (26, $md$The heart of the whole thing, in a voice instead of off a screen. One step this weekend toward not doing life alone.$md$),
+  (27, $md$Use the room you got into. Post one true thing, not a highlight. You say one real thing and other men exhale, because you just gave them permission too.$md$),
+  (28, $md$One month, and you are still showing up. That is rare. This was the week you traded the mask for honesty out loud. Heads up: the next stretch is the hardest part.$md$),
+  (29, $md$The shine is gone and it gets harder right about now. That is not failure. It is where the real work starts. Do not quit on the doorstep of the part that changes you.$md$),
+  (30, $md$Under the mask is the wound: the moment you came to believe a lie. Not enough, too much, on your own. It still runs you, and it is exactly what Jesus wants to heal, but not while it stays hidden.$md$)
 ) as v(si, line)
 where e.sort_index = v.si;
+
+
+-- Days 31-35 (Week 5, The Cliff). New "Do this" action replaces "Sit with it".
+-- Audio recorded separately (audio_url stays null until day-3N.mp3 is uploaded).
+insert into public.entries (id, week, day, title, body_text, audio_url, sort_index, reflection_prompt)
+values
+  ('e1000001-0001-0001-0001-000000000031', 5, 3,
+   $md$The Lie You Have Believed Longest$md$,
+   $md$Yesterday you started naming the wound. Today we go after the lie it taught you, the one you have carried so long it stopped sounding like a lie and started sounding like a fact about you.
+
+It usually fits in a few words. I am not enough. I am too much. I am on my own. I do not matter. I am only worth what I produce. Whatever yours is, it has been running quietly in the background for years, deciding how you read every room, every failure, every silence from your dad.
+
+And maybe you did not get a clear word at camp. Maybe you left more confused than fixed. That is fine. This still works. You do not need a mountaintop moment to name a lie. You just need to get honest for five minutes.$md$,
+   null, 31,
+   $md$Five quiet minutes today. Ask God: what is the lie I have believed longest? Write down the words that come, even if it is just one line.$md$),
+  ('e1000001-0001-0001-0001-000000000032', 5, 4,
+   $md$It Is an Agreement, Not a Fact$md$,
+   $md$Here is what changes everything. That lie is not a fact about you. It is an agreement you made.
+
+Somewhere back there it got handed to you, by a moment, a person, a silence. And without knowing it, a younger version of you signed for it. And you have been living under that signature ever since.
+
+But here is the thing about an agreement. What got agreed to can get broken. You are not stuck with it because it is old, or because it feels true, or because you have believed it your whole life. Age does not make a lie true. It just makes it familiar.
+
+Today you stop treating it as a life sentence and start treating it as what it is: a contract you can tear up.$md$,
+   null, 32,
+   $md$Write your lie on one line. Under it write: this is an agreement, not a fact, and I can break it. Say it out loud once.$md$),
+  ('e1000001-0001-0001-0001-000000000033', 5, 5,
+   $md$Take It to the One Who Was There$md$,
+   $md$End of the work week. Before the weekend swallows it, one move.
+
+You have named the lie. You have called it an agreement. Now take it to Jesus, and not as a theology exercise. The claim is simple: he was actually there in the moment you got wounded, and he is not done with it.
+
+So go back to that moment in your mind, the one where the lie got signed. And instead of reliving it alone like you always have, ask him a question. Where were you when that happened to me. What do you want me to know about it now.
+
+Then listen. You are not making something up. You are letting the one who was there speak into a place that has only ever had your own verdict in it.$md$,
+   null, 33,
+   $md$Ten quiet minutes this weekend. Go back to the moment the lie started, ask Jesus where he was and what he wants you to know, and write down anything you hear.$md$),
+  ('e1000001-0001-0001-0001-000000000034', 5, 6,
+   $md$It Can Happen on a Tuesday$md$,
+   $md$Short read today. Hit play. This one is better in a voice than off a screen.$md$,
+   null, 34,
+   $md$Pick your spot. Truck, porch, kitchen, before everyone wakes. That is your ground now. Use it once this weekend.$md$),
+  ('e1000001-0001-0001-0001-000000000035', 5, 7,
+   $md$That Was a Heavy Week$md$,
+   $md$Sunday. Catch your breath.
+
+That was a heavy one. We went down to the wound and named the lie underneath it. Heavy is okay. Heavy means you went somewhere real instead of skating the surface like most men do their whole lives.
+
+You do not have to have it all sorted. You just had to stay in the room. You did. That is the entire job this week.
+
+Rest today.$md$,
+   null, 35,
+   $md$Name one good thing in your life right now and thank God for it. After a heavy week, naming one good thing is its own kind of healing.$md$)
+on conflict (id) do update set
+  week = excluded.week, day = excluded.day, title = excluded.title,
+  body_text = excluded.body_text, sort_index = excluded.sort_index,
+  reflection_prompt = excluded.reflection_prompt;
+
+update public.entries e set format = v.format, phase = v.phase
+from (values
+  (31, 'Challenge', 'The cliff'),
+  (32, 'Truth',     'The cliff'),
+  (33, 'Challenge', 'The cliff'),
+  (34, 'Listen',    'The cliff'),
+  (35, 'Pause',     'The cliff')
+) as v(sort_index, format, phase)
+where e.sort_index = v.sort_index;
