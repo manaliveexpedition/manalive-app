@@ -71,7 +71,7 @@ export function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: 
     <div className="audio-launch">
       <p className="audio-note">From John, on today’s reading:</p>
       <button type="button" className="secondary" onClick={start} disabled={loading}>
-        {loading ? 'Loading…' : '▶ John’s thoughts'}
+        {loading ? 'Loading…' : '▶ Go Deeper'}
       </button>
       {error && <p className="error">{error}</p>}
     </div>
