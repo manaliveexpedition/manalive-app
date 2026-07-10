@@ -100,21 +100,42 @@ function addDays(isoDate: string, days: number): string {
   return `${y}-${m}-${dd}`
 }
 
+// PostgREST caps a single response at 1000 rows. events (and eventually
+// checkins) grow past that, so we page through with .range() until a short
+// page comes back — otherwise the newest rows silently vanish and every
+// recent-day stat (drop-off, retention, on-time) reads far too low. Order by
+// created_at so paging is deterministic across requests.
+async function fetchAllRows<T>(table: string, cols: string): Promise<T[]> {
+  const PAGE = 1000
+  const rows: T[] = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from(table)
+      .select(cols)
+      .order('created_at', { ascending: true })
+      .range(from, from + PAGE - 1)
+    if (error) throw error
+    const batch = (data ?? []) as T[]
+    rows.push(...batch)
+    if (batch.length < PAGE) break
+  }
+  return rows
+}
+
 export async function loadAdminData(now: Date = new Date()): Promise<AdminData> {
-  const [profilesRes, checkinsRes, eventsRes, entriesRes] = await Promise.all([
+  const [profilesRes, entriesRes, checkins, events] = await Promise.all([
     supabase.from('profiles').select('id, email, name, cohort, start_date, role'),
+    supabase.from('entries').select('id, week, day, title, format, phase, sort_index'),
     // Beta feedback: what_landed / what_didnt are read here on purpose (see the
     // header note) so John can see per-day comments. RLS still blocks peers.
-    supabase.from('checkins').select('user_id, entry_id, created_at, what_landed, what_didnt'),
-    supabase.from('events').select('user_id, entry_id, event_type, created_at'),
-    supabase.from('entries').select('id, week, day, title, format, phase, sort_index'),
+    // Both events and checkins are paged so the newest rows are never dropped.
+    fetchAllRows<{ user_id: string; entry_id: string | null; created_at: string; what_landed: string | null; what_didnt: string | null }>('checkins', 'user_id, entry_id, created_at, what_landed, what_didnt'),
+    fetchAllRows<{ user_id: string; entry_id: string | null; event_type: string; created_at: string }>('events', 'user_id, entry_id, event_type, created_at'),
   ])
-  const err = profilesRes.error || checkinsRes.error || eventsRes.error || entriesRes.error
+  const err = profilesRes.error || entriesRes.error
   if (err) throw err
 
   const profiles = profilesRes.data ?? []
-  const checkins = checkinsRes.data ?? []
-  const events = eventsRes.data ?? []
   const entries = entriesRes.data ?? []
 
   const week1Entries = new Set(entries.filter((e) => e.week === 1).map((e) => e.id))
