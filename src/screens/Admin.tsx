@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
-import { loadAdminData, type AdminData, type ManRow, type EntryStat, type GroupStat, type DayFeedback } from '../lib/admin'
+import { loadAdminData, type AdminData, type ManRow, type EntryStat, type GroupStat, type FeedbackItem } from '../lib/admin'
 
 type SortKey = 'name' | 'lastActive' | 'daysEngaged' | 'revisits' | 'audioPlays' | 'alumniClicks' | 'onTimeRate' | 'weekReached' | 'checkinsLogged' | 'listenCount'
+
+type Tab = 'engagement' | 'list' | 'feedback' | 'phase' | 'scorecard'
+const TABS: { key: Tab; label: string }[] = [
+  { key: 'engagement', label: 'Engagement' },
+  { key: 'list', label: 'List' },
+  { key: 'feedback', label: 'Feedback' },
+  { key: 'phase', label: 'Phase' },
+  { key: 'scorecard', label: 'Scorecard' },
+]
 
 export function Admin() {
   const [data, setData] = useState<AdminData | null>(null)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState<Tab>('engagement')
   const [filter, setFilter] = useState('')
   const [week8Only, setWeek8Only] = useState(false)
   const [sortKey, setSortKey] = useState<SortKey>('lastActive')
@@ -43,86 +53,107 @@ export function Admin() {
 
   return (
     <section className="card admin">
-      <h1>Engagement</h1>
+      <h1>Admin</h1>
 
-      <div className="rollups">
-        <Rollup label="Week-1 activation" value={data.week1Activation} hint="opened the wk1 entry" />
-        <Rollup label="Week-8 retention" value={data.week8Retention} hint="still active at wk8" />
-        <div className="rollup">
-          <span className="rollup-num">{data.cohortSize}</span>
-          <span className="rollup-label">men in cohort</span>
+      <nav className="admin-tabs">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            className={tab === t.key ? 'admin-tab on' : 'admin-tab'}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      {tab === 'engagement' && (
+        <>
+          <div className="rollups">
+            <Rollup label="Week-1 activation" value={data.week1Activation} hint="opened the wk1 entry" />
+            <Rollup label="Week-8 retention" value={data.week8Retention} hint="still active at wk8" />
+            <div className="rollup">
+              <span className="rollup-num">{data.cohortSize}</span>
+              <span className="rollup-label">men in cohort</span>
+            </div>
+          </div>
+          <DropOff entries={data.entryStats} />
+        </>
+      )}
+
+      {tab === 'list' && (
+        <>
+          <div className="admin-controls">
+            <input
+              type="search"
+              placeholder="Filter by name or email"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+            <label className="checkbox">
+              <input type="checkbox" checked={week8Only} onChange={(e) => setWeek8Only(e.target.checked)} />
+              Reached week 8
+            </label>
+          </div>
+
+          <div className="table-wrap">
+            <table className="men">
+              <thead>
+                <tr>
+                  <Th label="Man" k="name" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Last active" k="lastActive" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Days" k="daysEngaged" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Revisits" k="revisits" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Listens" k="audioPlays" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Group" k="alumniClicks" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="On-time" k="onTimeRate" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
+                  <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
+                  <th>Read / Listen</th>
+                  <Th label="Wk8" k="listenCount" hideSort {...{ sortKey, sortDir, toggleSort }} />
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((m) => (
+                  <tr key={m.userId}>
+                    <td>
+                      <div className="man-name">{m.name || '-'}</div>
+                      <div className="man-email">{m.email}</div>
+                    </td>
+                    <td>{m.lastActive ?? '-'}</td>
+                    <td>{m.daysEngaged}</td>
+                    <td>{m.revisits}</td>
+                    <td>{m.audioPlays}</td>
+                    <td>{m.alumniClicks}</td>
+                    <td title={`${m.onTimeOpens}/${m.onTimeTotal} opened on their day`}>
+                      {m.onTimeRate == null ? '-' : `${Math.round(m.onTimeRate * 100)}%`}
+                    </td>
+                    <td>{m.weekReached ?? '-'}</td>
+                    <td>{m.checkinsLogged}</td>
+                    <td>{m.readCount} / {m.listenCount}</td>
+                    <td><Week8Badge row={m} /></td>
+                  </tr>
+                ))}
+                {rows.length === 0 && (
+                  <tr><td colSpan={11} className="muted">No men match this filter.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {tab === 'feedback' && <FeedbackFeed items={data.feedback} />}
+
+      {tab === 'phase' && (
+        <div className="group-rollups">
+          <GroupTable title="By format" hint="Opened = of the men who reached a shape's days, the share who opened it. Apples-to-apples, best first." groups={data.formatStats} />
+          <GroupTable title="By phase" hint="Opened = share of men who opened, among days they've reached. In journey order." groups={data.phaseStats} />
         </div>
-      </div>
+      )}
 
-      <h2 className="section-head">Men</h2>
-      <div className="admin-controls">
-        <input
-          type="search"
-          placeholder="Filter by name or email"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-        <label className="checkbox">
-          <input type="checkbox" checked={week8Only} onChange={(e) => setWeek8Only(e.target.checked)} />
-          Reached week 8
-        </label>
-      </div>
-
-      <div className="table-wrap">
-        <table className="men">
-          <thead>
-            <tr>
-              <Th label="Man" k="name" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Last active" k="lastActive" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Days" k="daysEngaged" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Revisits" k="revisits" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Listens" k="audioPlays" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Group" k="alumniClicks" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="On-time" k="onTimeRate" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Week" k="weekReached" {...{ sortKey, sortDir, toggleSort }} />
-              <Th label="Reflections" k="checkinsLogged" {...{ sortKey, sortDir, toggleSort }} />
-              <th>Read / Listen</th>
-              <Th label="Wk8" k="listenCount" hideSort {...{ sortKey, sortDir, toggleSort }} />
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((m) => (
-              <tr key={m.userId}>
-                <td>
-                  <div className="man-name">{m.name || '-'}</div>
-                  <div className="man-email">{m.email}</div>
-                </td>
-                <td>{m.lastActive ?? '-'}</td>
-                <td>{m.daysEngaged}</td>
-                <td>{m.revisits}</td>
-                <td>{m.audioPlays}</td>
-                <td>{m.alumniClicks}</td>
-                <td title={`${m.onTimeOpens}/${m.onTimeTotal} opened on their day`}>
-                  {m.onTimeRate == null ? '-' : `${Math.round(m.onTimeRate * 100)}%`}
-                </td>
-                <td>{m.weekReached ?? '-'}</td>
-                <td>{m.checkinsLogged}</td>
-                <td>{m.readCount} / {m.listenCount}</td>
-                <td><Week8Badge row={m} /></td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr><td colSpan={11} className="muted">No men match this filter.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <FeedbackByDay days={data.feedbackByDay} />
-      <DropOff entries={data.entryStats} />
-
-      <div className="group-rollups">
-        <GroupTable title="By format" hint="Opened = of the men who reached a shape's days, the share who opened it. Apples-to-apples, best first." groups={data.formatStats} />
-        <GroupTable title="By phase" hint="Opened = share of men who opened, among days they've reached. In journey order." groups={data.phaseStats} />
-      </div>
-
-      {/* Full per-day scorecard last — it's the longest table. */}
-      <Scorecard entries={data.entryStats} />
+      {tab === 'scorecard' && <Scorecard entries={data.entryStats} />}
     </section>
   )
 }
@@ -187,30 +218,31 @@ function Scorecard({ entries }: { entries: EntryStat[] }) {
 }
 
 // ----------------------------------------------------------- beta feedback
-function FeedbackByDay({ days }: { days: DayFeedback[] }) {
+function FeedbackFeed({ items }: { items: FeedbackItem[] }) {
   return (
     <>
-      <h2 className="section-head">Beta feedback by day</h2>
-      <p className="rollup-hint">What testers said landed and didn't, grouped by day. Your "what to change" list.</p>
-      {days.length === 0 ? (
+      <h2 className="section-head">Beta feedback</h2>
+      <p className="rollup-hint">Newest first. Each note shows who left it and which day it was about.</p>
+      {items.length === 0 ? (
         <p className="muted">No feedback yet.</p>
       ) : (
         <div className="feedback-days">
-          {days.map((d) => (
-            <div className="feedback-day" key={d.entryId}>
+          {items.map((f) => (
+            <div className="feedback-day" key={f.checkinId}>
               <h3 className="feedback-day-head">
-                {d.week != null ? `Wk ${d.week} · Day ${d.day}` : `Day ${d.sortIndex}`}: {d.title ?? ''}
+                {f.week != null ? `Wk ${f.week} · Day ${f.day}` : `Day ${f.sortIndex}`}
+                {f.title ? `: ${f.title}` : ''} <span className="fb-who">({f.who})</span>
               </h3>
-              {d.landed.length > 0 && (
+              {f.landed && (
                 <div className="fb-group">
                   <p className="fb-label">What landed</p>
-                  <ul>{d.landed.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                  <p className="fb-text">{f.landed}</p>
                 </div>
               )}
-              {d.didnt.length > 0 && (
+              {f.didnt && (
                 <div className="fb-group">
                   <p className="fb-label">What didn't</p>
-                  <ul>{d.didnt.map((t, i) => <li key={i}>{t}</li>)}</ul>
+                  <p className="fb-text">{f.didnt}</p>
                 </div>
               )}
             </div>

@@ -68,22 +68,24 @@ export type GroupStat = {
   reflections: number
 }
 
-// Beta feedback collected per day — every tester's "what landed / what didn't"
-// for that entry, so John can see what to change.
-export type DayFeedback = {
-  entryId: string
+// One tester's beta feedback for a day. The admin feed is flat and newest-first
+// (latest note on top) and names who left it, so John can see who said what.
+export type FeedbackItem = {
+  checkinId: string
+  who: string // first name + last initial, e.g. "Trey M."
   sortIndex: number | null
   week: number | null
   day: number | null
   title: string | null
-  landed: string[]
-  didnt: string[]
+  landed: string | null
+  didnt: string | null
+  createdAt: string
 }
 
 export type AdminData = {
   men: ManRow[]
   cohortSize: number
-  feedbackByDay: DayFeedback[] // beta feedback, grouped by day (days with comments)
+  feedback: FeedbackItem[] // beta feedback, flat and newest-first, with author
   entryStats: EntryStat[] // per-entry scorecard, in journey order
   formatStats: GroupStat[] // which delivery shapes land (best avg reach first)
   phaseStats: GroupStat[] // engagement by journey phase, in journey order
@@ -98,6 +100,16 @@ function addDays(isoDate: string, days: number): string {
   d.setDate(d.getDate() + days)
   const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${dd}`
+}
+
+// "Trey M." — first name + last initial for feedback attribution. Falls back to
+// the email local part, then a generic label, so a note is never orphaned.
+function displayName(p: { name: string | null; last_name: string | null; email: string | null }): string {
+  const first = (p.name || '').trim()
+  const last = (p.last_name || '').trim()
+  if (first) return last ? `${first} ${last[0].toUpperCase()}.` : first
+  const local = (p.email || '').split('@')[0]
+  return local || 'Someone'
 }
 
 // PostgREST caps a single response at 1000 rows. events (and eventually
@@ -124,12 +136,12 @@ async function fetchAllRows<T>(table: string, cols: string): Promise<T[]> {
 
 export async function loadAdminData(now: Date = new Date()): Promise<AdminData> {
   const [profilesRes, entriesRes, checkins, events] = await Promise.all([
-    supabase.from('profiles').select('id, email, name, cohort, start_date, role'),
+    supabase.from('profiles').select('id, email, name, last_name, cohort, start_date, role'),
     supabase.from('entries').select('id, week, day, title, format, phase, sort_index'),
     // Beta feedback: what_landed / what_didnt are read here on purpose (see the
     // header note) so John can see per-day comments. RLS still blocks peers.
     // Both events and checkins are paged so the newest rows are never dropped.
-    fetchAllRows<{ user_id: string; entry_id: string | null; created_at: string; what_landed: string | null; what_didnt: string | null }>('checkins', 'user_id, entry_id, created_at, what_landed, what_didnt'),
+    fetchAllRows<{ id: string; user_id: string; entry_id: string | null; created_at: string; what_landed: string | null; what_didnt: string | null }>('checkins', 'id, user_id, entry_id, created_at, what_landed, what_didnt'),
     fetchAllRows<{ user_id: string; entry_id: string | null; event_type: string; created_at: string }>('events', 'user_id, entry_id, event_type, created_at'),
   ])
   const err = profilesRes.error || entriesRes.error
@@ -334,17 +346,32 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     .sort((a, b) => a.minSort - b.minSort) // journey order
     .map(({ minSort: _omit, ...g }) => g)
 
-  // Beta feedback grouped by day (members only). Each day collects every
-  // tester's non-empty "what landed" and "what didn't" comments.
-  const feedbackByDay: DayFeedback[] = entries
-    .map((en) => {
-      const cks = checkins.filter((c) => c.entry_id === en.id && memberIds.has(c.user_id))
-      const landed = cks.map((c) => (c.what_landed || '').trim()).filter(Boolean)
-      const didnt = cks.map((c) => (c.what_didnt || '').trim()).filter(Boolean)
-      return { entryId: en.id, sortIndex: en.sort_index, week: en.week, day: en.day, title: en.title, landed, didnt }
+  // Beta feedback as a flat, newest-first feed (members only). One item per
+  // check-in that carries a comment, tagged with who left it and which day it
+  // was about, so John sees the latest on top and knows the source.
+  const nameById = new Map(members.map((p) => [p.id, displayName(p)]))
+  const entryById = new Map(entries.map((e) => [e.id, e]))
+  const feedback: FeedbackItem[] = checkins
+    .map((c) => {
+      if (!memberIds.has(c.user_id)) return null
+      const landed = (c.what_landed || '').trim()
+      const didnt = (c.what_didnt || '').trim()
+      if (!landed && !didnt) return null
+      const en = c.entry_id ? entryById.get(c.entry_id) : undefined
+      return {
+        checkinId: c.id,
+        who: nameById.get(c.user_id) ?? 'Someone',
+        sortIndex: en?.sort_index ?? null,
+        week: en?.week ?? null,
+        day: en?.day ?? null,
+        title: en?.title ?? null,
+        landed: landed || null,
+        didnt: didnt || null,
+        createdAt: c.created_at,
+      }
     })
-    .filter((d) => d.landed.length || d.didnt.length)
-    .sort((a, b) => (a.sortIndex ?? 0) - (b.sortIndex ?? 0))
+    .filter((x): x is FeedbackItem => x !== null)
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0)) // newest first
 
-  return { men, cohortSize: members.length, feedbackByDay, entryStats, formatStats, phaseStats, week1Activation, week8Retention }
+  return { men, cohortSize: members.length, feedback, entryStats, formatStats, phaseStats, week1Activation, week8Retention }
 }
