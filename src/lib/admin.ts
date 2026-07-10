@@ -102,6 +102,17 @@ function addDays(isoDate: string, days: number): string {
   return `${y}-${m}-${dd}`
 }
 
+// Bucket a timestamp by America/Chicago calendar day (the cohort's timezone),
+// not UTC. Events are stored in UTC, so a man reading at 9pm Central lands on
+// the NEXT UTC day — which made "Last active" and on-time rate read a day off.
+// en-CA formats as YYYY-MM-DD, so these strings still sort and compare cleanly.
+const CT_DATE_FMT = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',
+})
+function ctDate(ts: string): string {
+  return CT_DATE_FMT.format(new Date(ts))
+}
+
 // "Trey M." — first name + last initial for feedback attribution. Falls back to
 // the email local part, then a generic label, so a note is never orphaned.
 function displayName(p: { name: string | null; last_name: string | null; email: string | null }): string {
@@ -163,11 +174,11 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     // readCount + listenCount = daysEngaged.
     const openDates = new Set(
       myEvents.filter((e) => e.event_type === 'opened_entry')
-        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10)),
+        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ctDate(ts)),
     )
     const listenDates = new Set(
       myEvents.filter((e) => e.event_type === 'played_audio')
-        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10)),
+        .map((e) => e.created_at).filter(Boolean).map((ts: string) => ctDate(ts)),
     )
     const listenCount = [...openDates].filter((d) => listenDates.has(d)).length
     const readCount = openDates.size - listenCount
@@ -186,7 +197,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const firstOpenByEntry = new Map<string, string>()
     myEvents.filter((e) => e.event_type === 'opened_entry' && e.entry_id && e.created_at)
       .forEach((e) => {
-        const d = (e.created_at as string).slice(0, 10)
+        const d = ctDate(e.created_at as string)
         const cur = firstOpenByEntry.get(e.entry_id!)
         if (!cur || d < cur) firstOpenByEntry.set(e.entry_id!, d)
       })
@@ -203,7 +214,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const onTimeRate = onTimeTotal ? onTimeOpens / onTimeTotal : null
 
     // Last active = most recent activity of any kind (every action emits an event).
-    const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ts.slice(0, 10))
+    const activityDates = myEvents.map((e) => e.created_at).filter(Boolean).map((ts: string) => ctDate(ts))
     const lastActive = activityDates.length ? activityDates.sort().at(-1)! : null
 
     const sortIndex = resolveSortIndex(p.start_date, now)
