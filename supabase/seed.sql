@@ -1,4 +1,5 @@
--- The Daily — real content, Days 1-30 (Weeks 1-4 + Week 5 days 1-2).
+-- The Daily: real content, Days 1-49 (Weeks 1-7). Days 1-30 first, then Days
+-- 31-49 appended in a second block at the bottom (same ON CONFLICT contract).
 -- Source of truth: Notion "The Daily, Week N Copy" pages. Each entry carries:
 --   title             = the day's title (no "Day N:" prefix; eyebrow shows week/day)
 --   body_text         = "The read" (the app entry text)
@@ -20,7 +21,7 @@ values
 
 Something happened to you this weekend. It was real. God met you and said something true about who you are. The plan against you right now is simple: make you forget it by Thursday.
 
-So do not trust your memory. Write down the one thing. What God let you know about who you really are. Maybe that came as a name, maybe as something he said to you, maybe just a knowing. Whatever form it took, get it down. Even the part that feels too good to say out loud.
+So do not trust your memory. Write down the one thing. What God let you know about who you really are. Maybe that came as a name, maybe as something He said to you, maybe just a knowing. Whatever form it took, get it down. Even the part that feels too good to say out loud.
 
 Put it where you will see it. Phone lock screen. Truck dash. Bathroom mirror. Today that is the only job.$md$,
    null, 1,
@@ -30,7 +31,7 @@ Put it where you will see it. Phone lock screen. Truck dash. Bathroom mirror. To
    $md$Say It Again$md$,
    $md$Day two. Whatever God let you know about who you are has probably faded a little since Saturday night. Normal. Not a sign it was fake.
 
-Some of you got a name up there. If you did, hold onto it, because a name from God is not a label, it is the truth about who he made you to be. Some of you did not get one, and that is not a miss. He gives a man his name when it will mean the most, and he is never late. Either way, go back to what he showed you and say it again, out loud if you can.
+Some of you got a name up there. If you did, hold onto it, because a name from God is not a label, it is the truth about who He made you to be. Some of you did not get one, and that is not a miss. He gives a man his name when it will mean the most, and He is never late. Either way, go back to what He showed you and say it again, out loud if you can.
 
 Here is the test, and be honest. Do you believe it today? Not do you understand it. Do you believe it, sitting in your actual life, with everything you know about yourself.
 
@@ -407,11 +408,269 @@ where e.sort_index = v.sort_index;
 update public.entries e set recap_line = v.line
 from (values
   (1, $md$God told you who you really are this weekend. The job was to write it down before the week could bury it.$md$),
-  (2, $md$It is already fading. That is normal, not fake. Say who he said you are again, even if you cannot fully believe it yet.$md$),
-  (3, $md$The high wears off. That is gravity, not proof it was fake. Who he says you are did not change with your mood.$md$),
+  (2, $md$It is already fading. That is normal, not fake. Say who He said you are again, even if you cannot fully believe it yet.$md$),
+  (3, $md$The high wears off. That is gravity, not proof it was fake. Who He says you are did not change with your mood.$md$),
   (4, $md$The one to keep: you are a son, not a hired hand earning his keep. You can stop performing.$md$),
   (5, $md$Make five minutes, ask God one question, then stop talking and listen.$md$),
   (6, $md$The ordinary day is not a break from the story. It is the story, and you have a part to play in it.$md$),
   (7, $md$You were not perfect. Does not matter. You showed up, and that is the whole win.$md$)
+) as v(si, line)
+where e.sort_index = v.si;
+
+-- Days 31-49 (Week 5 days 3-7, Weeks 6-7). Appended so seed.sql is the whole
+-- source of truth. Same ON CONFLICT contract as above: audio_url is left
+-- intact (set out-of-band by npm run upload:audio), never reset to null here.
+insert into public.entries (id, week, day, title, body_text, audio_url, sort_index, reflection_prompt)
+values
+  ('e1000001-0001-0001-0001-000000000031', 5, 3,
+   $md$The Lie You Have Believed Longest$md$,
+   $md$Yesterday you started naming the wound. Today we go after the lie it taught you, the one you have carried so long it stopped sounding like a lie and started sounding like a fact about you.
+
+It usually fits in a few words. I am not enough. I am too much. I am on my own. I do not matter. I am only worth what I produce. Whatever yours is, it has been running quietly in the background for years, deciding how you read every room, every failure, every silence from your dad.
+
+And maybe you did not get a clear word at camp. Maybe you left more confused than fixed. That is fine. This still works. You do not need a mountaintop moment to name a lie. You just need to get honest for five minutes.$md$,
+   null, 31,
+   $md$Five quiet minutes today. Ask God: what is the lie I have believed longest? Write down the words that come, even if it is just one line.$md$),
+
+  ('e1000001-0001-0001-0001-000000000032', 5, 4,
+   $md$It Is an Agreement, Not a Fact$md$,
+   $md$Here is what changes everything. That lie is not a fact about you. It is an agreement you made.
+
+Somewhere back there it got handed to you, by a moment, a person, a silence. And without knowing it, a younger version of you signed for it. And you have been living under that signature ever since.
+
+But here is the thing about an agreement. What got agreed to can get broken. You are not stuck with it because it is old, or because it feels true, or because you have believed it your whole life. Age does not make a lie true. It just makes it familiar.
+
+Today you stop treating it as a life sentence and start treating it as what it is: a contract you can tear up.$md$,
+   null, 32,
+   $md$Write your lie on one line. Under it write: this is an agreement, not a fact, and I can break it. Say it out loud once.$md$),
+
+  ('e1000001-0001-0001-0001-000000000033', 5, 5,
+   $md$Take It to the One Who Was There$md$,
+   $md$End of the work week. Before the weekend swallows it, one move.
+
+You have named the lie. You have called it an agreement. Now take it to Jesus, and not as a theology exercise. The claim is simple: He was actually there in the moment you got wounded, and He is not done with it.
+
+So go back to that moment in your mind, the one where the lie got signed. And instead of reliving it alone like you always have, ask Him a question. Where were you when that happened to me. What do you want me to know about it now.
+
+Then listen. You are not making something up. You are letting the One who was there speak into a place that has only ever had your own verdict in it.$md$,
+   null, 33,
+   $md$Ten quiet minutes this weekend. Go back to the moment the lie started, ask Jesus where He was and what He wants you to know, and write down anything you hear.$md$),
+
+  ('e1000001-0001-0001-0001-000000000034', 5, 6,
+   $md$It Can Happen on a Tuesday$md$,
+   $md$Short read today. Hit play. This one is better in a voice than off a screen.$md$,
+   null, 34,
+   $md$Pick your spot. Truck, porch, kitchen, before everyone wakes. That is your ground now. Use it once this weekend.$md$),
+
+  ('e1000001-0001-0001-0001-000000000035', 5, 7,
+   $md$That Was a Heavy Week$md$,
+   $md$Sunday. Catch your breath.
+
+That was a heavy one. We went down to the wound and named the lie underneath it. Heavy is okay. Heavy means you went somewhere real instead of skating the surface like most men do their whole lives.
+
+You do not have to have it all sorted. You just had to stay in the room. You did. That is the entire job this week.
+
+Rest today.$md$,
+   null, 35,
+   $md$Name one good thing in your life right now and thank God for it. After a heavy week, naming one good thing is its own kind of healing.$md$),
+
+  ('e1000001-0001-0001-0001-000000000036', 6, 1,
+   $md$Now We Go After the Healing$md$,
+   $md$New week. Last week we went down to the wound and named the lie it taught you. This week we go after the healing, because naming a wound and walking off is only half the job.
+
+Think back to camp, the long Friday session, the one that ran almost twice as long as the others. That was not an accident. Everything turned on it. It was the day we stopped talking about the mask and went to the thing underneath, and then we did not leave you there. We took it to Jesus. That is what this week is. The same work, back home, on an ordinary Monday.
+
+One thing before we start. The journey was never meant to be walked alone, and we will keep saying that. But this piece, going quiet and taking the wound to God, that part is just you and Him. Remember the covenant of silence at camp, when we sent you off by yourself to get honest with God. That is the posture this week. We bring the brothers back in soon. This part starts alone.
+
+Let's go.$md$,
+   null, 36,
+   $md$Say last week's lie out loud one more time. Then ask God, this is the lie I agreed with, what is true instead? Sit quiet for two minutes and listen before you move on with your day.$md$),
+
+  ('e1000001-0001-0001-0001-000000000037', 6, 2,
+   $md$He Was Already There$md$,
+   $md$Yesterday we said healing is God telling you what is true, right where the lie went in. Today, the one claim the whole thing hangs on: Jesus was not absent when you got hurt. He was in the room.
+
+That is hard to hold, especially if the wound came from a man who was supposed to protect you and did not. Where was God, then. It is a fair question, maybe the most honest one you have ever asked. We are not going to hand you a tidy answer. We are going to do what we did at camp instead. Ask Him directly, instead of carrying the silence alone one more year.
+
+Because here is what men report, over and over. When they finally ask, they do not get a lecture. They get a sense of where He was. A different way of seeing what happened to them. And it changes the whole memory.$md$,
+   null, 37,
+   $md$Ask God one question about the wound: where were you when that happened to me? Then sit in silence and listen. Write down whatever comes, even if it is nothing yet.$md$),
+
+  ('e1000001-0001-0001-0001-000000000038', 6, 3,
+   $md$What Is True Instead$md$,
+   $md$You asked Him yesterday where He was. Today, you ask Him what is true.
+
+Back at the wound, you heard something about yourself and you agreed with it. It was not a general idea. It was personal, and it was aimed. You are worthless. You will always be alone. You are too much. You are only worth what you produce. Whatever yours was, it has been the loudest voice in the room for years, and you half took it as plain fact about you.
+
+So today you go back to God with it, straight: this is the lie I agreed with. What is true instead? Then you stop and listen. Do not answer for Him. Do not talk yourself into something. Ask, and wait for what He says back. Most men, when they finally get quiet and ask, find He has been wanting to tell them the true thing for a long time.$md$,
+   null, 38,
+   $md$Two minutes of silence. Tell God the lie you agreed with, ask Him what is true instead, and listen. Write down what He gives you and carry it today.$md$),
+
+  ('e1000001-0001-0001-0001-000000000039', 6, 4,
+   $md$Ten Minutes$md$,
+   $md$This is the day. Not a reading day, a doing day, and it is the most important one this week.
+
+Ten minutes. Not two. Phone in another room. Go back to the wound you named, take the lie to God again, ask Him the real question, what is true instead of this, and write down whatever comes. No editing. No deciding whether it is real. Just get it on paper.
+
+This is the exact practice that turned camp from a good feeling into a real change for a lot of men. It is also the thing most men skip once they are home and busy. Ten minutes feels like a lot when you are slammed and like nothing when you are honest. Do not skip it.$md$,
+   null, 39,
+   $md$Ten minutes today, no phone. Take the lie back to God, ask Him what is true instead, and write down everything He gives you, unedited.$md$),
+
+  ('e1000001-0001-0001-0001-000000000040', 6, 5,
+   $md$Don't Carry It Silent$md$,
+   $md$Some of you did the ten minutes and heard something real. Hold onto it. Say it back to yourself today so it does not slip.
+
+And some of you sat there and got silence. Maybe you felt stupid. The quiet voice is about to tell you this does not work for you, you are too broken, too far gone. That is a lie too. This is not a vending machine. Sometimes God answers the first time you ask. Sometimes it comes after weeks of showing up. Getting nothing yet is not failure. It is just not yet.
+
+Here is the part we do not say enough. Going to the wound, that part you do alone, just you and God, the way you did in the silence at camp. But you were never meant to stay alone with it afterward. Remember, at camp there were men right there when you came back and told what happened. That is the design. You go in alone. You do not carry it out alone.$md$,
+   null, 40,
+   $md$Two moves. If God gave you something this week, sit with it, say it back to yourself, and ask Him to tell you again. That is how a relationship works. And say one honest sentence to one man, or your band of brothers, that you are in a heavy, good stretch and doing real work. Not a project. Just do not carry it silent.$md$),
+
+  ('e1000001-0001-0001-0001-000000000041', 6, 6,
+   $md$It Is a Process$md$,
+   $md$Short read today. Hit play. This one belongs in a voice.$md$,
+   null, 41,
+   $md$Look back at the week. Name one place a wound came up. Did you bury it like the old days, take it to God, or maybe even tell a brother? No guilt either way. Just notice.$md$),
+
+  ('e1000001-0001-0001-0001-000000000042', 6, 7,
+   $md$What Is Loosening$md$,
+   $md$Sunday. Look back at the week.
+
+We went after the healing, the truth God spoke to you about what happened. Maybe a lot loosened. Maybe a little. Maybe it is still locked up tight and you are frustrated. All of it is fine. You showed up to the quiet and took the real thing to God, and some of you told one man you were in it. That is the important part here.
+
+Rest today.$md$,
+   null, 42,
+   $md$Name one place, even a small one, where something feels a little less heavy than it did two weeks ago. Thank God for it. And if you told a man this week, thank him too.$md$),
+
+  ('e1000001-0001-0001-0001-000000000043', 7, 1,
+   $md$What He Calls You$md$,
+   $md$New week. Go back to camp with me for a minute.
+
+Friday night we gave half a session to one truth before we sent you anywhere: God has given you a name. A stone with a name on it that only the Father knows. Story after story of men walking away from an encounter with God carrying a different name than they came with. Then we sent you out alone for an hour to ask Him yours. Not a performance review. Not a list of things to fix. A name. The one He has always called you.
+
+Some of you heard something. A word, a phrase, a picture you know you did not manufacture. Some of you got silence and figured you did it wrong. Either way, hold on to what that hour was actually about. The world handed you a name a long time ago, through the wound, and you have been answering to it ever since. But the Father has a name He calls you, and it is not a replacement He came up with to cheer you up. It is the name that was always His for you. Older than the lie. Older than you.
+
+This week is about that name. And more than the name, the One who speaks it and what that means to you.$md$,
+   null, 43,
+   $md$Write down what you heard in that hour at camp, word for word as it came. If you got silence, write that down honestly. Then take ten minutes, phone in another room, and ask Him again: Father, what do you call me? Listen.$md$),
+
+  ('e1000001-0001-0001-0001-000000000044', 7, 2,
+   $md$Whose Voice$md$,
+   $md$Carry one question through today: whose voice have you been listening to since you got home?
+
+Every man has a running narrator. When you mess up, when your kid pushes back, when the project fails, when your wife is short with you, a voice tells you what it means about you. Here is what we want you to see today: that voice is not you thinking, and it is not the old name talking, because names do not talk. That is the Enemy. He found the name the wound wrote on you and he has been reading it back to you so long that his voice sounds like your own thoughts.
+
+Two voices speak over a man's life. The Enemy talks about you. He accuses, he labels, he repeats the old name, and he walks off. The Father talks to you. He calls you by name because He wants you close. One voice isolates. The other invites. Today, just catch which one you have been listening to. You do not have to win the argument yet. Notice who is doing the talking, and remember there is a Father who would rather talk with you than about you.$md$,
+   null, 44,
+   $md$Catch the narrator once today. When you hear it, call it what it is, the Enemy, and take it to the Father on the spot: Father, what do you say about me? One sentence counts.$md$),
+
+  ('e1000001-0001-0001-0001-000000000045', 7, 3,
+   $md$Why Men Don't Ask$md$,
+   $md$Some of you have not done the ask yet this week. Monday came and went. Let's be honest about why.
+
+It is not the ten minutes. You have ten minutes. It is what you are afraid He will say. Deep down, most of us expect that if we got truly quiet and asked God what He thinks of us, He would say what everyone else has said. The room goes still, and the answer comes back the same thing your dad said, your coach said, the same thing the Enemy has been repeating over you your whole life.
+
+Name that fear for what it is: the Enemy's darkest lie in this whole fight, the lie that your Father is on his side. Jesus put it plainly: what father, when his son asks for bread, hands him a rock? If a broken earthly dad still knows how to give his kid something good, how much more your Father. He is not waiting to confirm the wound. He has been waiting a long time to speak truth into it.$md$,
+   null, 45,
+   $md$Say the fear out loud: I am afraid He will say what they said. Then ask anyway. Ten minutes, phone away. Father, what do you call me? Write down what comes, unedited.$md$),
+
+  ('e1000001-0001-0001-0001-000000000046', 7, 4,
+   $md$Catch It and Answer It$md$,
+   $md$Today is a rep day. One practice, done for real.
+
+Once today, catch the Enemy in the act, calling you by the old name. The second you hear it, answer out loud, even under your breath: that is not what my Father calls me. Then say what He does call you, from that hour at camp or from this week.
+
+Notice what that sentence does. It does not just swap a bad word for a better one. It brings your Father into the room. You are not out-arguing the accuser on your own steam. You are standing next to the One who named you and letting Him settle it. And if you have not heard a name yet, use the ground you already have: I am His son, and He does not talk to me like that. That is true today. The rest is coming.$md$,
+   null, 46,
+   $md$One rep. When the Enemy calls you by the old name, answer out loud: that is not what my Father calls me. Then say what He does call you.$md$),
+
+  ('e1000001-0001-0001-0001-000000000047', 7, 5,
+   $md$I Still Fight It$md$,
+   $md$Short read today. Hit play. This is one I want you to hear in my voice.$md$,
+   null, 47,
+   $md$This weekend, when you hear the old name, do not panic that it is still there. Notice it, refuse it, and take it to your Father. Practice not believing the Enemy.$md$),
+
+  ('e1000001-0001-0001-0001-000000000048', 7, 6,
+   $md$You Are Going to Mess Up$md$,
+   $md$Short read. Hit play.$md$,
+   null, 48,
+   $md$Think of one man you could actually call if you blew it. Just identify him in your head. We build on that next week.$md$),
+
+  ('e1000001-0001-0001-0001-000000000049', 7, 7,
+   $md$Seven Weeks$md$,
+   $md$Sunday. Seven weeks in. Look back.
+
+This was the week we went back for the name. The one the world gave you got called what it is, and the name the Father has always had for you got some air. If all you did was ask Him once and answer the Enemy out loud once or twice, that is real. That is a man learning to live from his Father's voice instead of the world's.
+
+And if you have not heard the name yet, you did not fail the week. Some men hear it in that hour at camp. Some hear it months or even years later, sideways, in a line from a book or a moment that stops them cold. The asking is not a waiting room. The asking is the relationship, and He is drawing you closer through every round of it. Keep pursuing. The name is coming, and the Father is already here.
+
+You are almost through the cliff. One more week of the hard stretch, and it is the week things start turning toward other men, which is where this whole thing has been heading.
+
+Rest today.$md$,
+   null, 49,
+   $md$If you have heard the name, say it out loud once today and thank Him for it. If you are still waiting, ask Him one more time before the day ends. Either way, you end the week talking with the Father. That is the whole assignment.$md$)
+on conflict (id) do update set
+  week              = excluded.week,
+  day               = excluded.day,
+  title             = excluded.title,
+  body_text         = excluded.body_text,
+  -- audio_url intentionally NOT overwritten (see note above).
+  sort_index        = excluded.sort_index,
+  reflection_prompt = excluded.reflection_prompt;
+
+-- Format + Phase tags, Days 31-49.
+update public.entries e set format = v.format, phase = v.phase
+from (values
+  (31, 'Challenge', 'The cliff'),
+  (32, 'Truth', 'The cliff'),
+  (33, 'Challenge', 'The cliff'),
+  (34, 'Listen', 'The cliff'),
+  (35, 'Pause', 'The cliff'),
+  (36, 'Anchor', 'The cliff'),
+  (37, 'Truth', 'The cliff'),
+  (38, 'Question', 'The cliff'),
+  (39, 'Challenge', 'The cliff'),
+  (40, 'Truth', 'The cliff'),
+  (41, 'Listen', 'The cliff'),
+  (42, 'Pause', 'The cliff'),
+  (43, 'Anchor', 'The cliff'),
+  (44, 'Question', 'The cliff'),
+  (45, 'Truth', 'The cliff'),
+  (46, 'Challenge', 'The cliff'),
+  (47, 'Listen', 'The cliff'),
+  (48, 'Listen', 'The cliff'),
+  (49, 'Pause', 'The cliff')
+) as v(sort_index, format, phase)
+where e.sort_index = v.sort_index;
+
+-- Recap "heart" lines present in the live DB beyond Week 1 (Days 8-30, plus the
+-- Week 6/7 Pause days). Kept in sync so the weekly digest email matches live.
+update public.entries e set recap_line = v.line
+from (values
+  (8, $md$The mask probably went on with the work boots this morning. Step one is not fighting the poser. It is catching the exact moment he shows up.$md$),
+  (9, $md$You were not built to do this alone. Two minutes: apply to the alumni group and get through the door before the harder weeks hit.$md$),
+  (10, $md$The poser kept you safe once, but a mask cannot be loved. People only love what they can see. You do not have to take him off all at once. Just know he is not you.$md$),
+  (11, $md$Telling one man the truth does not cost you respect. It costs you the loneliness. The thing you are protecting is usually the thing killing you.$md$),
+  (12, $md$The "I'm good" when you were not. The opinion you swallowed. Naming one place you wore the mask is how the grip starts to loosen.$md$),
+  (13, $md$Today was my story, in my voice instead of off a screen. The one thing you fear would make men walk if they knew. Naming that it is there is the start.$md$),
+  (14, $md$Two weeks. This was the week you went after the poser. If all you did was start noticing him, that is the win. Most men never catch the act once.$md$),
+  (15, $md$Two costumes men hide behind: the lone wolf and the social butterfly. Opposite looks, same move. Both keep people from seeing you. Figure out which one is yours.$md$),
+  (16, $md$Independence looks like strength. It is mostly fear wearing armor. The strongest thing a wolf can do is let one man get close enough to actually help.$md$),
+  (17, $md$Loved everywhere, known nowhere. The charm is a defense. Being liked is not the same as being known, and known is what you came here for.$md$),
+  (18, $md$When the bottom drops out, who actually gets in the truck and drives over? Be honest with the number. That number is what these next weeks are about changing.$md$),
+  (19, $md$Wolf and butterfly run the same engine: self-protection, one with walls, one with charm. Neither gives you life. It was a decision, and decisions can be unmade.$md$),
+  (20, $md$One man, one message. Not for help, not a confession. Just crack a door you usually keep shut.$md$),
+  (21, $md$Three weeks. You named your costume and what it has cost you. If it left you raw, that is the work doing its job. Next week we go underneath the mask.$md$),
+  (22, $md$Putting the mask down does not mean you have it all fixed. Honesty comes first, healing comes after. Lower the bar from perfect to honest.$md$),
+  (23, $md$Until you know a man's story, you do not know the man. Knowing his stats is not knowing him. Real connection only happens at the level of story.$md$),
+  (24, $md$Is there one man alive who has heard your whole story and stayed? Carrying a story no one knows is its own kind of heavy. You were not built to carry it alone.$md$),
+  (25, $md$Eight men, a fire, the truth finally told, and not one man rejected for it. When men trade real stories they stop being strangers. That fire is where this whole thing was born.$md$),
+  (26, $md$The heart of the whole thing, in a voice instead of off a screen. One step this weekend toward not doing life alone.$md$),
+  (27, $md$Use the room you got into. Post one true thing, not a highlight. You say one real thing and other men exhale, because you just gave them permission too.$md$),
+  (28, $md$One month, and you are still showing up. That is rare. This was the week you traded the mask for honesty out loud. Heads up: the next stretch is the hardest part.$md$),
+  (29, $md$The shine is gone and it gets harder right about now. That is not failure. It is where the real work starts. Do not quit on the doorstep of the part that changes you.$md$),
+  (30, $md$Under the mask is the wound: the moment you came to believe a lie. Not enough, too much, on your own. It still runs you, and it is exactly what Jesus wants to heal, but not while it stays hidden.$md$),
+  (42, $md$This week we went after the healing, the truth God told you about the lie you were told. Slow counts. You go to the wound alone, but you were never meant to carry it out alone.$md$),
+  (49, $md$This week was the two names. The one the wound gave you, and the one that was always His for you. The name matters because of who says it. Keep going back to Him to hear it.$md$)
 ) as v(si, line)
 where e.sort_index = v.si;
