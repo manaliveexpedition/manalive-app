@@ -1,132 +1,126 @@
-# The Journey
+# The Journey (ManAlive)
 
-A PWA that delivers a daily devotional ("The Daily") as text and audio, lets a
-member log a quick check-in, shows his private progress, and gives the admin a
-view of engagement.
+A devotional PWA that delivers a daily reading plus audio to men after a ManAlive
+Expedition weekend. Each man moves through the plan one day at a time, paced from
+his own start date. He can read, listen, journal privately, check in, and get a
+gentle push notification or a weekly recap email. Admins get an engagement dashboard.
 
-**Stack:** Vite + React + TypeScript (PWA) · Supabase (auth, Postgres, storage, RLS)
-**Auth:** Sign in with Google (primary) · email 6-digit code (fallback) — both passwordless
+This README is the front door. Go deeper from here:
 
-## Step 1 status — auth scaffold (current)
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) : the system map (data model, RLS, content pipeline, cron, gotchas).
+- [`docs/SETUP.md`](docs/SETUP.md) : one-time setup (Supabase project, Google OAuth, SMTP, VAPID).
+- [`scripts/README.md`](scripts/README.md) : what every script does and how to run it.
+- Notion runbook **"The Daily, Runbook: How to Prepare and Ship a Week"** : the non-code workflow and the writing standards.
 
-Done so far:
+## Stack
 
-- Vite + React + TS app, installable as a PWA (`vite-plugin-pwa`, manifest + service worker).
-- Supabase client wired to env vars.
-- Sign-in flow: **Continue with Google** (OAuth) as primary; **email 6-digit code**
-  (OTP: request → verify) as fallback for users without a Google account.
-- Signed-in view showing the user's email + sign out.
+- **Frontend:** Vite + React 19 + TypeScript, shipped as an installable PWA
+  (`vite-plugin-pwa`, custom service worker in `src/sw.ts`).
+- **Backend:** Supabase (Postgres, Auth, Storage, Row Level Security, Edge
+  Functions on Deno, `pg_cron` + `pg_net` for scheduling).
+- **Email / push:** Web Push (VAPID) for notifications; Gmail SMTP (`denomailer`)
+  for the weekly recap email.
+- **Hosting:** Vercel auto-deploys the frontend on every push to `main`.
 
-The database schema (check-ins, events, daily content) and RLS policies are
-**not** built yet — that is the next step.
+## Quick start
 
-## One-time setup
-
-You need a Supabase project + its API keys, and a Google OAuth client, before
-both sign-in methods work.
-
-### 1. Create a Supabase project
-
-1. Go to https://supabase.com → **New project**. Pick a name and a strong
-   database password (you won't need it for step 1).
-2. Once it finishes provisioning, open **Project Settings → API**.
-3. Copy the **Project URL** and the **anon / public** key.
-
-### 2. Configure local env
-
-```sh
-cp .env.local.example .env.local
+```bash
+npm install
+npm run dev        # local dev server (Vite)
+npm run build      # typecheck (tsc -b) + production build
+npm run lint       # eslint
 ```
 
-Fill in `.env.local`:
+Two gitignored env files must exist at the repo root (details in
+[`docs/SETUP.md`](docs/SETUP.md)):
+
+- `.env.local` : `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_VAPID_PUBLIC_KEY` (browser-safe).
+- `.secrets.local` : service role key, DB password, VAPID private key, cron
+  secret, Gmail app password. Used by scripts and edge functions only, never the browser.
+
+## Repo map
 
 ```
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-public-key
+src/
+  main.tsx            App bootstrap (React root).
+  App.tsx             Auth gate + Shell (top nav + which screen shows) + SignIn + NameSetup.
+  sw.ts               Service worker: receives push, sets the app-icon badge, routes notification taps.
+  index.css, App.css  Global styles (design tokens live at the top of index.css).
+
+  screens/            One file per view. UI plus light data loading.
+    Today.tsx           The daily entry, or the "not started" / "caught up" states.
+    entryParts.tsx      Shared pieces: EntryBody, AudioPlayer, CheckInCard, NotesCard.
+    Progress.tsx        The man's own progress (streak, days reached).
+    DayBrowser.tsx      Re-read any day he has already reached.
+    Settings.tsx        Notifications (reminder toggle + time), name, install prompt.
+    Library.tsx         Admin-only: every entry, for review.
+    Admin.tsx           Admin-only: engagement dashboard (tabs: Engagement, List, Feedback, Phase, Scorecard).
+    InstallBanner.tsx   "Add to home screen" nudge.
+
+  lib/                Logic and data access. No JSX. Each file owns one concern.
+    supabase.ts         The shared Supabase browser client.
+    today.ts            Day math: resolveSortIndex(start_date -> journey day), loadToday, loadReachedEntries.
+    progress.ts         Streak / progress derivation and TOTAL_WEEKS.
+    checkins.ts         Read/write a day's check-in (beta feedback fields live here).
+    notes.ts            A man's PRIVATE per-day notes (admins cannot read them).
+    events.ts           Fire-and-forget engagement logging (opened_entry, played_audio, ...).
+    profile.ts          Profile type + fetch + saveName (preferred + last name).
+    admin.ts            loadAdminData: the whole admin dashboard is computed here.
+    push.ts             Web Push subscribe/enable, reminder prefs, badge clearing.
+    install.ts          PWA install-prompt plumbing.
+    deeplink.ts         Survives email deep links across the Google OAuth redirect (localStorage stash).
+
+scripts/              Node one-off tooling (not shipped). See scripts/README.md.
+supabase/
+  migrations/         Timestamped schema history (source of truth for the DB shape).
+  functions/          Edge Functions: send-reminders, send-weekly-digest.
+  seed.sql            All daily CONTENT, Days 1-49 (title, read, do-this, tags, heart lines).
+docs/
+  ARCHITECTURE.md     Deep system map.
+  SETUP.md            One-time project + auth + SMTP + VAPID setup.
 ```
 
-`.env.local` is gitignored, so your keys stay out of version control. Only the
-**anon** key belongs here — never the service-role key (it bypasses RLS).
+## How content gets into the app
 
-### 3. Configure auth URLs
+Content is authored in Notion, then loaded into the database. The app reads it
+live, so **new content needs no deploy**.
 
-In the Supabase dashboard → **Authentication → URL Configuration**:
+1. A week is written on its Notion "The Daily, Week N Copy" page: per day a title,
+   the read (`body_text`), the listen (audio script), the do-this
+   (`reflection_prompt`), and a one-line heart line (`recap_line`).
+2. The reads / prompts / tags / heart lines are loaded into the `entries` table.
+   The canonical copy lives in `supabase/seed.sql`.
+3. Audio is recorded separately, dropped in `audio-source/` as `day-NN.mp3`, and
+   uploaded with `npm run upload:audio`, which also sets `entries.audio_url`.
 
-- **Site URL:** `http://localhost:5173`
-- **Redirect URLs:** add `http://localhost:5173` (where the user lands after the
-  Google round-trip).
+`seed.sql` never overwrites `audio_url` on re-run, so re-seeding content can never
+wipe the recordings. The full workflow and the writing standards live in the Notion runbook.
 
-### 4. Enable Google sign-in (primary)
+## Key concepts (one line each; details in ARCHITECTURE.md)
 
-You need a Google OAuth client, then connect it to Supabase.
+- **Journey day** = calendar days since the man's `start_date`, resolved locally
+  so the day flips at his own midnight (`resolveSortIndex` in `lib/today.ts`).
+- **RLS everywhere:** a man reads/writes only his own rows; only `is_admin()`
+  reads across the cohort. Notes are private even from admins.
+- **Audio** lives in a private Storage bucket; the app mints a short-lived signed
+  URL at play time.
+- **Weekly email** fires on each man's Pause day (Day 7 of a week) and prints all
+  seven days' `recap_line`, so every day needs one.
+- **Push** is opt-in: a new-day badge, plus an optional daily reminder at a chosen
+  time (only if the day is still unread).
 
-1. In **Google Cloud Console** → **APIs & Services → Credentials** → **Create
-   credentials → OAuth client ID** → application type **Web application**.
-2. Under **Authorized redirect URIs**, add your Supabase callback:
-   `https://<your-project-ref>.supabase.co/auth/v1/callback`
-   (find it in Supabase → Authentication → Providers → Google; copy it exactly).
-3. Copy the generated **Client ID** and **Client secret**.
-4. In **Supabase → Authentication → Providers → Google**: enable it and paste the
-   Client ID + secret. Save.
+## Deploy and ops
 
-(First time using OAuth in this Google project, you may need to configure the
-**OAuth consent screen** — pick "External", add yourself as a test user.)
+- **Frontend:** push to `main`; Vercel builds and deploys.
+- **Database schema:** `supabase db push` applies new `migrations/`.
+- **Content / data:** loaded via scripts or `scripts/db-exec.mjs`; canonical in
+  `seed.sql`. Never edit RLS-sensitive data through the Supabase SQL editor.
+- **Edge functions + cron:** `send-reminders` and `send-weekly-digest` run hourly
+  via `pg_cron`; the timing and dedupe logic lives in SQL functions.
 
-### 5. Enable the 6-digit email code (fallback)
+## Conventions
 
-By default Supabase's email template sends a magic *link*, not a code. To send a
-6-digit code instead:
-
-1. In **Supabase → Authentication → Email Templates → Magic Link**, edit the body
-   to include the token, e.g. `Your code is {{ .Token }}` (instead of relying on
-   `{{ .ConfirmationURL }}`).
-2. Save. The app calls `verifyOtp` with whatever code the user types.
-
-No separate test user is needed — both methods create the user automatically on
-first successful sign-in.
-
-## Run it
-
-```sh
-npm install      # if you haven't already
-npm run dev
-```
-
-Open http://localhost:5173.
-
-## Testing auth with one user
-
-**Google (primary):**
-
-1. Click **Continue with Google**, pick your account, approve.
-2. You land back on the app showing **"You're in"** and your email.
-
-**Email 6-digit code (fallback):**
-
-1. Enter your email, click **Send code**.
-2. Check your inbox for the 6-digit code (built-in email is rate-limited to a few
-   per hour — fine for testing, not production; we'll add custom SMTP before launch).
-   - **Tip:** to skip the inbox, you can read the token via the dashboard logs, or
-     just test the Google path.
-3. Enter the code, click **Verify** → **"You're in"**.
-
-Click **Sign out** to confirm the session clears for either method.
-
-## Scripts
-
-- `npm run dev` — local dev server
-- `npm run build` — type-check + production build (also generates the service worker)
-- `npm run preview` — serve the production build locally
-- `npm run lint` — ESLint
-
-## Notes / known rough edges (to revisit later)
-
-- **Production email:** swap Supabase's built-in email for custom SMTP (Resend/Postmark).
-- **Google OAuth in production:** add your real domain to the Google client's
-  authorized redirect URIs and Supabase's redirect URLs, and publish the OAuth
-  consent screen.
-- **PWA icons:** `public/pwa-192.png` and `public/pwa-512.png` are solid-color
-  placeholders — replace with real artwork before launch.
-- **Admin view:** will read across all users, which RLS deliberately blocks for
-  normal members. We'll handle it with an admin role check / `security definer`
-  function, not by weakening per-user policies.
+- Every source file opens with a short comment saying what it owns and why.
+- `lib/` is pure logic/data (no JSX); `screens/` is UI.
+- No em dashes anywhere in user-facing copy or content.
+- Commits are authored as `John Pulley <jpulley@manaliveexpedition.com>`.
