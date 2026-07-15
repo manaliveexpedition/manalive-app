@@ -674,3 +674,27 @@ from (values
   (49, $md$This week was the two names. The one the wound gave you, and the one that was always His for you. The name matters because of who says it. Keep going back to Him to hear it.$md$)
 ) as v(si, line)
 where e.sort_index = v.si;
+
+-- Recap heart lines for Days 31-41 and 43-48 (fills the Week 5-7 weekly-email
+-- gaps so the digest has a line for every day). Generated 2026-07-15.
+update public.entries e set recap_line = v.line
+from (values
+  (31, $md$The lie you have carried longest stopped sounding like a lie and started sounding like a fact about you. Get quiet and ask God to help you name it. You cannot fight what you will not name.$md$),
+  (32, $md$That lie is not a fact about you. It is an agreement you signed a long time ago, and what got agreed to can get broken.$md$),
+  (33, $md$Take the lie back to the moment it started, with Jesus this time instead of alone, and ask Him what He wants you to know. He was actually there.$md$),
+  (34, $md$The same Jesus who met you at camp meets you in the truck on a hard Tuesday. You do not need a mountain. You need to get quiet and bring Him the real thing.$md$),
+  (35, $md$That was a heavy week. Heavy means you went somewhere real instead of skating the surface. You did not have to have it sorted, you just had to stay in the room. You did.$md$),
+  (36, $md$Naming the lie was half the job. This week we go after the healing: letting God tell you what is true, right where the lie went in.$md$),
+  (37, $md$Jesus was not absent when you got hurt. He was in the room. Ask Him where He was, instead of carrying the silence alone one more year.$md$),
+  (38, $md$Take the lie to God straight: this is what I agreed with, what is true instead? Then stop talking and listen for what He says back.$md$),
+  (39, $md$Ten minutes, no phone. Take the lie to God, ask Him what is true instead, and write down whatever comes. Most men skip this one. Be the man who does.$md$),
+  (40, $md$Heard nothing this week? That is not failure, it is not yet. And you were never meant to carry this alone. Say one honest sentence to one man.$md$),
+  (41, $md$Healing comes in layers, not one moment. Measure the week by whether you brought your real heart to God instead of burying it, and let a man or two in.$md$),
+  (43, $md$The world handed you a name through the wound. But the Father has a name He has always called you, older than the lie. This week is about that name, and the One who speaks it.$md$),
+  (44, $md$Two voices speak over you. The Enemy talks about you and walks off. The Father talks to you because He wants you close. Catch which one you have been listening to.$md$),
+  (45, $md$What keeps you from asking is the fear He will say what everyone else said. He will not. He is not waiting to confirm the wound, He has been waiting to speak truth into it.$md$),
+  (46, $md$When the Enemy calls you by the old name, answer out loud: that is not what my Father calls me. You are not out-arguing him alone, you are letting the One who named you settle it.$md$),
+  (47, $md$The finish line was never the Enemy going quiet. It is his voice losing your agreement. You are not aiming for the day he shuts up, you are aiming for the day you stop believing him.$md$),
+  (48, $md$You are going to mess up. That is okay. Just do not do the mess-up part alone. Pulling the knife out of your own leg is what other men are for.$md$)
+) as v(si, line)
+where e.sort_index = v.si;
