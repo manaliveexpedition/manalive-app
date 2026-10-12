@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 2 · The Larger Story</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 400; src: url('assets/oswald-400.woff2') format('woff2'); }
+  @font-face { font-family: 'Oswald'; font-weight: 600; src: url('assets/oswald-600.woff2') format('woff2'); }
+
+  :root {
+    --ox: #4a1f1f;
+    --ox-tint: #f5eeee;
+    --ink: #101418;
+    --ink-soft: #46515c;
+    --line: #c3cad1;
+    --label: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --body: Georgia, 'Times New Roman', serif;
+  }
+
+  @page {
+    size: Letter;
+    margin: 0.75in 0.9in 0.8in 0.9in;
+    @bottom-left {
+      content: "THE JOURNEY  ·  WEEK 2  ·  DRAFT FOR REVIEW";
+      font-family: 'Oswald', sans-serif; font-size: 8pt; letter-spacing: 0.12em; color: #46515c;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Oswald', sans-serif; font-size: 9pt; color: #4a1f1f;
+    }
+  }
+  @page cover { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 11.5pt; line-height: 1.6; }
+
+  .label, h1, h2, h3, .kicker {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ox);
+  }
+  p { margin: 0 0 0.7em; }
+
+  /* Cover */
+  .cover { page: cover; height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover img { width: 3.4in; margin: 0 auto 0.6in; }
+  .cover .kicker { font-size: 12pt; color: var(--ink-soft); margin-bottom: 0.1in; }
+  .cover h1 { font-size: 38pt; line-height: 1.05; margin: 0 0 0.15in; }
+  .cover .sub { font-family: var(--label); font-weight: 400; font-size: 14pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .cover .stamp { margin: 0.7in auto 0; display: inline-block; border: 1.5px solid var(--ox); padding: 0.08in 0.25in;
+    font-family: var(--label); font-weight: 600; letter-spacing: 0.16em; color: var(--ox); font-size: 10pt; }
+  .cover .date { margin-top: 0.15in; font-size: 10pt; color: var(--ink-soft); }
+
+  /* Overview */
+  .page { break-before: page; }
+  h2 { font-size: 20pt; margin: 0 0 0.12in; }
+  h3 { font-size: 10pt; margin: 0.2in 0 0.06in; }
+  .endstate { border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.14in 0.2in; font-size: 13pt; line-height: 1.5; font-style: italic; margin: 0.1in 0 0.2in; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 8.5pt; text-align: left; border-bottom: 1.5px solid var(--ox); padding: 0.05in 0.08in; }
+  td { border-bottom: 1px solid var(--line); padding: 0.045in 0.08in; vertical-align: top; }
+  td.handle { font-family: var(--label); font-weight: 600; letter-spacing: 0.04em; color: var(--ox); white-space: nowrap; }
+  .shape { display: grid; grid-template-columns: 1.15in 1fr; gap: 0.03in 0.15in; font-size: 10pt; line-height: 1.45; }
+  .shape .label { font-size: 9pt; padding-top: 0.02in; }
+
+  /* Day pages */
+  .day { break-before: page; }
+  .dayhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ox); padding-bottom: 0.06in; margin-bottom: 0.18in; }
+  .dayhead .kicker { font-size: 10pt; }
+  .dayhead .run { font-family: var(--label); font-size: 9pt; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+  .day h2 { font-size: 26pt; margin: 0 0 0.12in; line-height: 1.1; }
+
+  .section { margin-top: 0.22in; }
+  .section > .label { font-size: 9.5pt; display: flex; align-items: center; gap: 0.1in; margin-bottom: 0.08in; }
+  .section > .label::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .section > .label .meta { font-weight: 400; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+  .carry { break-inside: avoid; margin: 0.2in 0; border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.1in 0.2in; }
+  .carry .label { font-size: 8.5pt; }
+  .carry .handle { font-family: var(--label); font-weight: 600; font-size: 18pt; letter-spacing: 0.04em; color: var(--ox); line-height: 1.2; }
+
+  .audio { border-left: 2px solid var(--line); padding-left: 0.2in; }
+  .audio p { margin-bottom: 0.55em; }
+  .audio .beat { font-weight: bold; }
+
+  .box { break-inside: avoid; border: 1px solid var(--line); padding: 0.12in 0.18in; margin-top: 0.1in; }
+  .box p:last-child { margin-bottom: 0; }
+
+  .notes { break-inside: avoid; margin-top: 0.3in; }
+  .notes .label { font-size: 9pt; margin-bottom: 0.05in; }
+  .notes .ln { height: 0.36in; border-bottom: 1px solid var(--line); }
+
+  .mock { break-inside: avoid; border: 1px dashed var(--ox); padding: 0.12in 0.18in; }
+  .mockrow { border-bottom: 1px solid var(--line); padding: 0.06in 0 0.1in; margin-bottom: 0.06in; }
+  .mockday { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 9.5pt; }
+  .mockctx { font-size: 10pt; color: var(--ink-soft); }
+  .mockctx span { font-family: var(--label); text-transform: uppercase; letter-spacing: 0.08em; font-size: 8.5pt; }
+  .mocknote { margin-top: 0.05in; font-style: italic; }
+  .mockcap { font-size: 9.5pt; color: var(--ink-soft); margin: 0.06in 0 0; }
+
+  .email { border: 1px solid var(--line); padding: 0.2in 0.25in; font-family: system-ui, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+  .email .hdr { font-size: 9.5pt; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 0.08in; margin-bottom: 0.14in; }
+  .email .hdr b { color: var(--ink); }
+  .email .btn { display: inline-block; background: var(--ox); color: #fff; padding: 0.06in 0.16in; border-radius: 6px; font-weight: 600; font-size: 10pt; }
+  .email .link { color: var(--ox); font-weight: 600; white-space: nowrap; }
+
+  ul.tight { margin: 0.05in 0 0.1in; padding-left: 0.22in; }
+  ul.tight li { margin-bottom: 0.06in; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Cover ═══ -->
+<section class="cover">
+  <img src="assets/manalive-logo.png" alt="ManAlive Expedition">
+  <div class="kicker">The Journey</div>
+  <h1>Week 2<br>The Larger Story</h1>
+  <div class="sub">You are here</div>
+  <div><span class="stamp">DRAFT FOR REVIEW</span></div>
+  <div class="date">October 12, 2026</div>
+</section>
+
+<!-- ═══ Overview ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Week 2 overview</div>
+  <h2>What this week is for</h2>
+  <p>Week 2 walks a man back through Friday morning's Larger Story, one act at a time, so his life stops feeling random. By Sunday he should be able to say:</p>
+  <div class="endstate">My life is not random. There is a larger story. It began in fellowship. There is an enemy. God has moved to rescue. Restoration is coming. I'm living in Act Three, and I'm learning to live awake inside it.</div>
+
+  <h3>How every day works</h3>
+  <div class="shape">
+    <div class="label">Reading</div><div>About 150 words. A quick reminder of what happened at camp and where it shows up at home.</div>
+    <div class="label">Audio</div><div>About 2 minutes from John. A handle to carry, one layer deeper, and a story.</div>
+    <div class="label">With Dad</div><div>3 minutes on weekdays this week, up from 2 in Week 1. Saturday is 5.</div>
+    <div class="label">Share</div><div>Optional. Opens the alumni group with his thought ready to paste.</div>
+    <div class="label">Notes</div><div>Private. Day 14 shows him this week's notes in one place.</div>
+    <div class="label">Weekly email</div><div>Sunday evening. One heart line per day.</div>
+  </div>
+
+  <h3>The week at a glance</h3>
+  <table>
+    <tr><th>Day</th><th>Title</th><th>Carry this</th><th>With Dad</th></tr>
+    <tr><td>8 · Mon</td><td>You Are Here</td><td class="handle">You are here</td><td>3 min</td></tr>
+    <tr><td>9 · Tue</td><td>Control, Crazy, Check Out</td><td class="handle">Not defective. Disoriented.</td><td>3 min</td></tr>
+    <tr><td>10 · Wed</td><td>Made for Fellowship</td><td class="handle">Made for fellowship</td><td>3 min</td></tr>
+    <tr><td>11 · Thu</td><td>Born Into a War</td><td class="handle">Every story has a villain</td><td>3 min</td></tr>
+    <tr><td>12 · Fri</td><td>He Hit the Beach</td><td class="handle">He hit the beach for me</td><td>3 min</td></tr>
+    <tr><td>13 · Sat</td><td>Not Yet</td><td class="handle">Not yet</td><td>5 min</td></tr>
+    <tr><td>14 · Sun</td><td>Live Awake</td><td class="handle">Live awake</td><td>3 min</td></tr>
+  </table>
+</section>
+
+<!-- ═══ Day 8 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 8 · Monday</span><span class="run">Audio about 2:00</span></div>
+  <h2>You Are Here</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Ever stood in front of one of those big maps at the mall? You look for one thing first. The red dot. <em>You are here.</em></p>
+    <p>Until you find it, the rest of the map is useless.</p>
+    <p>That's what Friday morning at camp was. The Larger Story. A map, and a red dot.</p>
+    <p>Most of us walked into life like walking into a movie twenty minutes late. Stuff is blowing up. Nobody tells you the plot. You just try to keep up. And some Wednesdays, life doesn't feel like a story at all. It feels like a mugging.</p>
+    <p>Here's what that session was saying: your life is not random. There is a larger story, and you're in it. This week we walk back through it, one act at a time.</p>
+    <p>You don't have to remember all of it. You just need to find the red dot.</p>
+    <p>You are here.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">You are here.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>My first year of marriage, I was lost.</p>
+      <p>I'd never lived with a woman before. And all of a sudden here's somebody with her own feelings, her own way of doing things. How she wanted to decorate. How she wanted to do just about everything. Different from mine. Sometimes the opposite.</p>
+      <p>It was good. But I didn't know how to move forward. I didn't know what to think. And it's not like you can just go get a new roommate. You're in it.</p>
+      <p>Nobody handed me the manual.</p>
+      <p>That's what it's like when you don't know the story you're in. Everything feels random. Good things feel like luck. Bad things feel like you must have done something wrong. Or like God checked out.</p>
+      <p>And most of us just put our heads down and try to survive the next scene.</p>
+      <p>Here's what I want you to get this week. The problem isn't you. You're not stupid. You're not behind. You walked in twenty minutes late, and nobody handed you the map.</p>
+      <p>So this week, we hand you the map.</p>
+      <p>It's a story with four acts. It started way before you showed up. There's a villain. There's a rescue. And there's an ending better than anything you've been told.</p>
+      <p>And you're somewhere in the middle of it. Right now. Today. In your truck, at your desk, in your kitchen.</p>
+      <p class="beat">That's what I want you to carry today. You are here.</p>
+      <p>When today feels random, when something blindsides you, stop and remember. This isn't random. I'm in a story. I don't have to understand the whole plot today. I just need to know where I am, and who's telling it.</p>
+      <p>So take it to Him. Ask Him where you are.</p>
+      <p>You are here. And He knows exactly where that is.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, where am I in Your story right now?</em> Then listen. If nothing's clear yet, that's okay. You just started reading the map.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Where does life feel like you walked in twenty minutes late?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 9 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 9 · Tuesday</span><span class="run">Audio about 2:00</span></div>
+  <h2>Control, Crazy, Check Out</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember the frogs? In the middle of the night, frogs start falling out of the sky and smashing into a windshield. Nobody knows why.</p>
+    <p>That's how life can feel. And when it does, men reach for one of three moves.</p>
+    <p><strong>Control.</strong> Grip tighter. Plan harder. Make everybody fall in line.</p>
+    <p><strong>Crazy.</strong> Blow up. Worry, rage, spin out.</p>
+    <p><strong>Check out.</strong> Screens. Work. A beer. Whatever makes it go quiet.</p>
+    <p>Most of us have a favorite. Some of us use all three before lunch.</p>
+    <p>Hear this the way it was said at camp: these aren't a diagnosis. You're not broken for doing them. They're what a man does when he's lost the map. They kept you going.</p>
+    <p>But they cost you. Control suffocates the people closest to you. Crazy scares them. Checking out leaves them alone.</p>
+    <p>You're not defective. You're disoriented. And that can change.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Not defective. Disoriented.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Let me tell you my move.</p>
+      <p>Control. When something starts slipping, I grab tighter. I manage it. I want to get it back under control. I want to change things and fix things and make it work.</p>
+      <p>And if it gets too big, if I can't make it work? I disappear. Just check out.</p>
+      <p>So control is my first move. Checking out is my backup.</p>
+      <p>Here's what I didn't understand for a long time. I thought that was just who I was. My personality. How I'm wired.</p>
+      <p>It's not. It's what I did because I didn't know the story I was in. When you don't know there's a plot, when you don't know Somebody's telling it, you've got to hold everything together yourself. Or you blow up trying. Or you quit trying and check out.</p>
+      <p>Every one of those moves makes sense if you're on your own.</p>
+      <p>But you're not on your own. That's the whole point of this week.</p>
+      <p class="beat">So here's what I want you to carry. Not defective. Disoriented.</p>
+      <p>There's a difference. Defective means something's wrong with you, and it's permanent. Disoriented means you lost your bearings. And bearings can be found.</p>
+      <p>So today, when you feel yourself grabbing for control, or spinning up, or reaching for the remote, just notice it. No beating yourself up. Just say, there it is. I'm disoriented. And then turn toward Dad. Ask Him where you are.</p>
+      <p>That turn is the whole thing. You don't have to fix it today. You just have to turn.</p>
+      <p>Not defective. Disoriented.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, which one do I reach for?</em> Then: <em>What do You want to give me instead?</em> Listen. No beating yourself up.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Control, crazy, or check out: which is your go-to?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 10 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 10 · Wednesday</span><span class="run">Audio about 2:00</span></div>
+  <h2>Made for Fellowship</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Before there was a war, before there was a world, there was fellowship.</p>
+    <p>That's where the story starts. Not Genesis 1. Before it. <em>In the beginning was the Word.</em> Father, Son, and Spirit, together. A heroic fellowship.</p>
+    <p>Remember the opening of The Last of the Mohicans? No words. A father and his two sons running through the forest together. Fast. Free. Together.</p>
+    <p>That's the picture. That's Act One.</p>
+    <p>And you were made in that image. That's why something in you lights up when you're with a few good men doing something hard together. It's why you still want your Father's attention, even as a grown man. That hunger isn't weakness. It's the image of God in you.</p>
+    <p>You weren't made to run alone. You were made to run with Him. And with brothers.</p>
+    <p>The story started good. Really good. Hang on to that. You'll need it tomorrow.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Made for fellowship.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>When we started ManAlive, there were six of us. Six guys trying to put on a camp.</p>
+      <p>We didn't have the money. So we pooled our own money together and put down the deposit on a camp. We didn't know what we were doing. We didn't know how it was going to look or how it was going to turn out. We even canceled an event two weeks out, because we believed God told us to.</p>
+      <p>But man, it felt like a million dollars. Because we had a purpose. We wanted men to find freedom. And we were in. Whatever it took.</p>
+      <p>That's Act One. Not that exact moment, but what it points to.</p>
+      <p>Most of us think the Christian story starts with a problem. Sin. The fall. What's wrong with us. And so we live like the whole point is not screwing up.</p>
+      <p>But the story doesn't start with a problem. It starts with fellowship. A Father, a Son, and a Spirit who loved being together so much they wanted to make more of it. And they made you.</p>
+      <p>That's why being alone wears you down. It's why a weekend with a bunch of guys around a fire can do more for you than a year of trying harder. You're not needy. You're made for it.</p>
+      <p class="beat">So here's what I want you to carry today. Made for fellowship.</p>
+      <p>When you feel that pull toward a few good men, don't ignore it. When you feel that ache for your Father, don't stuff it. That's not the broken part of you. That's the original part.</p>
+      <p>And today, don't bring Dad a list. Don't bring Him a problem. Just go be with Him. Like a son running alongside his Father.</p>
+      <p>Made for fellowship. Go run with Him.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Don't ask Him for anything today. Just say: <em>I'm here, Dad.</em> And be with Him. If that feels strange, that's okay. Stay anyway.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Tag one man you'd want to run with.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 11 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 11 · Thursday</span><span class="run">Audio about 2:10</span></div>
+  <h2>Born Into a War</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Ever notice every great story has a villain?</p>
+    <p>There's a reason. Yours does too.</p>
+    <p>Act Two is where the story turns. God made angels, and they're not chubby babies with harps. They're fierce. Think Navy SEALs. And the most beautiful of them all, Lucifer, decided he didn't want to serve. He wanted the throne. He rebelled and took a third of the angels with him.</p>
+    <p>God threw him out of heaven. But He didn't take him out of the story.</p>
+    <p>So here's the truth most of us never heard growing up: you were born into a world at war.</p>
+    <p>That's not meant to scare you. It's meant to make sense of things. Why life is this hard. Why it feels like something's against you. Why the good things you go after always seem to cost something.</p>
+    <p>It's not because you're cursed. It's because you matter.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Every story has a villain.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Why would God put a warrior heart in every little boy?</p>
+      <p>Give a little boy a stick and it's a sword. Give him a graham cracker and he chews it into a gun. Nobody teaches him that. It's in there.</p>
+      <p>Why? Because he's going to need it.</p>
+      <p>Here's something I've noticed. The week before a camp, all hell breaks loose.</p>
+      <p>It's a little different every time. There's never enough time to get done what needs to get done. Money gets tight, or something weird happens with finances. My wife and I get along great almost all the time, but that week, there's tension. Our team starts disagreeing about how things should be done. My health goes sideways. Last time it was my back.</p>
+      <p>Every time. Right before men are about to get free.</p>
+      <p>That's not bad luck. When you start moving toward life, something pushes back. Hardship isn't proof you're doing it wrong. A lot of times, it's a backhanded compliment. The enemy doesn't waste his time on men who don't matter. He's afraid of who you could become.</p>
+      <p>Now hear me. We're not going to get weird about this. We're not chasing demons around the house. The point is clarity. You're not crazy for feeling like there's a fight. There is one.</p>
+      <p class="beat">So here's what I want you to carry today. Every story has a villain.</p>
+      <p>When it gets hard this week, and it will, remember that. It's not random. It's not God being against you. It's a war. And you're in it because you're worth fighting over.</p>
+      <p>So take it to Dad. Don't ask Him what's wrong with you. Ask Him what He sees in you that's worth all this.</p>
+      <p>Every story has a villain. Yours too. Which means you're in a story worth telling.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what do You see in me that's worth fighting over?</em> Then listen.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>One place you're pushing toward life right now.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 12 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 12 · Friday</span><span class="run">Audio about 2:10</span></div>
+  <h2>He Hit the Beach</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Act Three starts in a garden.</p>
+    <p>Everything is good. And the enemy shows up with one message. It wasn't really about fruit. It was this: <em>You can't trust the heart of God.</em></p>
+    <p>Adam bought it. Most of us still do. It's the lie under almost every other lie.</p>
+    <p>But God didn't leave. He set the stage for a rescue. And then He came Himself.</p>
+    <p>Christmas wasn't a sweet little manger scene. It was an invasion. Remember Omaha Beach? Men running into gunfire for people they'd never met. That's closer to what Jesus did. He landed in enemy territory to set captives free. That was His mission, right out of Isaiah 61: heal the brokenhearted, free the prisoners.</p>
+    <p>They killed Him. And three days later, He walked out of the grave. The only one ever to come back from that fight alive.</p>
+    <p>He didn't come to make you nicer. He came to get you.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">He hit the beach for me.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Let me ask you something. Do you actually trust God's heart?</p>
+      <p>Not, do you believe in Him. Not, do you go to church. Do you trust that His heart toward you is good?</p>
+      <p>After my divorce, I lost my job too. And I couldn't see one good thing in my life.</p>
+      <p>I was resigned. Checked out. Just trying to survive day to day, paycheck to paycheck. I'd go out to the bars. Play poker. Anything to not feel it. A normal day was sadness, and grief, and this general frustration with everything.</p>
+      <p>I wouldn't have said it out loud. But I didn't trust God's heart. Not even a little.</p>
+      <p>That's the lie from the garden. You can't trust the heart of God. It's sneaky, because it almost never shows up as a thought you'd say out loud. It shows up as control. As worry. As doing it all yourself. As keeping one foot out the door.</p>
+      <p>And here's God's answer to that lie. Not an argument. An invasion.</p>
+      <p>He didn't send a memo. He came. He hit the beach. Into the mud and the blood and the gunfire, for people who didn't even know they needed rescuing. For you.</p>
+      <p class="beat">So here's what I want you to carry today. He hit the beach for me.</p>
+      <p>When the old lie shows up, when you catch yourself white-knuckling it again, remember that. A God who didn't care wouldn't have come. He came. For you. And He's still coming after you.</p>
+      <p>So today, be honest with Him. Ask Him where you don't trust His heart. He can handle it.</p>
+      <p>He hit the beach. For you.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him honestly: <em>Father, where don't I trust Your heart?</em> Then listen. He's not offended by the question.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Where have you seen Him come after you?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 13 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 13 · Saturday</span><span class="run">Audio about 2:20</span></div>
+  <h2>Not Yet</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember the end of Gladiator? Maximus is going home to his family. And the line: <em>"I will see you again. But not yet."</em></p>
+    <p>That's Act Four.</p>
+    <p>Most of us were sold a version of heaven that sounds like an endless church service. No wonder nobody's in a hurry. That's not the story.</p>
+    <p>The story ends with restoration. God says, <em>I make all things new.</em> Not all new things. All things new. This world, put right. What was lost, given back. Everything that was ever good, healed and whole and forever.</p>
+    <p>We've been ripped off of Act Four. And a man who doesn't know how the story ends will settle for whatever he can grab now.</p>
+    <p>But we're not there yet. We're still in Act Three. That's why it's still hard.</p>
+    <p>Remember what Sam told Frodo? There's some good in this world, and it's worth fighting for.</p>
+    <p>Not yet. But it's coming.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Not yet.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>My Papaw died in 1989. My mom died a couple of years ago. And I am really looking forward to seeing them again.</p>
+      <p>There's a moment at the end of Gladiator. Maximus reaches out and touches that door, and it opens, and his family comes running to him. Every time I see it, I think about that day.</p>
+      <p>I don't know exactly how it all works. But I believe there's going to be a reunion. A restoration of what was meant to be. And I cannot wait to see everything that hindered people in this life made right. Made whole.</p>
+      <p>That's why Act Four matters. It's not a nice idea for later. It changes how you live now.</p>
+      <p>If this life is all there is, you'll grab. Comfort. Control. Whatever makes today feel better. Because what else is there?</p>
+      <p>But if you know how the story ends, you can hold on. You can take a hit. You can wait. You can lose something and know it's not lost forever.</p>
+      <p>I make all things new. That's what He said. Not a different world. This one. Put right. Your story, put right.</p>
+      <p>We're not there yet. We're still in Act Three. It's still a war, and some days are going to be really hard. That's not a sign the ending isn't coming. It's a sign you're still in the middle.</p>
+      <p class="beat">So here's what I want you to carry today. Two words. Not yet.</p>
+      <p>When something hurts this week, when you miss somebody, when it feels like it'll never change, say it. Not never. Not yet.</p>
+      <p>It's Saturday. Take a little longer with Dad today. Five minutes. Ask Him what He's going to make new. In the world. In you.</p>
+      <p>There's some good in this world, and it's worth fighting for. Not yet. But it's coming.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what are You going to make new?</em> Then listen, and write down what comes. Let yourself hope a little.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What are you looking forward to seeing made new?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 14 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 14 · Sunday</span><span class="run">Audio about 1:50</span></div>
+  <h2>Live Awake</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Two weeks home.</p>
+    <p>This week you got the map. Fellowship before the war. A villain who comes after you because you matter. A God who hit the beach to get you back. An ending worth waiting for.</p>
+    <p>And the red dot. You are here. Act Three. In the middle of the fight, with the ending still coming.</p>
+    <p>Most men sleepwalk through that story. They just try to get through the day. The invitation is to live awake. To see your Tuesday as part of something bigger. Your marriage. Your work. Your kids. The fight you're in.</p>
+    <p>Your notes from this week are right below. Read back through them. You might see more of the story than you thought.</p>
+    <p>Today, rest.</p>
+    <p>And if one question is sitting with you, let it sit: <em>If this is the story, why am I not living like a free man?</em></p>
+    <p>Tomorrow we start there.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Live awake.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Let me walk you through an ordinary day with the map in your hand.</p>
+      <p>You wake up tired. The phone's already buzzing. That's Act Three. The noise is part of the war. So Dad gets the first two minutes.</p>
+      <p>Your kid melts down before school. Or your wife says something that stings. The old you grabs for control, or blows up, or checks out. But you're not defective. You're disoriented. Find the red dot. Whip or well?</p>
+      <p>At work, something pushes back right when you were finally getting traction. Every story has a villain. It doesn't mean you're cursed. It means you matter.</p>
+      <p>You pass a guy at the gas station who looks like he's barely hanging on. He's in the story too. Somebody hit the beach for him.</p>
+      <p>And tonight, when you miss somebody, or something still isn't fixed, you can say it. Not yet.</p>
+      <p>Nothing about that day was spectacular. But you saw the story underneath it. That's living awake.</p>
+      <p>Most days, we sleepwalk. Get up, go to work, come home, scroll, sleep, repeat. And the story's still going on all around us. We just don't see it.</p>
+      <p class="beat">So here's what I want you to carry into this week. Live awake.</p>
+      <p>You don't have to figure out the whole plot. You just keep finding the red dot. Where am I? Who's telling this story? What's He doing right here?</p>
+      <p>And if this was a week you felt more asleep than awake, that's okay. Everybody drifts. You just wake back up. That's all.</p>
+      <p>Today, rest. Read back through your notes. Text one of the guys and ask him how his heart is.</p>
+      <p>And sit with that question I left you. If this is the story, why am I not living like a free man?</p>
+      <p>We'll start there tomorrow. Live awake.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what did You show me this week?</em> Then just be with Him.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>One line about your second week home.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Your week <span class="meta">In the app: his notes from Days 8 to 14, filled in</span></div>
+    <div class="mock"><p class="mockcap" style="margin:0">Same as Day 7: each note he wrote this week, with the day, the "Carry this" line, and the With Dad question. Only days he wrote show up.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes on Day 14</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Weekly email ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Sunday evening, after Day 14</div>
+  <h2>The Week 2 email</h2>
+  <p>Same template as Week 1. Only the seven day lines are new.</p>
+  <div class="email">
+    <div class="hdr"><b>From:</b> The Journey &lt;jpulley@manaliveexpedition.com&gt;<br><b>Subject:</b> Week two is in the books. You're caught up.</div>
+    <p>Mike,</p>
+    <p>Two weeks home. Maybe you did every day. Maybe you missed a few. Either way, you're not behind, and there's nothing to apologize for. Here's the heart of the week, in case any of it slipped by.</p>
+    <p><b>Day 8, You Are Here.</b> Life isn't random. You walked in twenty minutes late, and nobody gave you the map. This week you found the red dot. <span class="link">Reread Day 8 ›</span></p>
+    <p><b>Day 9, Control, Crazy, Check Out.</b> When life makes no sense, men grab, blow up, or disappear. That's not who you are. Not defective. Disoriented. <span class="link">Reread Day 9 ›</span></p>
+    <p><b>Day 10, Made for Fellowship.</b> The story doesn't start with a problem. It starts with fellowship, and you were made in that image. <span class="link">Reread Day 10 ›</span></p>
+    <p><b>Day 11, Born Into a War.</b> Every story has a villain because yours does. Hardship doesn't mean you're cursed. It means you matter. <span class="link">Reread Day 11 ›</span></p>
+    <p><b>Day 12, He Hit the Beach.</b> The oldest lie is that you can't trust God's heart. His answer wasn't an argument. It was an invasion. <span class="link">Reread Day 12 ›</span></p>
+    <p><b>Day 13, Not Yet.</b> The story ends with all things made new. We're not there yet. But it's coming, and it's worth fighting for. <span class="link">Reread Day 13 ›</span></p>
+    <p><b>Day 14, Live Awake.</b> You're in Act Three. You don't need the whole plot. Just keep finding the red dot. <span class="link">Reread Day 14 ›</span></p>
+    <p>Your notes from this week are waiting for you on Day 14. Only you can see them.</p>
+    <p><span class="btn">Read your week ›</span></p>
+    <p>That's the week. If you just read this, you're caught up. Tomorrow we start fresh.</p>
+    <p>Strength and Honor,<br>Pulley</p>
+  </div>
+</section>
+
+<!-- ═══ Decisions ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">For your review</div>
+  <h2>Decisions made in this draft</h2>
+  <ul class="tight">
+    <li><strong>One act per day.</strong> Days 10 to 13 walk Acts One to Four in order. Day 8 is the map, Day 9 the three survival moves, Day 14 the landing.</li>
+    <li><strong>Act Two is titled "Born Into a War,"</strong> not "The Battle," so it isn't confused with the Battle week later. Day 11 stays clarity, not fear: no agreements, no tactics.</li>
+    <li><strong>Control, crazy, check out</strong> are named as survival moves, never as a diagnosis. Masks and false self wait for the Poser week.</li>
+    <li><strong>Day 14 ends on the session's own bridge question:</strong> "If this is the story, why am I not living like a free man?" That's where Week 3 (Poser) picks up.</li>
+    <li><strong>With Dad grows</strong> to 3 minutes on weekdays (Week 1 was 2), 5 on Saturday.</li>
+    <li><strong>Movie moments</strong> are named in the readings (Magnolia's frogs, Mohicans, Omaha Beach, Gladiator, Sam and Frodo). No clips in the app.</li>
+  </ul>
+  <div class="notes"><div class="label">Overall notes on Week 2</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+</body>
+</html>
