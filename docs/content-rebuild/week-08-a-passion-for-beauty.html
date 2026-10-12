@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 8 · A Passion for Beauty</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 400; src: url('assets/oswald-400.woff2') format('woff2'); }
+  @font-face { font-family: 'Oswald'; font-weight: 600; src: url('assets/oswald-600.woff2') format('woff2'); }
+
+  :root {
+    --ox: #4a1f1f;
+    --ox-tint: #f5eeee;
+    --ink: #101418;
+    --ink-soft: #46515c;
+    --line: #c3cad1;
+    --label: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --body: Georgia, 'Times New Roman', serif;
+  }
+
+  @page {
+    size: Letter;
+    margin: 0.75in 0.9in 0.8in 0.9in;
+    @bottom-left {
+      content: "THE JOURNEY  ·  WEEK 8  ·  DRAFT FOR REVIEW";
+      font-family: 'Oswald', sans-serif; font-size: 8pt; letter-spacing: 0.12em; color: #46515c;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Oswald', sans-serif; font-size: 9pt; color: #4a1f1f;
+    }
+  }
+  @page cover { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 11.5pt; line-height: 1.6; }
+
+  .label, h1, h2, h3, .kicker {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ox);
+  }
+  p { margin: 0 0 0.7em; }
+
+  /* Cover */
+  .cover { page: cover; height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover img { width: 3.4in; margin: 0 auto 0.6in; }
+  .cover .kicker { font-size: 12pt; color: var(--ink-soft); margin-bottom: 0.1in; }
+  .cover h1 { font-size: 38pt; line-height: 1.05; margin: 0 0 0.15in; }
+  .cover .sub { font-family: var(--label); font-weight: 400; font-size: 14pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .cover .stamp { margin: 0.7in auto 0; display: inline-block; border: 1.5px solid var(--ox); padding: 0.08in 0.25in;
+    font-family: var(--label); font-weight: 600; letter-spacing: 0.16em; color: var(--ox); font-size: 10pt; }
+  .cover .date { margin-top: 0.15in; font-size: 10pt; color: var(--ink-soft); }
+
+  /* Overview */
+  .page { break-before: page; }
+  h2 { font-size: 20pt; margin: 0 0 0.12in; }
+  h3 { font-size: 10pt; margin: 0.2in 0 0.06in; }
+  .endstate { border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.14in 0.2in; font-size: 13pt; line-height: 1.5; font-style: italic; margin: 0.1in 0 0.2in; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 8.5pt; text-align: left; border-bottom: 1.5px solid var(--ox); padding: 0.05in 0.08in; }
+  td { border-bottom: 1px solid var(--line); padding: 0.045in 0.08in; vertical-align: top; }
+  td.handle { font-family: var(--label); font-weight: 600; letter-spacing: 0.04em; color: var(--ox); white-space: nowrap; }
+  .shape { display: grid; grid-template-columns: 1.15in 1fr; gap: 0.03in 0.15in; font-size: 10pt; line-height: 1.45; }
+  .shape .label { font-size: 9pt; padding-top: 0.02in; }
+
+  /* Day pages */
+  .day { break-before: page; }
+  .dayhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ox); padding-bottom: 0.06in; margin-bottom: 0.18in; }
+  .dayhead .kicker { font-size: 10pt; }
+  .dayhead .run { font-family: var(--label); font-size: 9pt; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+  .day h2 { font-size: 26pt; margin: 0 0 0.12in; line-height: 1.1; }
+
+  .section { margin-top: 0.22in; }
+  .section > .label { font-size: 9.5pt; display: flex; align-items: center; gap: 0.1in; margin-bottom: 0.08in; }
+  .section > .label::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .section > .label .meta { font-weight: 400; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+  .carry { break-inside: avoid; margin: 0.2in 0; border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.1in 0.2in; }
+  .carry .label { font-size: 8.5pt; }
+  .carry .handle { font-family: var(--label); font-weight: 600; font-size: 18pt; letter-spacing: 0.04em; color: var(--ox); line-height: 1.2; }
+
+  .audio { border-left: 2px solid var(--line); padding-left: 0.2in; }
+  .audio p { margin-bottom: 0.55em; }
+  .audio .beat { font-weight: bold; }
+
+  .box { break-inside: avoid; border: 1px solid var(--line); padding: 0.12in 0.18in; margin-top: 0.1in; }
+  .box p:last-child { margin-bottom: 0; }
+
+  .notes { break-inside: avoid; margin-top: 0.3in; }
+  .notes .label { font-size: 9pt; margin-bottom: 0.05in; }
+  .notes .ln { height: 0.36in; border-bottom: 1px solid var(--line); }
+
+  .mock { break-inside: avoid; border: 1px dashed var(--ox); padding: 0.12in 0.18in; }
+  .mockrow { border-bottom: 1px solid var(--line); padding: 0.06in 0 0.1in; margin-bottom: 0.06in; }
+  .mockday { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 9.5pt; }
+  .mockctx { font-size: 10pt; color: var(--ink-soft); }
+  .mockctx span { font-family: var(--label); text-transform: uppercase; letter-spacing: 0.08em; font-size: 8.5pt; }
+  .mocknote { margin-top: 0.05in; font-style: italic; }
+  .mockcap { font-size: 9.5pt; color: var(--ink-soft); margin: 0.06in 0 0; }
+
+  .email { border: 1px solid var(--line); padding: 0.2in 0.25in; font-family: system-ui, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+  .email .hdr { font-size: 9.5pt; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 0.08in; margin-bottom: 0.14in; }
+  .email .hdr b { color: var(--ink); }
+  .email .btn { display: inline-block; background: var(--ox); color: #fff; padding: 0.06in 0.16in; border-radius: 6px; font-weight: 600; font-size: 10pt; }
+  .email .link { color: var(--ox); font-weight: 600; white-space: nowrap; }
+
+  ul.tight { margin: 0.05in 0 0.1in; padding-left: 0.22in; }
+  ul.tight li { margin-bottom: 0.06in; }
+
+  .story-slot { break-inside: avoid; border: 1.5px dashed var(--ox); background: var(--ox-tint); padding: 0.1in 0.18in; margin: 0.1in 0 0.6em; }
+  .story-slot .label { font-size: 8.5pt; }
+  .story-slot p { font-style: italic; margin: 0.04in 0 0; }
+  .ask { break-inside: avoid; margin: 0.22in 0 0; }
+  .ask .label { font-size: 9pt; }
+  .ask p { margin: 0.04in 0 0.02in; }
+  .ask .ln { height: 0.34in; border-bottom: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<!-- ═══ Cover ═══ -->
+<section class="cover">
+  <img src="assets/manalive-logo.png" alt="ManAlive Expedition">
+  <div class="kicker">The Journey</div>
+  <h1>Week 8<br>A Passion for Beauty</h1>
+  <div class="sub">Bring, don't take</div>
+  <div><span class="stamp">DRAFT FOR REVIEW</span></div>
+  <div class="date">October 12, 2026</div>
+</section>
+
+<!-- ═══ Overview ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Week 8 overview</div>
+  <h2>What this week is for</h2>
+  <p>Week 8 walks a man back through A Passion for Beauty, so he stops asking a woman to answer what only Dad can answer, and starts bringing strength instead. Single, married, divorced, or widowed, it stays with his heart, not his relationship status. By Sunday he should be able to say:</p>
+  <div class="endstate">My desire for beauty is not the enemy. I can see where I've asked women to answer questions that belong between me and Dad, and where that has tangled my heart. There may be soul ties I need to break. My failures don't have to be the end of my story. Dad is where I get my deepest validation and strength. The woman in my life has a story that matters, and I don't have to fix her. Jesus is her rescuer, and I can partner with Him. I'm learning to bring strength instead of taking it. Fierce for her. Tender with her.</div>
+
+  <h3>How every day works</h3>
+  <div class="shape">
+    <div class="label">Reading</div><div>About 150 words. A quick reminder of what happened at camp and where it shows up at home.</div>
+    <div class="label">Audio</div><div>About 2 minutes from John. A handle to carry, one layer deeper, and a story.</div>
+    <div class="label">With Dad</div><div>5 minutes on weekdays this week. Saturday is 10. Sunday is 3.</div>
+    <div class="label">Share</div><div>Optional. Opens the alumni group with his thought ready to paste.</div>
+    <div class="label">Notes</div><div>Private. Day 56 shows him this week's notes in one place.</div>
+    <div class="label">Weekly email</div><div>Sunday evening. One heart line per day.</div>
+  </div>
+
+  <h3>The week at a glance</h3>
+  <table>
+    <tr><th>Day</th><th>Title</th><th>Carry this</th><th>With Dad</th></tr>
+    <tr><td>50 · Mon</td><td>Not the Problem</td><td class="handle">The pull isn't the problem</td><td>5 min</td></tr>
+    <tr><td>51 · Tue</td><td>Sweet Vermouth</td><td class="handle">What am I asking her for?</td><td>5 min</td></tr>
+    <tr><td>52 · Wed</td><td>The Report Card</td><td class="handle">She's not my report card</td><td>5 min</td></tr>
+    <tr><td>53 · Thu</td><td>Tangled</td><td class="handle">Give it back. Take it back.</td><td>5 min</td></tr>
+    <tr><td>54 · Fri</td><td>Not the End of the Story</td><td class="handle">Not the end of my story</td><td>5 min</td></tr>
+    <tr><td>55 · Sat</td><td>Her Story</td><td class="handle">Know her. Don't fix her.</td><td>10 min</td></tr>
+    <tr><td>56 · Sun</td><td>Fierce for Her</td><td class="handle">Fierce for her. Tender with her.</td><td>3 min</td></tr>
+  </table>
+</section>
+
+<!-- ═══ Your stories ═══ -->
+<section class="page"><div class="kicker" style="font-size:10pt">Before you record</div><h2>Your stories</h2>
+<p>Answer these however is easiest: talk, scribble, bullet points. Each one drops into that day's audio script.</p>
+<div class="ask"><div class="label">Day 53 · Tangled</div><p>When did soul ties stop sounding dumb to you? What happened the first time you actually prayed through one?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 54 · Not the End of the Story</div><p>After the affairs, what was the first thing that started turning you around? Where did Dad meet you?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 55 · Her Story</div><p>Tell about a time you learned something from a woman's past that explained a moment you'd taken personally. What did you do? (Her details can stay private. Just what happened in you.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 56 · Fierce for Her</div><p>Tell about a time you watched a man bring strength to a woman or a girl without taking anything from her. What did he do?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 50 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 50 · Monday</span><span class="run">Audio about 2:05</span></div>
+  <h2>Not the Problem</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember how the Beauty session started? Somebody stood up and read Song of Songs out loud. The whole passage.</p>
+    <p>And the room got loud. Laughing. A couple of catcalls. Some guys studying the floor.</p>
+    <p>That's in the Bible. On purpose.</p>
+    <p>Here's why it was read: the pull you feel toward a woman's beauty was God's idea. So is the pull toward a mountain, or a song that stops you cold. It isn't the broken part of you.</p>
+    <p>That room had single guys, married guys, divorced guys, widowers. And the session wasn't about any of those situations. It wasn't a marriage talk or a dating talk. It was about your heart.</p>
+    <p>Because the pull isn't the problem. The problem starts with what you ask her to give you.</p>
+    <p>This week we walk back through that session. Not to shame you. To get you free.</p>
+    <p>Wherever you are with women right now, this week is for you.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">The pull isn't the problem.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I'll take a risk on almost anything.</p>
+      <p>A lot of days a week, I go get beat up on a jiu-jitsu mat. It scares me some. I go anyway, because I want to get better.</p>
+      <p>One time God told me to move to Wisconsin. Honestly, at first I thought it was Satan. But I packed everything I owned in a truck and drove north, with no idea where I'd live or how I'd get paid.</p>
+      <p>Risk? I'm in.</p>
+      <p>But there's one area where I've had a real hard time risking. Women.</p>
+      <p>The pull toward them? Easy. But how to move toward a woman without needing something from her? For a long time I had no clue. I used to say women were crazy. They're not. They're made in the image of God. I was the one who didn't know what to do with my own heart.</p>
+      <p>Here's what took me years to see. The desire was never the problem. God put it there. He made you to be moved by beauty. A sunrise. A song. A woman.</p>
+      <p>The problem is what we ask it to do. Make me feel like a man. Tell me I'm okay. Make the ache go away. That's a weight no woman was built to carry.</p>
+      <p>So this week, we're not killing the desire. We're untangling it.</p>
+      <p>And if you're single, divorced, or you've lost your wife, stay with me. This is about your heart, not your relationship status.</p>
+      <p class="beat">So here's what I want you to carry today. The pull isn't the problem.</p>
+      <p>When you feel it today, don't panic and don't feed it. Thank God for how He made you. Then ask Him the honest question: what have I been asking it to give me?</p>
+      <p>Go talk to Dad about it.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Thank Him for the way He made you, pull and all. Then ask: <em>Father, what have I been asking beauty to give me?</em> Listen. If nothing comes, that's okay. You're just starting to look.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What's something beautiful that stopped you in your tracks lately?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 51 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 51 · Tuesday</span><span class="run">Audio about 1:55</span></div>
+  <h2>Sweet Vermouth</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember Groundhog Day? Phil is stuck living the same day over and over. So he works it.</p>
+    <p>Every day he learns one more thing about Rita. Her drink: sweet vermouth, rocks, with a twist. What she toasts to. What she studied in college. The next day he plays it all back to her like it's fate.</p>
+    <p>The room laughed. Then it got a little quiet.</p>
+    <p>Because Phil knows everything about her and doesn't know her at all. He's not asking, who is she? He's asking, how do I get her to tell me something about me?</p>
+    <p>Every man carries two questions. <em>Do I have what it takes? Am I the apple of my Father's eye?</em> Those were made to be answered by Dad.</p>
+    <p>When we take them to a woman, even a good one, she becomes the answer key. And she can't be.</p>
+    <p>Today, just notice. When you move toward her, what are you hoping she'll tell you?</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">What am I asking her for?</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>In high school I wasn't the athlete. I was the band geek. That's where I got my sense that I was okay: performing, looking good in front of people.</p>
+      <p>With girls, I knew my looks weren't going to carry me. So I figured some things out. Girls like to laugh. So I got funny.</p>
+      <p>Then I figured out something better. Most guys don't listen. So I listened. I'd let her talk, and I could feel myself go up a notch in her book.</p>
+      <p>Now, listening is good. Making somebody laugh is good. She felt seen. She had fun.</p>
+      <p>But years later I had to face it. That's where my manipulation started. I couldn't have said it then. But I wasn't listening to know her. I was listening to get something. I wanted her to tell me I was okay. I wanted my two questions answered.</p>
+      <p>That's Phil in Groundhog Day. All the right moves, for the wrong reason.</p>
+      <p>And even when it works, it doesn't work. A woman can't hand you your masculinity. She can love you. She can encourage you. But she can't answer the question at the bottom of your heart. That one belongs to your Father.</p>
+      <p class="beat">So here's what I want you to carry today. What am I asking her for?</p>
+      <p>Not to beat yourself up. Just to notice. When you crack the joke. When you check whether she's looking. When you need her to be happy with you. Ask it.</p>
+      <p>And then take the real question to the One who can actually answer it. Dad, do I have what it takes?</p>
+      <p>Ask Him. Then listen.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, where have I asked a woman to tell me who I am?</em> Then: <em>What do You say about me?</em> Listen. No beating yourself up. Just honest.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Phil knew her drink, her toast, and her college major. What's the difference between knowing about someone and knowing them?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 52 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 52 · Wednesday</span><span class="run">Audio about 2:05</span></div>
+  <h2>The Report Card</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>After Groundhog Day, the session turned the camera around. On us.</p>
+    <p>Because most of the ways a man looks to a woman to make him okay aren't sexual at all.</p>
+    <p>Needing her mood to be good before your day can be good. Dreading that she's disappointed in you. Dodging the hard conversation because her reaction feels like a verdict. Needing to be wanted. Getting flattened when she says no. Single guys know this one too: needing her to pick you.</p>
+    <p>There was a question at camp worth hanging on to: <em>Is she someone I'm free to love, or has she become the report card on whether I'm okay?</em></p>
+    <p>That's a lot to hand somebody. And it isn't fair to her.</p>
+    <p>Here's the turn. What you've been demanding from her belongs between you and Dad. Get it from Him. Then you're free to walk toward her with something to give, instead of something to get.</p>
+    <p>From needing to bringing.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">She's not my report card.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>About six months into dating my wife, we were sitting outside Walmart waiting on our groceries. And I said, honey, I need to tell you something. It's not going to sound very romantic at first. Stick with me.</p>
+      <p>I said, I don't need you.</p>
+      <p>You don't complete me. You're not my better half. I've got my work, my friends, my ministry. I'm a whole person.</p>
+      <p>But every day of my life, I choose you. Because I don't know anybody like you. And I think you'd rather be chosen than needed.</p>
+      <p>She didn't say much the rest of the day. Her first thought, she told me later, was not a nice one.</p>
+      <p>The next morning she brought it back up. She said she'd been with a man who needed her to make him feel good about himself, all the time, and she was worn out from carrying it. And she said, I love that you don't have to have me to be okay.</p>
+      <p>I could only say what I said because I'd started getting my answers somewhere else. From Dad. From good men.</p>
+      <p>That's the freedom. When she's not your report card, you can actually love her. You can stay in the hard conversation. You can let her have a bad day without it meaning you failed. You can bring something instead of needing something.</p>
+      <p class="beat">So here's what I want you to carry today. She's not my report card.</p>
+      <p>No woman in your life right now? It still counts. Maybe it's an ex who still grades you in your head. Maybe it's every woman who didn't pick you.</p>
+      <p>Take the report card back to Dad. Ask Him what He thinks of you. His answer is the one that sticks.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Dad, what would it look like for me to get my validation from You?</em> Then listen. Write down whatever He says about you, even if it sounds too good to be true.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Where are you learning to let Dad answer your questions instead of someone else?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 53 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 53 · Thursday</span><span class="run">Audio about 2:10</span></div>
+  <h2>Tangled</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Some of us are still carrying somebody.</p>
+    <p>An old girlfriend. An ex-wife. An affair. A hookup. A woman whose approval, or rejection, or memory still has a grip on you years later. You moved on. Your heart didn't quite.</p>
+    <p>At camp we called that a soul tie. It's ManAlive's word for a relationship, past or present, that still holds power over your heart it shouldn't have.</p>
+    <p>Not every past relationship leaves one. And loving or missing someone isn't one. A widower's grief is not a tangle. This is about the holds that keep pulling you where you don't want to go.</p>
+    <p>Remember the Covenant of Silence? An hour alone with the handout. There was a prayer on it: <em>Jesus, I break the soul tie between myself and ___.</em></p>
+    <p>Maybe you prayed it. Maybe you didn't get to it. Maybe no one came to mind. All okay.</p>
+    <p>That prayer is still yours. It's between you and Jesus. Nobody else needs a name.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Give it back. Take it back.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I'll be honest with you. The first time I heard somebody talk about soul ties, I thought, that's dumb.</p>
+      <p>I'd never seen one. It made no sense to me. It sounded like one more church thing people say.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>When did soul ties stop sounding dumb to you? What happened the first time you actually prayed through one?</p></div>
+      <p>Here's what I know now. When you hand your heart to someone, again and again, looking for something only Dad can give, it doesn't just leave when the relationship does. It hangs on. A memory you keep going back to. A comparison you can't shake. A voice that still tells you whether you're enough.</p>
+      <p>You don't want to carry that into the rest of your life. Into your marriage, your next relationship, or your quiet nights alone.</p>
+      <p>That's what the prayer is for. Listen to the end of it again. Anything I have taken from her, I return now. Anything she has taken from me, I take it back.</p>
+      <p>Those aren't magic words. It's you and Jesus putting things back where they belong.</p>
+      <p class="beat">So here's what I want you to carry today. Give it back. Take it back.</p>
+      <p>And hear me, this is not a beatdown. You don't need to make a list of everyone you've ever dated. Just ask Dad if there's anyone. If a name comes, take it to Jesus, alone, and pray the prayer. If no name comes, that's an answer too.</p>
+      <p>Give it back. Take it back. Then let Him have your whole heart.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, is there anyone my heart is still tangled with?</em> If a name comes, pray the prayer from camp, just you and Jesus: <em>Jesus, I break the soul tie between myself and ___. I bring the cross of Christ between us. Anything I have taken from her, I return now. Anything she has taken from me, I take it back.</em> If no name comes, that's okay. Thank Him and stay a minute.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>No names, no stories. If you did some business with God today, just post "Done," and pray for the next guy.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 54 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 54 · Friday</span><span class="run">Audio about 2:15</span></div>
+  <h2>Not the End of the Story</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember Kingdom of Heaven? Balian has already blown it. He slept with Sibylla, the king's sister, a married woman.</p>
+    <p>Then the offer comes again. Bigger this time. Marry her, command the army, have the kingdom. All he has to do is let a man be killed to get it.</p>
+    <p>And he says no.</p>
+    <p>That's why the scene is there. Not because Balian was a perfect knight. Because he wasn't, and he still turned.</p>
+    <p>Some men in that room had blown it badly. Porn. An affair. Using women. Disappearing when she needed him. Maybe that's you.</p>
+    <p>Hear this: shame has never set a man free. Repentance isn't beating yourself up or white-knuckling it. It's turning around and walking back toward Dad. Then small choices, one at a time, that give your strength back.</p>
+    <p>Your worst failure doesn't get to write the rest of your story.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Not the end of my story.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I want to talk to you about failure, because I know it well.</p>
+      <p>I had affairs when I was married to my first wife.</p>
+      <p>The first time, I was wrecked. Guilt everywhere. I swore I'd never do it again.</p>
+      <p>The second time was easier. Less guilt.</p>
+      <p>By the third time, I didn't care.</p>
+      <p>That's how it goes when you keep giving your strength away. A little more goes each time, and the next time costs less. I wasn't bringing strength to anybody. I was trying to take it. Because underneath it all, I didn't believe I was worth anything. I felt like a failure.</p>
+      <p>I'm not telling you that so you'll feel worse about whatever you've done. I'm telling you because that was not the end of my story.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>After the affairs, what was the first thing that started turning you around? Where did Dad meet you?</p></div>
+      <p>Look at Balian. He didn't stay where he fell. When the next offer came, he said no. And every no makes the next one easier. Strength comes back the way it left. One choice at a time.</p>
+      <p>Repentance isn't proving to God you'll be good from now on. It's turning around, and letting Him give back what you gave away.</p>
+      <p class="beat">So here's what I want you to carry today. Not the end of my story.</p>
+      <p>If you've failed here, and most of us have in some way, don't hide from Dad today. Ask Him where you gave your heart away, and what turning looks like now. He's not keeping score. He wants you back.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, where have I given my heart away, and what would repentance look like now?</em> Then listen. No beatdown. If He puts His finger on one thing, that's enough for today.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Who's a character, in a movie, a book, or real life, who blew it and came back?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 55 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 55 · Saturday</span><span class="run">Audio about 2:25</span></div>
+  <h2>Her Story</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>After Kingdom of Heaven, the session turned again. From what you want from her, to what's going on in her.</p>
+    <p>She has a story too. Things that happened to her. Messages she picked up along the way. Questions she carries: <em>Am I lovely? Do you delight in me?</em></p>
+    <p>You can't answer those all the way down. Only God can. But how you look at her, talk to her, show up or disappear, matters more than you know.</p>
+    <p>Knowing her story isn't so you can figure her out or tell her what's wrong with her. It's so you know the terrain. Sometimes the moment isn't about you. It's about something much older.</p>
+    <p>And she's not your project. Jesus is her rescuer, not you. You get to partner with Him as He comes for her heart.</p>
+    <p>That goes for a wife, a daughter, your mom, a sister, a friend. Every woman in your life is somebody's daughter. His.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Know her. Don't fix her.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Most of us have a move when a woman we love is hurting. We fix it.</p>
+      <p>She starts telling you what's wrong, and before she's done you've got three solutions. And if she doesn't take them, you get frustrated. Because somewhere in there, her being upset feels like you failing. We're back to the report card.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>Tell about a time you learned something from a woman's past that explained a moment you'd taken personally. What did you do? (Her details can stay private. Just what happened in you.)</p></div>
+      <p>That's what knowing her story does. It doesn't make you her therapist or give you the right to explain her to herself. It gives you your bearings. This moment might not be about you at all. And instead of fixing her, you can ask God, what does strength look like from me right now?</p>
+      <p>Sometimes it's listening longer than you want to. Sometimes it's just staying in the room. Sometimes it's praying for her when she doesn't know you are.</p>
+      <p>And here's the relief. You're not her rescuer. Jesus is. He was after her heart long before you showed up. You get to walk with Him while He does it.</p>
+      <p>No woman close to you right now? It still applies. Every woman you meet is His daughter, with a story you don't know.</p>
+      <p class="beat">So here's what I want you to carry today. Know her. Don't fix her.</p>
+      <p>It's Saturday. Take ten minutes with Dad and ask Him about her. What's her story? What does she need from me that isn't one more demand? How do You want me to love her here?</p>
+      <p>He knows her better than you ever will. Let Him show you.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">10 minutes</span></div>
+    <div class="box"><p>Pick one woman in your life: a wife, a daughter, your mom, a sister, a friend. Ask Him: <em>Father, what's her story? How do You want me to love her here?</em> Then listen, and write down what comes. Don't plan a fix. Let Him show you her.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Name a woman whose strength you admire, and why.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 56 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 56 · Sunday</span><span class="run">Audio about 1:55</span></div>
+  <h2>Fierce for Her</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Eight weeks home.</p>
+    <p>The last clip in the Beauty session was Les Misérables. Fantine has lost everything. Javert wants her locked up. She spits on Jean Valjean, and he stands between her and all of it anyway.</p>
+    <p>He needs nothing from her. He's fierce toward what's crushing her. Then he sits by her bed and tells her the truth: <em>In His eyes, you've never been anything but an innocent and beautiful woman.</em></p>
+    <p>Fierce for her. Tender with her. Never fierce toward her.</p>
+    <p>That's the whole week in one scene. From taking to offering. From needing to bringing. From fixing to knowing. From using to loving.</p>
+    <p>Your notes from this week are right below. Read back through them. Some of this week was heavy. Notice where Dad met you.</p>
+    <p>Today, rest.</p>
+    <p>And if one question is sitting with you, let it sit: <em>Who actually knows my heart? Not my roles. My heart.</em></p>
+    <p>Tomorrow we start there.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Fierce for her. Tender with her.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Every time I watch that Les Mis scene, I notice what Jean Valjean doesn't do.</p>
+      <p>He doesn't need anything from Fantine. She spits on him, and he stands up for her anyway. He's not working an angle. He's not scared of her. He's not trying to fix her. He shows up, takes on what's crushing her, and then he's gentle.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>Tell about a time you watched a man bring strength to a woman or a girl without taking anything from her. What did he do?</p></div>
+      <p>That's bringing strength. It's not control. It's not knowing what's best for her. It's having enough of your heart anchored in Dad that you can show up for her without needing her to make you okay.</p>
+      <p class="beat">So here's what I want you to carry into this week. Fierce for her. Tender with her.</p>
+      <p>Fierce toward whatever is coming against her. Tender with her heart. Never fierce toward her.</p>
+      <p>And if this week stirred up things you'd rather have left alone, that's okay. You don't have to be finished. You turned toward Dad. That's the whole thing.</p>
+      <p>Today, rest. Read back through your notes. And sit with that question I left you. Who actually knows my heart? Not my roles. My heart.</p>
+      <p>We'll start there tomorrow. Fierce for her. Tender with her.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what did You show me this week?</em> Then: <em>Where do You want me to bring strength?</em> Then just be with Him.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>One line about your eighth week home.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Your week <span class="meta">In the app: his notes from Days 50 to 56, filled in</span></div>
+    <div class="mock"><p class="mockcap" style="margin:0">Same as Day 7: each note he wrote this week, with the day, the "Carry this" line, and the With Dad question. Only days he wrote show up.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes on Day 56</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Weekly email ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Sunday evening, after Day 56</div>
+  <h2>The Week 8 email</h2>
+  <p>Same template as Week 1. Only the seven day lines are new.</p>
+  <div class="email">
+    <div class="hdr"><b>From:</b> The Journey &lt;jpulley@manaliveexpedition.com&gt;<br><b>Subject:</b> Week eight is in the books. You're caught up.</div>
+    <p>Mike,</p>
+    <p>Eight weeks home. Maybe you did every day. Maybe you missed a few. Either way, you're not behind, and there's nothing to apologize for. Here's the heart of the week, in case any of it slipped by.</p>
+    <p><b>Day 50, Not the Problem.</b> The pull toward beauty was God's idea. The trouble starts with what we ask it to give us. The pull isn't the problem. <span class="link">Reread Day 50 ›</span></p>
+    <p><b>Day 51, Sweet Vermouth.</b> Phil knew everything about Rita and didn't know her at all. Your two questions belong to Dad. What am I asking her for? <span class="link">Reread Day 51 ›</span></p>
+    <p><b>Day 52, The Report Card.</b> Needing her mood, her approval, or her yes to feel okay is too much to hand anyone. She's not my report card. <span class="link">Reread Day 52 ›</span></p>
+    <p><b>Day 53, Tangled.</b> Some of us are still carrying somebody. The prayer from camp is still yours, just you and Jesus. Give it back. Take it back. <span class="link">Reread Day 53 ›</span></p>
+    <p><b>Day 54, Not the End of the Story.</b> Balian blew it and still said no the next time. Shame never set a man free. Turning back to Dad does. <span class="link">Reread Day 54 ›</span></p>
+    <p><b>Day 55, Her Story.</b> She has a story and questions of her own. Jesus is her rescuer, and you get to partner with Him. Know her. Don't fix her. <span class="link">Reread Day 55 ›</span></p>
+    <p><b>Day 56, Fierce for Her.</b> Strength isn't control. It's showing up without needing her to make you okay. Fierce for her. Tender with her. <span class="link">Reread Day 56 ›</span></p>
+    <p>Your notes from this week are waiting for you on Day 56. Only you can see them.</p>
+    <p><span class="btn">Read your week ›</span></p>
+    <p>That's the week. If you just read this, you're caught up. Tomorrow we start fresh.</p>
+    <p>Strength and Honor,<br>Pulley</p>
+  </div>
+</section>
+
+<!-- ═══ Decisions ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">For your review</div>
+  <h2>Decisions made in this draft</h2>
+  <ul class="tight">
+    <li><strong>The week follows the session's own movement.</strong> Desire (50), Groundhog Day and the two questions (51), validation and the report card (52), soul ties (53), Kingdom of Heaven and repentance (54), her story and Jesus as rescuer (55), Les Mis and bringing strength as the Sunday landing (56). All three clips are named. Les Mis lands on Sunday so the week ends on bringing strength, not on "stop lusting."</li>
+    <li><strong>Stays in the lane.</strong> No marriage, dating, sex, or porn teaching, and no explaining women. Porn and affairs are named once each as examples, never the subject. Most days have one line for the single, divorced, or widowed man so nobody reads it as "not for me."</li>
+    <li><strong>Core questions are the spec's:</strong> "Do I have what it takes?" and "Am I the apple of my Father's eye?" Your 2024 talk used "Am I loved?" for the first. Her questions are "Am I lovely? Do you delight in me?" used as a lens, not a rule about every woman.</li>
+    <li><strong>Stories retold from your 2024 AR Beauty talk</strong> (please confirm each): <em>Day 50</em>, jiu-jitsu and moving to Wisconsin, then "the one area I have trouble risking in." <em>Day 51</em>, the band geek who learned to make girls laugh and to listen, and later saw that's where his manipulation started. This is not the trumpet-selling story from Day 4; it only mentions band. <em>Day 52</em>, the Walmart parking lot, "I don't need you, I choose you." I softened her first reaction and kept her ex to one vague line; confirm she's okay with that in an app. The line "I could only say that because I'd started getting my answers from Dad and good men" is my bridge, not from the talk. <em>Day 54</em>, the affairs on your first wife: first was hard, second easier, third you didn't care. Kept non-graphic.</li>
+    <li><strong>Day 54 overlaps the held POSER story.</strong> I did not use the POSER details (the hours of porn, sex addiction). But if the Poser week already tells the cheating, Day 54 may feel like a repeat. Your call: keep it here, or trim it to one line and let the story slot carry the day.</li>
+    <li><strong>Deliberately left out of your talk:</strong> your wife's trafficking story and the dissociation moment (her story, and an app keeps text forever; camp permission isn't app permission), the roommate and the sheriff's call, the "yes or no" line about objectifying, the porn statistics, and the "pipe" explanation of how soul ties work (the spec says no mechanics). Matt Hoyer leaving camp for his daughter's homecoming, and Ryan Stevens teaching your wife jiu-jitsu, are other men's stories; either would fit the Day 56 slot if they're good with it.</li>
+    <li><strong>Four story slots:</strong> Days 53, 54, 55, 56. The Day 55 slot asks for what changed in you, so her details can stay private. No jail story slot: it doesn't fit this session.</li>
+    <li><strong>Soul ties (Day 53)</strong> use ManAlive's definition and the Covenant prayer word for word. Not every relationship leaves one, nobody names anyone, and the share is just "Done." I added one line that a widower's grief is not a soul tie; confirm you're comfortable with that.</li>
+    <li><strong>The man who failed badly</strong> gets "shame never set a man free" (Day 54) and "you don't have to be finished" (Day 56). Repentance is turning toward Dad, then small choices, never trying harder.</li>
+    <li><strong>Jesus is her rescuer</strong> (Day 55). The man partners with Him. Knowing her story is for his bearings, not for diagnosing her.</li>
+    <li><strong>Day 56 bridge:</strong> "Who actually knows my heart? Not my roles. My heart." Points to Week 9, Band of Brothers. (The drafter first assumed Sonship; there is no Sonship week yet.)</li>
+    <li><strong>With Dad</strong> is 5 minutes on weekdays, 10 on Saturday, 3 on Sunday.</li>
+    <li><strong>Movie lines</strong> are short: Rita's drink, Fantine's "innocent and beautiful woman" line. The Song of Songs reading is named, not quoted.</li>
+  </ul>
+  <div class="notes"><div class="label">Overall notes on Week 8</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+</body>
+</html>

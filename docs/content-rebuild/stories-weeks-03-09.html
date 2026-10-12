@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Stories · Weeks 3 to 9</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 400; src: url('assets/oswald-400.woff2') format('woff2'); }
+  @font-face { font-family: 'Oswald'; font-weight: 600; src: url('assets/oswald-600.woff2') format('woff2'); }
+
+  :root {
+    --ox: #4a1f1f;
+    --ox-tint: #f5eeee;
+    --ink: #101418;
+    --ink-soft: #46515c;
+    --line: #c3cad1;
+    --label: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --body: Georgia, 'Times New Roman', serif;
+  }
+
+  @page {
+    size: Letter;
+    margin: 0.75in 0.9in 0.8in 0.9in;
+    @bottom-left {
+      content: "THE JOURNEY  ·  YOUR STORIES  ·  WEEKS 3 TO 9";
+      font-family: 'Oswald', sans-serif; font-size: 8pt; letter-spacing: 0.12em; color: #46515c;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Oswald', sans-serif; font-size: 9pt; color: #4a1f1f;
+    }
+  }
+  @page cover { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 11.5pt; line-height: 1.6; }
+
+  .label, h1, h2, h3, .kicker {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ox);
+  }
+  p { margin: 0 0 0.7em; }
+
+  /* Cover */
+  .cover { page: cover; height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover img { width: 3.4in; margin: 0 auto 0.6in; }
+  .cover .kicker { font-size: 12pt; color: var(--ink-soft); margin-bottom: 0.1in; }
+  .cover h1 { font-size: 38pt; line-height: 1.05; margin: 0 0 0.15in; }
+  .cover .sub { font-family: var(--label); font-weight: 400; font-size: 14pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .cover .stamp { margin: 0.7in auto 0; display: inline-block; border: 1.5px solid var(--ox); padding: 0.08in 0.25in;
+    font-family: var(--label); font-weight: 600; letter-spacing: 0.16em; color: var(--ox); font-size: 10pt; }
+  .cover .date { margin-top: 0.15in; font-size: 10pt; color: var(--ink-soft); }
+
+  /* Overview */
+  .page { break-before: page; }
+  h2 { font-size: 20pt; margin: 0 0 0.12in; }
+  h3 { font-size: 10pt; margin: 0.2in 0 0.06in; }
+  .endstate { border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.14in 0.2in; font-size: 13pt; line-height: 1.5; font-style: italic; margin: 0.1in 0 0.2in; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 8.5pt; text-align: left; border-bottom: 1.5px solid var(--ox); padding: 0.05in 0.08in; }
+  td { border-bottom: 1px solid var(--line); padding: 0.045in 0.08in; vertical-align: top; }
+  td.handle { font-family: var(--label); font-weight: 600; letter-spacing: 0.04em; color: var(--ox); white-space: nowrap; }
+  .shape { display: grid; grid-template-columns: 1.15in 1fr; gap: 0.03in 0.15in; font-size: 10pt; line-height: 1.45; }
+  .shape .label { font-size: 9pt; padding-top: 0.02in; }
+
+  /* Day pages */
+  .day { break-before: page; }
+  .dayhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ox); padding-bottom: 0.06in; margin-bottom: 0.18in; }
+  .dayhead .kicker { font-size: 10pt; }
+  .dayhead .run { font-family: var(--label); font-size: 9pt; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+  .day h2 { font-size: 26pt; margin: 0 0 0.12in; line-height: 1.1; }
+
+  .section { margin-top: 0.22in; }
+  .section > .label { font-size: 9.5pt; display: flex; align-items: center; gap: 0.1in; margin-bottom: 0.08in; }
+  .section > .label::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .section > .label .meta { font-weight: 400; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+  .carry { break-inside: avoid; margin: 0.2in 0; border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.1in 0.2in; }
+  .carry .label { font-size: 8.5pt; }
+  .carry .handle { font-family: var(--label); font-weight: 600; font-size: 18pt; letter-spacing: 0.04em; color: var(--ox); line-height: 1.2; }
+
+  .audio { border-left: 2px solid var(--line); padding-left: 0.2in; }
+  .audio p { margin-bottom: 0.55em; }
+  .audio .beat { font-weight: bold; }
+
+  .box { break-inside: avoid; border: 1px solid var(--line); padding: 0.12in 0.18in; margin-top: 0.1in; }
+  .box p:last-child { margin-bottom: 0; }
+
+  .notes { break-inside: avoid; margin-top: 0.3in; }
+  .notes .label { font-size: 9pt; margin-bottom: 0.05in; }
+  .notes .ln { height: 0.36in; border-bottom: 1px solid var(--line); }
+
+  .mock { break-inside: avoid; border: 1px dashed var(--ox); padding: 0.12in 0.18in; }
+  .mockrow { border-bottom: 1px solid var(--line); padding: 0.06in 0 0.1in; margin-bottom: 0.06in; }
+  .mockday { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 9.5pt; }
+  .mockctx { font-size: 10pt; color: var(--ink-soft); }
+  .mockctx span { font-family: var(--label); text-transform: uppercase; letter-spacing: 0.08em; font-size: 8.5pt; }
+  .mocknote { margin-top: 0.05in; font-style: italic; }
+  .mockcap { font-size: 9.5pt; color: var(--ink-soft); margin: 0.06in 0 0; }
+
+  .email { border: 1px solid var(--line); padding: 0.2in 0.25in; font-family: system-ui, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+  .email .hdr { font-size: 9.5pt; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 0.08in; margin-bottom: 0.14in; }
+  .email .hdr b { color: var(--ink); }
+  .email .btn { display: inline-block; background: var(--ox); color: #fff; padding: 0.06in 0.16in; border-radius: 6px; font-weight: 600; font-size: 10pt; }
+  .email .link { color: var(--ox); font-weight: 600; white-space: nowrap; }
+
+  ul.tight { margin: 0.05in 0 0.1in; padding-left: 0.22in; }
+  ul.tight li { margin-bottom: 0.06in; }
+
+  .story-slot { break-inside: avoid; border: 1.5px dashed var(--ox); background: var(--ox-tint); padding: 0.1in 0.18in; margin: 0.1in 0 0.6em; }
+  .story-slot .label { font-size: 8.5pt; }
+  .story-slot p { font-style: italic; margin: 0.04in 0 0; }
+  .ask { break-inside: avoid; margin: 0.22in 0 0; }
+  .ask .label { font-size: 9pt; }
+  .ask p { margin: 0.04in 0 0.02in; }
+  .ask .ln { height: 0.34in; border-bottom: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<section class="cover"><img src="assets/manalive-logo.png" alt="ManAlive Expedition"><div class="kicker">The Journey</div><h1>Your Stories<br>Weeks 3 to 9</h1><div class="sub">29 questions, one sitting</div><div><span class="stamp">ANSWER ANY WAY YOU LIKE</span></div><div class="date">Talk, scribble, or bullet points. Each answer drops into that day’s audio script.</div></section><section class="page"><div class="kicker" style="font-size:10pt">Week 3</div><h2>The Poser</h2><div class="ask"><div class="label">Day 15 · Free in Theory</div><p>When's the last time you felt truly free? Nothing to hide, nothing to prove. Where were you, and what were you doing?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 16 · Survival Mode</div><p>Think of a stretch when work or home had you under real pressure (not the divorce season; you told that one in Week 2). What did you do to get through the day?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 18 · The Version They See</div><p>What's something you do around people that isn't really you? When did you do it last, how did it go, and did it cost you or anybody close to you something?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 19 · The Fig Leaf</div><p>Finish this sentence the way you'd say it about yourself: "I'm just the kind of guy who..." When did that line come out of your mouth last, and what was going on?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 4</div><h2>The Wound</h2><div class="ask"><div class="label">Day 23 · Two Questions</div><p>When's a time one of your kids (or grandkids) yelled "Watch this!" and needed you to see him? What happened, and what did his face do when you looked?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 24 · His Eighth Birthday</div><p>Do you have a picture of yourself as a boy, around eight? What was that kid like? What did he love? What was he scared of?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 26 · Every Wound Carries a Message</div><p>When's a time as a grown man that "nothing I do is good enough" was running the show? At work, at home, with your kids. What happened?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 27 · It Mattered</div><p>Before you could see it as a wound, how did you talk about the way you grew up? What did you tell people, or yourself?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 5</div><h2>The New Name</h2><div class="ask"><div class="label">Day 30 · What Is True</div><p>Is there something you used to believe about yourself that you don't believe anymore? What was it, and what changed?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 31 · Still Need a Father</div><p>Make your own short list: where do you still need God to father you right now? Pick one. What's going on there that you honestly don't know how to handle?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 33 · The Yellow Passport</div><p>Was there a season you carried something like Valjean's yellow passport, a name or label that told people who you were before you opened your mouth? How did it run your life? (If the jail story fits here and you want to use it, this is the spot. If not, any name you lived under works. You don't have to say the word itself.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 35 · Not a Test</div><p>How has your own name or word from God come to you over the years? Fast or slow, clear or fuzzy, all at once or in pieces? Is there anything you're still asking Him?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 6</div><h2>A Battle to Fight</h2><div class="ask"><div class="label">Day 37 · Real Event, False Spin</div><p>When's a time something real happened, and right after it a voice in your head told you what it meant about you? What happened, and what exactly did that voice say?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 38 · Robert Sat Down</div><p>Which one gets you more, accusation or diminishment? What does it actually say in your head, word for word? When did it last show up?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 39 · Break It Out Loud</div><p>What's a lie you lived under for a long time? Keep what happened short. What did you start believing, what did it do to your life, and what happened when you finally stopped agreeing with it? What's that fight like now?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 41 · Beginning to Believe</div><p>When's a time you stopped running from something and turned around to face it? What happened? (Optional: if your jail story belongs anywhere, it may be here. Only if you want it.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 7</div><h2>An Adventure to Live</h2><div class="ask"><div class="label">Day 43 · What Did You Want?</div><p>When you were a kid, what did you want to be when you grew up? When did you stop saying it out loud?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 44 · Bigger Than a Weekend</div><p>Leave out hunting, fishing and trips. What's an adventure you've been in where your heart was on the line with another person? What did it ask of you?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 46 · The One Thing</div><p>What do you love bringing into a room, even when nobody asked you to? When did you first notice it in yourself?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 47 · On the Way</div><p>Was there a season you'd have called wasted time while you were in it? A job, a long wait, a stretch where nothing moved. What was it like? What do you see when you look back?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 48 · Walk With Him Into It</div><p>When's a time you stepped into something and couldn't control how it would end? What did it cost you to go? (The 2019 Texas Adventure transcript has a Pulley telling about leaving roofing and driving a U-Haul north to Wisconsin. If that's yours, it fits here.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 8</div><h2>A Passion for Beauty</h2><div class="ask"><div class="label">Day 53 · Tangled</div><p>When did soul ties stop sounding dumb to you? What happened the first time you actually prayed through one?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 54 · Not the End of the Story</div><p>After the affairs, what was the first thing that started turning you around? Where did Dad meet you?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 55 · Her Story</div><p>Tell about a time you learned something from a woman's past that explained a moment you'd taken personally. What did you do? (Her details can stay private. Just what happened in you.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 56 · Fierce for Her</div><p>Tell about a time you watched a man bring strength to a woman or a girl without taking anything from her. What did he do?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+<section class="page"><div class="kicker" style="font-size:10pt">Week 9</div><h2>Band of Brothers</h2><div class="ask"><div class="label">Day 57 · Where's My Buffalo?</div><p>When's a time you carried something heavy by yourself that you could have handed to somebody? What was it, and how long did you carry it?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 59 · Brother Wounds</div><p>Was there a man in your life, a brother, a friend, a teammate, who let you down when it counted? What happened, and what did you tell yourself afterward?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 60 · Start With One</div><p>When you moved to Wisconsin and had to start over, how did you and Bill actually get going? Who reached out first, and what did those first few times look like?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="ask"><div class="label">Day 63 · Who Has Your Back?</div><p>Tell about a time you and one of your brothers hurt each other or let each other down. What happened, and how did you find your way back?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></section>
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 7 · An Adventure to Live</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 400; src: url('assets/oswald-400.woff2') format('woff2'); }
+  @font-face { font-family: 'Oswald'; font-weight: 600; src: url('assets/oswald-600.woff2') format('woff2'); }
+
+  :root {
+    --ox: #4a1f1f;
+    --ox-tint: #f5eeee;
+    --ink: #101418;
+    --ink-soft: #46515c;
+    --line: #c3cad1;
+    --label: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --body: Georgia, 'Times New Roman', serif;
+  }
+
+  @page {
+    size: Letter;
+    margin: 0.75in 0.9in 0.8in 0.9in;
+    @bottom-left {
+      content: "THE JOURNEY  ·  WEEK 7  ·  DRAFT FOR REVIEW";
+      font-family: 'Oswald', sans-serif; font-size: 8pt; letter-spacing: 0.12em; color: #46515c;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Oswald', sans-serif; font-size: 9pt; color: #4a1f1f;
+    }
+  }
+  @page cover { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 11.5pt; line-height: 1.6; }
+
+  .label, h1, h2, h3, .kicker {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ox);
+  }
+  p { margin: 0 0 0.7em; }
+
+  /* Cover */
+  .cover { page: cover; height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover img { width: 3.4in; margin: 0 auto 0.6in; }
+  .cover .kicker { font-size: 12pt; color: var(--ink-soft); margin-bottom: 0.1in; }
+  .cover h1 { font-size: 38pt; line-height: 1.05; margin: 0 0 0.15in; }
+  .cover .sub { font-family: var(--label); font-weight: 400; font-size: 14pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .cover .stamp { margin: 0.7in auto 0; display: inline-block; border: 1.5px solid var(--ox); padding: 0.08in 0.25in;
+    font-family: var(--label); font-weight: 600; letter-spacing: 0.16em; color: var(--ox); font-size: 10pt; }
+  .cover .date { margin-top: 0.15in; font-size: 10pt; color: var(--ink-soft); }
+
+  /* Overview */
+  .page { break-before: page; }
+  h2 { font-size: 20pt; margin: 0 0 0.12in; }
+  h3 { font-size: 10pt; margin: 0.2in 0 0.06in; }
+  .endstate { border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.14in 0.2in; font-size: 13pt; line-height: 1.5; font-style: italic; margin: 0.1in 0 0.2in; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 8.5pt; text-align: left; border-bottom: 1.5px solid var(--ox); padding: 0.05in 0.08in; }
+  td { border-bottom: 1px solid var(--line); padding: 0.045in 0.08in; vertical-align: top; }
+  td.handle { font-family: var(--label); font-weight: 600; letter-spacing: 0.04em; color: var(--ox); white-space: nowrap; }
+  .shape { display: grid; grid-template-columns: 1.15in 1fr; gap: 0.03in 0.15in; font-size: 10pt; line-height: 1.45; }
+  .shape .label { font-size: 9pt; padding-top: 0.02in; }
+
+  /* Day pages */
+  .day { break-before: page; }
+  .dayhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ox); padding-bottom: 0.06in; margin-bottom: 0.18in; }
+  .dayhead .kicker { font-size: 10pt; }
+  .dayhead .run { font-family: var(--label); font-size: 9pt; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+  .day h2 { font-size: 26pt; margin: 0 0 0.12in; line-height: 1.1; }
+
+  .section { margin-top: 0.22in; }
+  .section > .label { font-size: 9.5pt; display: flex; align-items: center; gap: 0.1in; margin-bottom: 0.08in; }
+  .section > .label::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .section > .label .meta { font-weight: 400; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+  .carry { break-inside: avoid; margin: 0.2in 0; border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.1in 0.2in; }
+  .carry .label { font-size: 8.5pt; }
+  .carry .handle { font-family: var(--label); font-weight: 600; font-size: 18pt; letter-spacing: 0.04em; color: var(--ox); line-height: 1.2; }
+
+  .audio { border-left: 2px solid var(--line); padding-left: 0.2in; }
+  .audio p { margin-bottom: 0.55em; }
+  .audio .beat { font-weight: bold; }
+
+  .box { break-inside: avoid; border: 1px solid var(--line); padding: 0.12in 0.18in; margin-top: 0.1in; }
+  .box p:last-child { margin-bottom: 0; }
+
+  .notes { break-inside: avoid; margin-top: 0.3in; }
+  .notes .label { font-size: 9pt; margin-bottom: 0.05in; }
+  .notes .ln { height: 0.36in; border-bottom: 1px solid var(--line); }
+
+  .mock { break-inside: avoid; border: 1px dashed var(--ox); padding: 0.12in 0.18in; }
+  .mockrow { border-bottom: 1px solid var(--line); padding: 0.06in 0 0.1in; margin-bottom: 0.06in; }
+  .mockday { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 9.5pt; }
+  .mockctx { font-size: 10pt; color: var(--ink-soft); }
+  .mockctx span { font-family: var(--label); text-transform: uppercase; letter-spacing: 0.08em; font-size: 8.5pt; }
+  .mocknote { margin-top: 0.05in; font-style: italic; }
+  .mockcap { font-size: 9.5pt; color: var(--ink-soft); margin: 0.06in 0 0; }
+
+  .email { border: 1px solid var(--line); padding: 0.2in 0.25in; font-family: system-ui, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+  .email .hdr { font-size: 9.5pt; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 0.08in; margin-bottom: 0.14in; }
+  .email .hdr b { color: var(--ink); }
+  .email .btn { display: inline-block; background: var(--ox); color: #fff; padding: 0.06in 0.16in; border-radius: 6px; font-weight: 600; font-size: 10pt; }
+  .email .link { color: var(--ox); font-weight: 600; white-space: nowrap; }
+
+  ul.tight { margin: 0.05in 0 0.1in; padding-left: 0.22in; }
+  ul.tight li { margin-bottom: 0.06in; }
+
+  .story-slot { break-inside: avoid; border: 1.5px dashed var(--ox); background: var(--ox-tint); padding: 0.1in 0.18in; margin: 0.1in 0 0.6em; }
+  .story-slot .label { font-size: 8.5pt; }
+  .story-slot p { font-style: italic; margin: 0.04in 0 0; }
+  .ask { break-inside: avoid; margin: 0.22in 0 0; }
+  .ask .label { font-size: 9pt; }
+  .ask p { margin: 0.04in 0 0.02in; }
+  .ask .ln { height: 0.34in; border-bottom: 1px solid var(--line); }
+</style>
+</head>
+<body>
+
+<!-- ═══ Cover ═══ -->
+<section class="cover">
+  <img src="assets/manalive-logo.png" alt="ManAlive Expedition">
+  <div class="kicker">The Journey</div>
+  <h1>Week 7<br>An Adventure to Live</h1>
+  <div class="sub">Your story isn't finished</div>
+  <div><span class="stamp">DRAFT FOR REVIEW</span></div>
+  <div class="date">October 12, 2026</div>
+</section>
+
+<!-- ═══ Overview ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Week 7 overview</div>
+  <h2>What this week is for</h2>
+  <p>Week 7 walks a man back through Saturday's last session before lunch, An Adventure to Live. Not a bucket list and not a career change: the start of finding his place in the Larger Story. One clue at a time, with the Father. By Sunday he should be able to say:</p>
+  <div class="endstate">I have a place in the Larger Story. My life matters, and God is willing to guide me. My story, my desires and my journey are clues. Following Him will mean some risk. Adventure is walking with God into the life He's giving me. And I'm starting to ask: Father, what are You inviting me into?</div>
+
+  <h3>How every day works</h3>
+  <div class="shape">
+    <div class="label">Reading</div><div>About 150 words. A quick reminder of what happened at camp and where it shows up at home.</div>
+    <div class="label">Audio</div><div>About 2 minutes from John. A handle to carry, one layer deeper, and a story.</div>
+    <div class="label">With Dad</div><div>5 minutes on weekdays this week. Saturday is 10. Sunday is 3.</div>
+    <div class="label">Share</div><div>Optional. Opens the alumni group with his thought ready to paste.</div>
+    <div class="label">Notes</div><div>Private. Day 49 shows him this week's notes in one place.</div>
+    <div class="label">Weekly email</div><div>Sunday evening. One heart line per day.</div>
+  </div>
+
+  <h3>The week at a glance</h3>
+  <table>
+    <tr><th>Day</th><th>Title</th><th>Carry this</th><th>With Dad</th></tr>
+    <tr><td>43 · Mon</td><td>What Did You Want?</td><td class="handle">My story isn't finished</td><td>5 min</td></tr>
+    <tr><td>44 · Tue</td><td>Bigger Than a Weekend</td><td class="handle">I have a part in this</td><td>5 min</td></tr>
+    <tr><td>45 · Wed</td><td>Other Forces at Work</td><td class="handle">There's more going on</td><td>5 min</td></tr>
+    <tr><td>46 · Thu</td><td>The One Thing</td><td class="handle">Desire is a clue</td><td>5 min</td></tr>
+    <tr><td>47 · Fri</td><td>On the Way</td><td class="handle">Training isn't failure</td><td>5 min</td></tr>
+    <tr><td>48 · Sat</td><td>Walk With Him Into It</td><td class="handle">Walk with Him into it</td><td>10 min</td></tr>
+    <tr><td>49 · Sun</td><td>Already Underway</td><td class="handle">What are You inviting me into?</td><td>3 min</td></tr>
+  </table>
+</section>
+
+<!-- ═══ Your stories ═══ -->
+<section class="page"><div class="kicker" style="font-size:10pt">Before you record</div><h2>Your stories</h2>
+  <p>Answer these however is easiest: talk, scribble, bullet points. Each one drops into that day's audio script.</p>
+  <div class="ask"><div class="label">Day 43 · What Did You Want?</div><p>When you were a kid, what did you want to be when you grew up? When did you stop saying it out loud?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  <div class="ask"><div class="label">Day 44 · Bigger Than a Weekend</div><p>Leave out hunting, fishing and trips. What's an adventure you've been in where your heart was on the line with another person? What did it ask of you?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  <div class="ask"><div class="label">Day 46 · The One Thing</div><p>What do you love bringing into a room, even when nobody asked you to? When did you first notice it in yourself?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  <div class="ask"><div class="label">Day 47 · On the Way</div><p>Was there a season you'd have called wasted time while you were in it? A job, a long wait, a stretch where nothing moved. What was it like? What do you see when you look back?</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+  <div class="ask"><div class="label">Day 48 · Walk With Him Into It</div><p>When's a time you stepped into something and couldn't control how it would end? What did it cost you to go? (The 2019 Texas Adventure transcript has a Pulley telling about leaving roofing and driving a U-Haul north to Wisconsin. If that's yours, it fits here.)</p><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 43 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 43 · Monday</span><span class="run">Audio about 2:00</span></div>
+  <h2>What Did You Want?</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember the kids in that commercial? Saturday, right before lunch. Little kids looking straight into the camera. <em>When I grow up, I want to file all day.</em> <em>I want to claw my way up to middle management.</em></p>
+    <p>The room laughed. Then it got quiet.</p>
+    <p>It's funny because kids said it. It's not funny because so many men live there.</p>
+    <p>Nobody was knocking your job. Work pays the bills. Responsibility is a good thing. But somewhere along the way a lot of us learned to survive, to meet expectations, to take care of what had to be done. And life got smaller. Not all at once. A little at a time.</p>
+    <p>The battle sessions that morning ended on this: the battle isn't the whole story. There's still an adventure to live.</p>
+    <p>So this week starts with one question from that room. <em>What did you want before you learned to settle?</em></p>
+    <p>If you can't remember, that's okay. Your story isn't finished.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">My story isn't finished.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I want to ask you something a kid could answer in two seconds. What do you want to be when you grow up?</p>
+      <p>Kids don't hesitate. Here's mine.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>When you were a kid, what did you want to be when you grew up? When did you stop saying it out loud?</p></div>
+      <p>I'm not telling you that so you'll go chase a childhood dream. Most of what we wanted at eight wasn't a career plan. It was a clue. Something in us wanted to matter. To do something only we could do.</p>
+      <p>Then life happened. Bills. Kids. A boss. You learned to be responsible. You learned to survive. Nobody ever told you to stop wanting things. It just got quiet.</p>
+      <p>That's not failure. And the story isn't over.</p>
+      <p>This week isn't about blowing up your life. Nobody needs to quit his job by Friday. It's about starting to listen again. To your heart, and to the Father who wrote it.</p>
+      <p class="beat">So here's what I want you to carry today. My story isn't finished.</p>
+      <p>When you catch yourself thinking, this is all there is, say it. My story isn't finished.</p>
+      <p>Then ask Dad what you wanted before you learned to settle. He remembers, even if you don't.</p>
+      <p>Your story isn't finished. Go ask Him about it.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what did I want before I learned to settle?</em> Then be quiet for a while. If nothing comes, that's okay. Ask again tomorrow. He remembers.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>When you were a kid, what did you want to be?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 44 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 44 · Tuesday</span><span class="run">Audio about 2:05</span></div>
+  <h2>Bigger Than a Weekend</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Say the word adventure in a room full of men and half of them see a deer stand. A river. A motorcycle.</p>
+    <p>Those are good. Hunting, fishing, hiking, a road trip with your buddies. At camp they got a name: casual adventures. They wake something up in you. Nobody was knocking them.</p>
+    <p>But adventure is bigger than a weekend.</p>
+    <p>There are crucial adventures, where your heart is on the line with another person. Going after your kid's heart. Having the conversation you've been avoiding. Going after a friend who's slipping.</p>
+    <p>And there are critical ones. The kind where you can't control how it ends, and God has to come through. Those look different for every man.</p>
+    <p>Here's the point under all three. In Week 2 you found the red dot. You are here. This week goes one step further. You're not just in the story. You have a part in it.</p>
+    <p>Your life matters. And the One telling the story is willing to show you.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">I have a part in this.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Can I tell you what most men do with the word adventure? We put it on a calendar.</p>
+      <p>Elk season. The fishing trip. I love that stuff. But if that's all adventure is, the rest of your life is just what happens between trips. That's a pretty small story.</p>
+      <p>Let me tell you about an adventure I never put on a calendar.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>Leave out hunting, fishing and trips. What's an adventure you've been in where your heart was on the line with another person? What did it ask of you?</p></div>
+      <p>Nobody took pictures of that. But my heart was on the line. That's what made it an adventure.</p>
+      <p>You don't have a place in the Larger Story only on vacation. You have one on a Tuesday. In your kitchen. At work. In the conversation you've been putting off.</p>
+      <p>You might not know what that place is yet. That's okay. Nobody walked out of camp with his life figured out. The point is you have one. Your life matters. And the God telling this story isn't hiding your part from you.</p>
+      <p class="beat">So here's what I want you to carry today. I have a part in this.</p>
+      <p>When today feels like another day between weekends, say it. I have a part in this.</p>
+      <p>Then ask Dad. Not, what's my whole calling? Just, what's my part today?</p>
+      <p>You have a part in this. Go ask Him about it.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, do I really have a part in this?</em> Then: <em>What's my part today?</em> Listen. You don't need the whole answer. Today's is enough.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What's an adventure you've been on that never made it onto a calendar?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 45 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 45 · Wednesday</span><span class="run">Audio about 1:55</span></div>
+  <h2>Other Forces at Work</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember Frodo in the dark of the mines? Lost. Worn out. Done.</p>
+    <p>He says what every man says at some point: <em>I wish none of this had happened.</em></p>
+    <p>Gandalf doesn't argue with him. He reminds him of the story. <em>There are other forces at work in this world, Frodo.</em> Bilbo was meant to find the Ring. Which means Frodo was meant to have it.</p>
+    <p>Watch Frodo's face. He doesn't get answers. He gets his bearings back. And that's when hope comes back.</p>
+    <p>That's the first clue to your place: story. What story are you actually living in?</p>
+    <p>A lot of men live in a story they made up. This is how my life is supposed to go. Some live in a story somebody handed them. Be what your dad was. Don't rock the boat.</p>
+    <p>And then there's the Larger Story God is actually writing. It has more going on in it than you can see from where you're standing.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">There's more going on.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Want to know what story you're living in? Listen to what you complain about.</p>
+      <p>There's an old line about soldiers. If a man's complaining the beer is warm, he's nowhere near the front. If he's complaining he's low on ammo, he's in the fight.</p>
+      <p>So try it. What did you complain about this week? Out loud, or just in your head?</p>
+      <p>Traffic. The boss. The kid who won't listen. Nobody noticed what you did. Nobody appreciates what you carry.</p>
+      <p>Here's what happens to a man living in a story he made up. All of life becomes about making his story work. And when life won't cooperate, he gets angry. Or tired. Or he quits trying.</p>
+      <p>That's Frodo in the mines. I wish none of this had happened. He's not wrong that it's hard. He's just lost the plot.</p>
+      <p>And Gandalf doesn't fix it. He doesn't explain everything. He just says, there's more going on here than you can see.</p>
+      <p>That's what I want you to hear today. You can't read your life right if you forget the Larger Story. The thing that went wrong this week might not be what you think it is. The door that closed. The plan that fell apart. God may be up to something you can't see yet.</p>
+      <p class="beat">So here's what I want you to carry today. There's more going on.</p>
+      <p>When something frustrates you today, before you write the ending yourself, stop and say it. There's more going on.</p>
+      <p>Then ask Dad the question Frodo needed. Father, what's really going on here? What am I not seeing?</p>
+      <p>There's more going on. Ask Him.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Pick one thing that frustrated you this week. Ask Him: <em>Father, what's really going on in my story that I haven't understood?</em> Then listen. You might not get answers. You might get your bearings.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Frodo or Gandalf: which one have you been this week?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 46 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 46 · Thursday</span><span class="run">Audio about 2:05</span></div>
+  <h2>The One Thing</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember Curly? The old cowboy in City Slickers holds up one finger. The secret of life. <em>One thing. Just one thing.</em></p>
+    <p>And Mitch asks what every man in the room wanted to ask. What's the one thing?</p>
+    <p><em>That's what you have to find out.</em></p>
+    <p>Nobody at camp said there's one secret job out there and you'd better find it. Your calling goes deeper than your job, your skills or your personality test. The one thing is a question, not a formula.</p>
+    <p>That's the second clue: desire. What makes you come alive? What do you keep wanting to bring into the world?</p>
+    <p>Here's the catch. Not every desire comes from the same place. Some come from the flesh. Some from old wounds. Some from the enemy. And some from the deep, good heart God gave you.</p>
+    <p>So don't bury desire. Don't worship it either. Bring it to Dad.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Desire is a clue.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Calling usually gets talked about wrong. What are you good at? What does the church need? What did your personality test say? And you end up volunteering for whatever has a sign-up sheet.</p>
+      <p>That's not where your part is written. It's written in what you want. So here's a better question. What do you love bringing into a room, even when nobody asked? Here's mine.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>What do you love bringing into a room, even when nobody asked you to? When did you first notice it in yourself?</p></div>
+      <p>That's a desire. Not a job title. Something I keep bringing, no matter where I am.</p>
+      <p>Now hear me. Not every want is a clue. Some of it is the flesh talking. Some of it is an old wound looking for relief. Some of it the enemy planted. You've chased a few of those.</p>
+      <p>So a lot of good men just shut desire down. But a man with no desire isn't safe. He just goes wherever the strongest pull takes him.</p>
+      <p>Don't bury it. Don't worship it. Bring it to Dad.</p>
+      <p>Back in Week 1, I asked, what's your trumpet? Here's the next step. Take whatever came up to Him and ask what's underneath it.</p>
+      <p class="beat">So here's what I want you to carry today. Desire is a clue.</p>
+      <p>Not the answer. A clue. Follow it to Dad, and let Him tell you what it means.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what makes me come alive?</em> Then pick one desire that keeps coming back and ask: <em>What's underneath this one?</em> Listen. Don't rush to a conclusion.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What do you love bringing into a room, even when nobody asked?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 47 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 47 · Friday</span><span class="run">Audio about 2:05</span></div>
+  <h2>On the Way</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>The third clue is journey.</p>
+    <p>You've probably met a man whose life you'd trade for. The way he talks. The way he leads. Something in you says, I want that. Why don't I have it yet?</p>
+    <p>Here's what you don't see. The road he took to get there. The failures. The training. The years nobody clapped.</p>
+    <p>At camp, the question was simple: <em>What is God doing in me right now?</em></p>
+    <p>Maybe He's building character. Maybe He's bringing clarity. Maybe He's teaching you to wait. Maybe He's healing something. Maybe He's giving you rest.</p>
+    <p>A man can know something about his desire and still not be ready for the whole assignment. That's not a problem. That's the journey. Nobody skips it.</p>
+    <p>So if you're in a season that feels slow, or stuck, or nothing like what you wanted, hear this. Training isn't failure.</p>
+    <p>You're not late. You're on the way.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Training isn't failure.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Most of us want the destination without the road.</p>
+      <p>We want to be the man who's ready. The guy who knows what his life is about. And we want it today.</p>
+      <p>Let me tell you about a season I'd have called wasted.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>Was there a season you'd have called wasted time while you were in it? A job, a long wait, a stretch where nothing moved. What was it like? What do you see when you look back?</p></div>
+      <p>I couldn't see it while I was in it. I just thought I was stuck.</p>
+      <p>God isn't in a hurry, and He isn't wasting anything. Sometimes He says go. Sometimes He says wait. Stay. Learn. Rest. Train. None of those mean you missed it.</p>
+      <p>Would you hand a broadsword to a man who's never held one? He'd take out the guys next to him. The weight of your life is like that. God trains you to carry it before He hands you all of it. That's not Him being hard. That's Him being kind.</p>
+      <p class="beat">So here's what I want you to carry today. Training isn't failure.</p>
+      <p>When you think, I should be further along by now, stop. Say it. Training isn't failure.</p>
+      <p>Then ask Dad the question from camp. What are You doing in me right now? You don't need the whole map. Just ask what He's working on.</p>
+      <p>Training isn't failure. You're on the way.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what are You doing in me right now?</em> Clarity, character, rest, training, something else? Listen. If it feels like nothing, ask Him what He sees that you don't.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What might God be training you in right now?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 48 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 48 · Saturday</span><span class="run">Audio about 2:15</span></div>
+  <h2>Walk With Him Into It</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Near the end of the session, one more man stood up and told his story. Probably nothing like the speaker's. That was on purpose.</p>
+    <p>Some adventures look like a moving truck. Some look like staying when you want to run. Caring for a parent. Being the dad your dad wasn't. Taking one hard next step.</p>
+    <p>Every real adventure has risk in it. Something you can't control. That's what makes it an adventure.</p>
+    <p>But risk isn't recklessness. It's not quitting your job to feel alive. It's not walking out on the people counting on you. Dramatic doesn't mean holy.</p>
+    <p>Here's the center of the whole session: adventure is walking with God into the life He's actually giving you. Not God hands you a mission and you go run it alone. You walk with Him. You listen. You take the next step together.</p>
+    <p>So the adventure might be going. It might be staying. It might be waiting.</p>
+    <p>If you're walking with Him, it's already started.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Walk with Him into it.</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>There's an old line I love. A ship in harbor is safe. But that's not what ships are for.</p>
+      <p>Let me tell you about a time I left the harbor.</p>
+      <div class="story-slot"><div class="label">Your story</div><p>When's a time you stepped into something and couldn't control how it would end? What did it cost you to go?</p></div>
+      <p>I'm not telling you that so you'll go do something dramatic. Dramatic isn't holier. Sometimes the brave thing is staying in the hard place when everything in you wants to run. That's risk too.</p>
+      <p>And risk isn't recklessness. It's not blowing up your life to feel something, or walking out on the people counting on you. It's stepping into something you can't control, because God is in it.</p>
+      <p>That's the center of all of it. Adventure isn't God handing you a mission and you running off to do it alone. It's walking with Him. One step, then the next. If you're walking with Him, you're already in it.</p>
+      <p class="beat">So here's what I want you to carry today. Walk with Him into it.</p>
+      <p>The conversation. The decision. The thing you've been putting off. Don't do it alone, and don't do it to prove something.</p>
+      <p>It's Saturday. Take ten minutes with Dad. Ask Him the question this whole week has been leading to. Father, what are You inviting me into?</p>
+      <p>Then be quiet and let Him answer. If nothing comes today, that's okay. He's not in a hurry, and He's not going anywhere.</p>
+      <p>Walk with Him into it.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">10 minutes</span></div>
+    <div class="box"><p>Ten minutes today. Ask Him: <em>Father, what are You inviting me into?</em> Then wait. Write down whatever comes, even if it's small or strange. If nothing comes, sit with Him anyway. That's walking with Him too.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Going, staying, or waiting: which season are you in right now?</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 49 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 49 · Sunday</span><span class="run">Audio about 1:50</span></div>
+  <h2>Already Underway</h2>
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Seven weeks home.</p>
+    <p>This week you went back to Saturday, right before lunch. Kids who wanted to file all day. Curly's one finger. Frodo in the dark, and Gandalf reminding him there was more going on.</p>
+    <p>Three clues. Story: what's really going on. Desire: what makes you come alive. Journey: what God is doing in you right now.</p>
+    <p>And at the center, not a plan. A walk. Adventure is walking with God into the life He's giving you.</p>
+    <p>You didn't have to solve it before lunch at camp. You don't have to solve it this week either.</p>
+    <p>Your notes from this week are right below. Read back through them. Look for the clues.</p>
+    <p>Today, rest.</p>
+    <p>And if one more question wants to sit with you, let it: <em>Why does beauty get to me the way it does?</em></p>
+    <p>Tomorrow we start there.</p>
+  </div>
+  <div class="carry"><div class="label">Carry this</div><div class="handle">What are You inviting me into?</div></div>
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Let me walk you through an ordinary Monday with this week in your pocket.</p>
+      <p>The alarm goes off, and the first thought is, same as always. That's the harbor talking. But your story isn't finished.</p>
+      <p>You get to work. Same desk, same truck, same crew. You have a part in this. Even here.</p>
+      <p>Something goes sideways before lunch. A plan falls through. Before you write the ending yourself, remember. There's more going on.</p>
+      <p>Somebody needs help with something, and you light up. You didn't even think about it. Notice that. Desire is a clue.</p>
+      <p>On the drive home you think, I should be further along by now. Training isn't failure.</p>
+      <p>And tonight there's one hard thing in front of you. A conversation. A decision. Maybe just staying present when you want to check out. You don't do it alone. You walk with Him into it.</p>
+      <p>Nothing about that day would make a movie. But that's adventure. Walking with God into the life He's actually giving you.</p>
+      <p class="beat">So here's the question I want you carrying from here on. Father, what are You inviting me into?</p>
+      <p>Ask it on Monday. Ask it again on Thursday. He's not going to hand you the whole map. He's going to walk it with you.</p>
+      <p>And if this week felt more like the harbor than open water, that's okay. You don't have to be finished.</p>
+      <p>Today, rest. Read your notes. Text one of the guys and ask him what adventure is in front of him.</p>
+      <p>And sit with that question about beauty. We'll start there tomorrow.</p>
+    </div>
+  </div>
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, which clue did You want me to see this week?</em> Then just be with Him.</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What's the adventure in front of you?</p></div>
+  </div>
+  <div class="section">
+    <div class="label">Your week <span class="meta">In the app: his notes from Days 43 to 49, filled in</span></div>
+    <div class="mock"><p class="mockcap" style="margin:0">Same as Day 7: each note he wrote this week, with the day, the "Carry this" line, and the With Dad question. Only days he wrote show up.</p></div>
+  </div>
+  <div class="notes"><div class="label">Your notes on Day 49</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Weekly email ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Sunday evening, after Day 49</div>
+  <h2>The Week 7 email</h2>
+  <p>Same template as Week 1. Only the seven day lines are new.</p>
+  <div class="email">
+    <div class="hdr"><b>From:</b> The Journey &lt;jpulley@manaliveexpedition.com&gt;<br><b>Subject:</b> Week seven is in the books. You're caught up.</div>
+    <p>Mike,</p>
+    <p>Seven weeks home. Maybe you did every day. Maybe you missed a few. Either way, you're not behind, and there's nothing to apologize for. Here's the heart of the week, in case any of it slipped by.</p>
+    <p><b>Day 43, What Did You Want?</b> Life got smaller a little at a time. That's not failure, and it's not the end. My story isn't finished. <span class="link">Reread Day 43 ›</span></p>
+    <p><b>Day 44, Bigger Than a Weekend.</b> Adventure is more than what goes on the calendar. You have a part in the Larger Story, and God is willing to show you. <span class="link">Reread Day 44 ›</span></p>
+    <p><b>Day 45, Other Forces at Work.</b> Like Frodo in the dark, you can't read your life right without the Larger Story. There's more going on. <span class="link">Reread Day 45 ›</span></p>
+    <p><b>Day 46, The One Thing.</b> Your calling goes deeper than your job. Don't bury desire or worship it. Bring it to Dad. Desire is a clue. <span class="link">Reread Day 46 ›</span></p>
+    <p><b>Day 47, On the Way.</b> God isn't wasting your season. Wait, stay, learn, train. Training isn't failure. <span class="link">Reread Day 47 ›</span></p>
+    <p><b>Day 48, Walk With Him Into It.</b> Risk isn't recklessness, and dramatic isn't holier. Adventure is walking with God into the life He's giving you. <span class="link">Reread Day 48 ›</span></p>
+    <p><b>Day 49, Already Underway.</b> Three clues and one question to keep asking. Father, what are You inviting me into? <span class="link">Reread Day 49 ›</span></p>
+    <p>Your notes from this week are waiting for you on Day 49. Only you can see them.</p>
+    <p><span class="btn">Read your week ›</span></p>
+    <p>That's the week. If you just read this, you're caught up. Tomorrow we start fresh.</p>
+    <p>Strength and Honor,<br>Pulley</p>
+  </div>
+</section>
+
+<!-- ═══ Decisions ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">For your review</div>
+  <h2>Decisions made in this draft</h2>
+  <ul class="tight">
+    <li><strong>One piece of the session per day.</strong> Day 43 wakes the heart (Monster commercial), Day 44 is Casual, Crucial, Critical kept short and landing on "you have a part," Days 45 to 47 are the three clues (Story, Desire, Journey), Day 48 is risk and walking with God (the responder moment), Day 49 lands on "Father, what are You inviting me into?"</li>
+    <li><strong>Discovery opened, not completed.</strong> No day tells a man what his calling is, equates calling with career, or suggests quitting a job. Desire is never "if you want it, God put it there": Day 46 names flesh, wounds, the enemy and the deep good heart, then "bring it to Dad."</li>
+    <li><strong>Current media only:</strong> Monster commercial, City Slickers, Fellowship of the Ring. Dead Poets, Bagger Vance and Zorro left out per the spec. The broadsword picture on Day 47 comes from Gary's Boot Camp talk, used as an image, not as a camp moment. Cut it if it doesn't fit how you teach.</li>
+    <li><strong>"A ship in harbor is safe"</strong> (John A. Shedd) opens Day 48's audio. It's in the 2024 and 2025 talks, not the spec, so it's in your voice rather than named as a camp moment.</li>
+    <li><strong>No speakers named.</strong> Speakers change camp to camp, so the readings point to the clips and the responder moment, never to Reed's, Steve's or Joshua's stories.</li>
+    <li><strong>No Covenant of Silence.</strong> Current practice sends men to lunch carrying the questions, and Day 49 says so. The 2019, 2024 and 2025 talks did send men into silence after this session. Confirm the lunch line works for alumni of those camps.</li>
+    <li><strong>Staying out of Beauty's lane.</strong> Crucial adventure examples are a kid's heart, a hard conversation, a friend slipping; pursuing a wife is left for next week. Day 49's bridge question is "Why does beauty get to me the way it does?" Confirm it.</li>
+    <li><strong>Five story slots</strong> (Days 43, 44, 46, 47, 48). Days 45 and 49 use non-story devices: the "what do you complain about" test and an ordinary-Monday walk-through. No held stories were assigned to this week. The jail story isn't invited; it doesn't fit Adventure's lane.</li>
+    <li><strong>Day 48, please confirm:</strong> the 2019 Texas transcript has a responder introduced as John Pulley telling about leaving roofing sales and driving a U-Haul north to Eau Claire, Wisconsin, without knowing if he'd be paid, and his biggest fear being losing face. If that's yours, it's a strong fit for the slot. It isn't written in, because I couldn't confirm it.</li>
+    <li><strong>Trumpet callback</strong> used once, on Day 46 ("Back in Week 1, I asked you, what's your trumpet?"). The trumpet story itself isn't retold.</li>
+    <li><strong>With Dad</strong> is 5 minutes on weekdays, 10 on Saturday, 3 on Sunday.</li>
+    <li><strong>Audio times</strong> assume each story runs about 30 seconds. A longer answer pushes that day past 2:00; the script around it is already trimmed.</li>
+  </ul>
+  <div class="notes"><div class="label">Overall notes on Week 7</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+</body>
+</html>
