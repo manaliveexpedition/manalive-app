@@ -34,7 +34,15 @@ export type Entry = {
   audio_url: string | null
   sort_index: number | null
   reflection_prompt: string | null
+  carry_line: string | null
+  with_dad_prompt: string | null
+  with_dad_minutes: number | null
+  share_prompt: string | null
 }
+
+// Every column the daily screens render. One list so Today, the previous-days
+// browser and the admin library can never drift apart.
+const ENTRY_COLUMNS = 'id, week, day, title, body_text, audio_url, sort_index, reflection_prompt, carry_line, with_dad_prompt, with_dad_minutes, share_prompt'
 
 // Resolve which entry the man should see today from his start_date.
 // Day 1 of the journey (start_date itself) maps to sort_index 1.
@@ -70,7 +78,7 @@ export async function loadToday(startDate: string | null, now: Date = new Date()
 
   const { data, error } = await supabase
     .from('entries')
-    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+    .select(ENTRY_COLUMNS)
     .eq('sort_index', sortIndex)
     .maybeSingle()
 
@@ -98,7 +106,7 @@ export async function loadReachedEntries(startDate: string | null, now: Date = n
 
   const { data, error } = await supabase
     .from('entries')
-    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+    .select(ENTRY_COLUMNS)
     .gte('sort_index', 1)
     .lte('sort_index', current)
     .order('sort_index', { ascending: false })
@@ -112,7 +120,7 @@ export async function loadReachedEntries(startDate: string | null, now: Date = n
 export async function loadAllEntries(): Promise<Entry[]> {
   const { data, error } = await supabase
     .from('entries')
-    .select('id, week, day, title, body_text, audio_url, sort_index, reflection_prompt')
+    .select(ENTRY_COLUMNS)
     .order('sort_index', { ascending: true })
   if (error) throw error
   return (data as Entry[]) ?? []

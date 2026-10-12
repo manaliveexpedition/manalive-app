@@ -1065,3 +1065,183 @@ table.men td.nowrap {
 .notes-saved {
   font-size: 0.85rem;
 }
+
+/* ------------------------------------------- rebuilt daily shape (Oct 2026) */
+/* Carry this: the one line he takes into his day. */
+.carry {
+  margin: 1.25rem 0 0.25rem;
+  padding: 0.9rem 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--edge);
+  border-left: 3px solid var(--oxblood);
+  border-radius: 10px;
+}
+
+.carry .eyebrow {
+  margin: 0 0 0.2rem;
+}
+
+.carry-line {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  color: var(--cream);
+}
+
+/* The audio sits inside its launch block now, so drop its own divider. */
+.audio-launch .eyebrow {
+  margin-bottom: 0.2rem;
+}
+
+.audio-launch .audio {
+  margin: 0;
+  padding: 0;
+  border-top: none;
+}
+
+/* With Dad: the center of the day. */
+.with-dad,
+.share,
+.week-notes,
+.card.notes {
+  margin-top: 1.25rem;
+}
+
+.with-dad {
+  border-color: var(--edge);
+}
+
+.with-dad-prompt,
+.share-prompt {
+  color: var(--cream);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.timer-start {
+  width: 100%;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.timer-clock {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-done {
+  color: var(--cream);
+}
+
+/* Share with the guys */
+.share .notes-input {
+  margin-bottom: 0.75rem;
+}
+
+.share-btn {
+  width: 100%;
+}
+
+.share-note {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+}
+
+.share-manual .notes-input {
+  margin-top: 0.5rem;
+}
+
+/* Day 7 "your week" + the My Notes tab */
+.week-notes h2,
+.my-notes h1 {
+  margin: 0 0 0.3rem;
+}
+
+.week-notes .muted,
+.my-notes .muted {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+}
+
+.week-notes-empty {
+  color: var(--cream);
+  margin: 0 0 0.75rem;
+}
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.note-item {
+  padding: 0.85rem 1rem;
+  background: var(--input-bg);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+}
+
+.note-day {
+  margin: 0 0 0.35rem;
+}
+
+.note-ctx {
+  color: var(--grey);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  margin: 0 0 0.2rem;
+}
+
+.note-ctx span {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  margin-right: 0.35rem;
+  color: rgba(236, 230, 215, 0.62);
+}
+
+.note-body {
+  color: var(--cream);
+  line-height: 1.55;
+  margin: 0.5rem 0 0;
+  white-space: pre-wrap;
+}
+
+.see-all-notes,
+.add-to-note {
+  margin-top: 0.75rem;
+  padding-left: 0;
+  text-decoration: none;
+}
+
+.notes-week + .notes-week {
+  margin-top: 1.5rem;
+}
+
+.notes-week-head {
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0 0 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+}

@@ -19,6 +19,7 @@ const BASE = 'https://manalive-app.vercel.app'
 
 const WEEK_WORD = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
 const weekWord = (n: number) => WEEK_WORD[n] || String(n)
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 const dayOf = (si: number) => ((si - 1) % 7) + 1
 const esc = (s: unknown) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -31,6 +32,13 @@ type Day = { sort_index: number; title: string; recap_line: string | null }
 function assemble(weekNumber: number, days: Day[], name: string | null) {
   const greet = name ? `Hey ${name},` : 'Men,'
   const subject = `Week ${weekWord(weekNumber)} is in the books. You're caught up.`
+  // How long he's been home, in words: 'One week home.', 'Two weeks home.'
+  const home = `${cap(weekWord(weekNumber))} week${weekNumber === 1 ? '' : 's'} home.`
+  const intro = `${home} Maybe you did every day. Maybe you missed a few. Either way, you're not behind, and there's nothing to apologize for. Here's the heart of the week, in case any of it slipped by.`
+  // His notes stay private: the email never carries them, it sends him back to
+  // the week's last day, where the app shows him his own notes.
+  const lastDay = days.length ? days[days.length - 1].sort_index : weekNumber * 7
+  const notesUrl = `${BASE}/#day/${lastDay}`
 
   const dayText = days.map((d) => {
     const n = dayOf(d.sort_index)
@@ -39,9 +47,12 @@ function assemble(weekNumber: number, days: Day[], name: string | null) {
 
   const text = `${greet}
 
-One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.
+${intro}
 
 ${dayText}
+
+Your notes from this week are waiting for you on Day 7. Only you can see them.
+Read your week: ${notesUrl}
 
 That is the week. If you just read that, you are caught up. Tomorrow we start fresh.
 
@@ -62,8 +73,10 @@ Pulley`
 
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:16px;line-height:1.55;color:#2c3137;max-width:560px">
 <p style="margin:0 0 14px">${esc(greet)}</p>
-<p style="margin:0 0 14px">One week down. Maybe you read every day, maybe you missed a few and doubted the whole thing on Wednesday. Either way you are not behind, and there is nothing to apologize for. Here is the heart of the week, in case any of it slipped by.</p>
+<p style="margin:0 0 14px">${intro}</p>
 ${dayHtml}
+<p style="margin:18px 0 12px">Your notes from this week are waiting for you on Day 7. Only you can see them.</p>
+<p style="margin:0 0 14px"><a href="${notesUrl}" style="display:inline-block;background:#8a3a2e;color:#ece6d7;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600">Read your week &rsaquo;</a></p>
 <p style="margin:18px 0 14px">That is the week. If you just read that, you are caught up. Tomorrow we start fresh.</p>
 <p style="margin:0 0 12px"><strong>One thing that helps:</strong> if you keep forgetting to check in, set a daily reminder. Gentle nudge, no guilt.</p>
 <p style="margin:0 0 12px"><a href="${BASE}/#settings" style="display:inline-block;background:#8a3a2e;color:#ece6d7;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600">Set your reminder &rsaquo;</a></p>

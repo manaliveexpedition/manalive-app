@@ -6,6 +6,8 @@ export type EventType =
   | 'played_audio'
   | 'submitted_checkin'
   | 'clicked_link' // tapped an outbound link in the entry copy (e.g. the alumni group)
+  | 'shared_to_group' // tapped "Share in the group" (copies his thought, opens the alumni group)
+  | 'started_with_dad' // started the With Dad quiet-time timer
 
 // Fire-and-forget engagement logging. user_id defaults to auth.uid() server-side,
 // so we never pass it from the client. Failures are swallowed — a missed event

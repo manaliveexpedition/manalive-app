@@ -4,13 +4,16 @@ import { TOTAL_WEEKS } from './progress'
 
 // ADMIN ENGAGEMENT.
 //
-// NOTE on what_landed / what_didnt: during the BETA these two are explicitly
-// feedback FOR the team (John), not a private reflection — so the admin view
-// reads them and aggregates them by day. They are gated client-side by
-// BETA_FEEDBACK and are not part of the real post-camp experience. Peer privacy
+// NOTE on what_landed / what_didnt: during the BETA these two were explicitly
+// feedback FOR the team (John), not a private reflection, so the admin view
+// reads them. The check-in that collected them is retired (Oct 2026 rebuild);
+// the feed survives as a read-only archive of the beta. Peer privacy
 // still holds: one member can never read another's rows (RLS); only the admin
 // (is_admin()) can read across the cohort, which is why the UI also gates the
 // Admin tab on role === 'admin'.
+
+// Both send a man to the alumni group: a link in the copy, or the Share card.
+const isAlumniClick = (t: string | null) => t === 'clicked_link' || t === 'shared_to_group'
 
 const WEEK8_START_OFFSET = 49 // start_date + 49 days = day 50 (week 8 begins)
 const WEEK8_END_OFFSET = 55 // start_date + 55 days = day 56 (week 8 ends, inclusive)
@@ -190,7 +193,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
       .forEach((e) => myEntryOpens.set(e.entry_id!, (myEntryOpens.get(e.entry_id!) ?? 0) + 1))
     const revisits = [...myEntryOpens.values()].reduce((s, n) => s + Math.max(0, n - 1), 0)
     const audioPlays = myEvents.filter((e) => e.event_type === 'played_audio').length
-    const alumniClicks = myEvents.filter((e) => e.event_type === 'clicked_link').length
+    const alumniClicks = myEvents.filter((e) => isAlumniClick(e.event_type)).length
 
     // Habit: of the entries he opened, how many he FIRST opened on their
     // scheduled day (start_date + sortIndex-1) vs late. Daily-rhythm signal.
@@ -286,7 +289,7 @@ export async function loadAdminData(now: Date = new Date()): Promise<AdminData> 
     const a = ensureEntry(e.entry_id)
     if (e.event_type === 'opened_entry') { a.opensByMan.set(e.user_id, (a.opensByMan.get(e.user_id) ?? 0) + 1); a.engagedMen.add(e.user_id) }
     else if (e.event_type === 'played_audio') { a.listenMen.add(e.user_id); a.engagedMen.add(e.user_id) }
-    else if (e.event_type === 'clicked_link') { a.clicks++; a.engagedMen.add(e.user_id) }
+    else if (isAlumniClick(e.event_type)) { a.clicks++; a.engagedMen.add(e.user_id) }
   }
   const reflByEntry = new Map<string, number>()
   for (const c of checkins) {

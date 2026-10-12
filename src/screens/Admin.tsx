@@ -7,7 +7,7 @@ type Tab = 'engagement' | 'list' | 'feedback' | 'phase' | 'scorecard'
 const TABS: { key: Tab; label: string }[] = [
   { key: 'engagement', label: 'Engagement' },
   { key: 'list', label: 'List' },
-  { key: 'feedback', label: 'Feedback' },
+  { key: 'feedback', label: 'Beta feedback' },
   { key: 'phase', label: 'Phase' },
   { key: 'scorecard', label: 'Scorecard' },
 ]
@@ -221,8 +221,8 @@ function Scorecard({ entries }: { entries: EntryStat[] }) {
 function FeedbackFeed({ items }: { items: FeedbackItem[] }) {
   return (
     <>
-      <h2 className="section-head">Beta feedback</h2>
-      <p className="rollup-hint">Newest first. Each note shows who left it and which day it was about.</p>
+      <h2 className="section-head">Beta feedback (archived)</h2>
+      <p className="rollup-hint">From the summer 2026 beta. The check-in that collected these is retired, so nothing new comes in. Newest first, with who left it and which day it was about.</p>
       {items.length === 0 ? (
         <p className="muted">No feedback yet.</p>
       ) : (

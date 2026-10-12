@@ -1,22 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import { localDateISO, type Entry as EntryRow } from '../lib/today'
+import { type Entry as EntryRow } from '../lib/today'
 import { logEvent } from '../lib/events'
-import { fetchCheckin, submitCheckin, BETA_FEEDBACK, type Checkin } from '../lib/checkins'
-import { loadNote, saveNote } from '../lib/notes'
-
-// Turn bare URLs in entry copy into tappable links (e.g. the alumni group on
-// Day 9). Author-controlled content, so this is plain rendering, not user input.
-const URL_RE = /(https?:\/\/[^\s]+)/g
-export function linkify(text: string) {
-  return text.split(URL_RE).map((part, i) =>
-    /^https?:\/\//.test(part) ? (
-      <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
-    ) : (
-      part
-    ),
-  )
-}
+import { loadNote, saveNote, loadNotesWithDays, type NoteWithDay } from '../lib/notes'
+import { navigateTo, ALUMNI_GROUP_URL } from '../lib/nav'
+import { richText } from '../lib/richText'
 
 // One day's reading body: paragraphs, with standalone markdown CTA links.
 export function EntryBody({ entry }: { entry: EntryRow }) {
@@ -33,8 +21,18 @@ export function EntryBody({ entry }: { entry: EntryRow }) {
             </a>
           )
         }
-        return <p key={i}>{linkify(para)}</p>
+        return <p key={i}>{richText(para)}</p>
       })}
+    </div>
+  )
+}
+
+// The one line he carries all day ("Whip or well?").
+export function CarryThis({ line }: { line: string }) {
+  return (
+    <div className="carry">
+      <p className="eyebrow">Carry this</p>
+      <p className="carry-line">{line}</p>
     </div>
   )
 }
@@ -44,7 +42,7 @@ const AUDIO_BUCKET = 'daily-audio'
 // The bucket is private, so we mint a short-lived signed URL at play time
 // (not getPublicUrl). createSignedUrl is authorized by the storage SELECT
 // policy for the signed-in user; an anonymous caller is rejected.
-export function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: string; onPlay: () => void }) {
+export function AudioPlayer({ entryId, path }: { entryId: string; path: string }) {
   const [url, setUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -59,110 +57,241 @@ export function AudioPlayer({ entryId, path, onPlay }: { entryId: string; path: 
       return
     }
     setUrl(data.signedUrl)
-    onPlay()
     logEvent('played_audio', entryId)
-  }
-
-  if (url) {
-    return <audio className="audio" controls autoPlay src={url} />
   }
 
   return (
     <div className="audio-launch">
-      <p className="audio-note">From John, on today’s reading:</p>
-      <button type="button" className="secondary" onClick={start} disabled={loading}>
-        {loading ? 'Loading…' : '▶ Go Deeper'}
-      </button>
+      <p className="eyebrow">From John</p>
+      {/* Men assumed the audio was the reading out loud. It isn't. */}
+      <p className="audio-note">Not the reading out loud. It takes today further. Do both when you can.</p>
+      {url ? (
+        <audio className="audio" controls autoPlay src={url} />
+      ) : (
+        <button type="button" className="secondary" onClick={start} disabled={loading}>
+          {loading ? 'Loading…' : '▶ Listen'}
+        </button>
+      )}
       {error && <p className="error">{error}</p>}
     </div>
   )
 }
 
-// The day's prompt + the BETA-ONLY "what landed / what didn't" feedback for John.
-export function CheckInCard({ entryId, played, prompt, heading = "Today's Check-In" }: { entryId: string; played: boolean; prompt: string | null; heading?: string }) {
-  const date = localDateISO()
-  const [existing, setExisting] = useState<Checkin | null>(null)
-  const [loading, setLoading] = useState(true)
+// ------------------------------------------------------------- With Dad
+const DEFAULT_WITH_DAD_MINUTES = 3
 
-  const [whatLanded, setWhatLanded] = useState('')
-  const [whatDidnt, setWhatDidnt] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+function mmss(ms: number) {
+  const s = Math.max(0, Math.ceil(ms / 1000))
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+}
+
+// Two soft rising notes. Created from the Start tap so iOS lets it play later.
+function playSoftTone(ctx: AudioContext) {
+  const now = ctx.currentTime
+  ;[528, 660].forEach((freq, i) => {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.value = freq
+    const t = now + i * 0.6
+    gain.gain.setValueAtTime(0, t)
+    gain.gain.linearRampToValueAtTime(0.15, t + 0.08)
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.2)
+    osc.connect(gain).connect(ctx.destination)
+    osc.start(t)
+    osc.stop(t + 1.25)
+  })
+}
+
+// The center of the day: one question for the Father, then quiet. The timer is
+// optional and calm: a countdown, then a soft tone and a buzz. He can ignore it.
+export function WithDadCard({ entryId, prompt, minutes, interactive }: {
+  entryId: string; prompt: string; minutes: number | null; interactive: boolean
+}) {
+  const mins = minutes && minutes > 0 ? minutes : DEFAULT_WITH_DAD_MINUTES
+  const [endAt, setEndAt] = useState<number | null>(null)
+  const [remaining, setRemaining] = useState(mins * 60_000)
+  const [done, setDone] = useState(false)
+  const audioCtx = useRef<AudioContext | null>(null)
+  const wakeLock = useRef<WakeLockSentinel | null>(null)
+
+  function releaseWakeLock() {
+    wakeLock.current?.release().catch(() => { /* already released */ })
+    wakeLock.current = null
+  }
+
+  useEffect(() => {
+    if (endAt === null) return
+    const id = window.setInterval(() => {
+      const left = endAt - Date.now()
+      setRemaining(left)
+      if (left <= 0) {
+        window.clearInterval(id)
+        setEndAt(null)
+        setDone(true)
+        releaseWakeLock()
+        if (audioCtx.current) playSoftTone(audioCtx.current)
+        navigator.vibrate?.([200, 120, 200])
+      }
+    }, 250)
+    return () => window.clearInterval(id)
+  }, [endAt])
+
+  useEffect(() => () => { releaseWakeLock(); audioCtx.current?.close().catch(() => {}) }, [])
+
+  async function start() {
+    setDone(false)
+    setRemaining(mins * 60_000)
+    setEndAt(Date.now() + mins * 60_000)
+    logEvent('started_with_dad', entryId)
+    try {
+      const Ctx = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      if (Ctx && !audioCtx.current) audioCtx.current = new Ctx()
+      await audioCtx.current?.resume()
+    } catch { /* no tone, the buzz and the screen still tell him */ }
+    try { wakeLock.current = await navigator.wakeLock?.request('screen') ?? null } catch { /* screen may dim, fine */ }
+  }
+
+  function stop() {
+    setEndAt(null)
+    setDone(false)
+    setRemaining(mins * 60_000)
+    releaseWakeLock()
+  }
+
+  return (
+    <section className="card with-dad">
+      <p className="eyebrow">With Dad · {mins} minute{mins === 1 ? '' : 's'}</p>
+      <p className="with-dad-prompt">{richText(prompt)}</p>
+      {interactive && (
+        endAt !== null ? (
+          <div className="timer running" role="timer" aria-live="off">
+            <span className="timer-clock">{mmss(remaining)}</span>
+            <button type="button" className="link" onClick={stop}>Stop</button>
+          </div>
+        ) : done ? (
+          <div className="timer done">
+            <p className="timer-done">Time's up. Stay as long as you want.</p>
+            <button type="button" className="link" onClick={start}>Start again</button>
+          </div>
+        ) : (
+          <button type="button" className="secondary timer-start" onClick={start}>
+            Start {mins} minute{mins === 1 ? '' : 's'}
+          </button>
+        )
+      )}
+    </section>
+  )
+}
+
+// Old content (before the rebuild) carries a plain daily prompt instead of a
+// With Dad question. Show it as it always was, minus the retired beta feedback.
+export function PromptCard({ prompt }: { prompt: string }) {
+  return (
+    <section className="card checkin">
+      <h2>Today's Check-In</h2>
+      <p className="prompt">{richText(prompt)}</p>
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------- Share
+function shareText(entry: EntryRow, thought: string) {
+  const where = entry.week != null && entry.day != null ? `Week ${entry.week}, Day ${entry.day}` : `Day ${entry.sort_index}`
+  const head = `The Journey · ${where} · ${entry.title ?? ''}`.trim()
+  return thought.trim() ? `${head}\n\n${thought.trim()}` : head
+}
+
+// Facebook won't let an app write the post, so: copy his words, open the group,
+// he pastes. Both start inside the tap so the browser allows them.
+export function ShareCard({ entry, interactive }: { entry: EntryRow; interactive: boolean }) {
+  const [thought, setThought] = useState('')
+  const [status, setStatus] = useState<'idle' | 'copied' | 'manual'>('idle')
+  const prompt = entry.share_prompt ?? ''
+
+  function share() {
+    const text = shareText(entry, thought)
+    const copy = navigator.clipboard?.writeText(text)
+    window.open(ALUMNI_GROUP_URL, '_blank', 'noopener,noreferrer')
+    logEvent('shared_to_group', entry.id)
+    if (copy) copy.then(() => setStatus('copied'), () => setStatus('manual'))
+    else setStatus('manual')
+  }
+
+  return (
+    <section className="card share">
+      <p className="eyebrow">Share with the guys</p>
+      <p className="share-prompt">{richText(prompt)}</p>
+      {interactive && (
+        <>
+          <textarea className="notes-input" rows={3} value={thought}
+            onChange={(e) => { setThought(e.target.value); setStatus('idle') }}
+            placeholder="Your thought (optional)" />
+          <button type="button" className="share-btn" onClick={share}>Share in the group</button>
+          {status === 'idle' && <p className="muted share-note">We'll copy your words and open the alumni group. Paste them into a new post.</p>}
+          {status === 'copied' && <p className="muted share-note">Copied. Paste it into a new post in the group.</p>}
+          {status === 'manual' && (
+            <div className="share-manual">
+              <p className="muted share-note">Copy this, then paste it into a new post in the group:</p>
+              <textarea className="notes-input" rows={4} readOnly value={shareText(entry, thought)}
+                onFocus={(e) => e.currentTarget.select()} />
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+// ---------------------------------------------------------------- Notes
+// One saved note with the day it came from. Shared by Day 7 and My Notes.
+export function NoteContext({ n }: { n: NoteWithDay }) {
+  return (
+    <>
+      <p className="eyebrow note-day">
+        {n.week != null && n.day != null ? `Week ${n.week} · Day ${n.day}` : `Day ${n.sortIndex}`}
+        {n.title ? ` · ${n.title}` : ''}
+      </p>
+      {n.carryLine && <p className="note-ctx"><span>Carry this</span> {n.carryLine}</p>}
+      {n.withDadPrompt && <p className="note-ctx"><span>With Dad</span> {richText(n.withDadPrompt)}</p>}
+    </>
+  )
+}
+
+// Day 7 (14, 21, ...): his own notes from the week, right where he rests and
+// looks back. Only days he wrote show up. Private: his rows only.
+export function WeekNotes({ entry }: { entry: EntryRow }) {
+  const [notes, setNotes] = useState<NoteWithDay[] | null>(null)
+  const last = entry.sort_index ?? 7
 
   useEffect(() => {
     let cancelled = false
-    ;(async () => {
-      try {
-        const c = await fetchCheckin(entryId)
-        if (!cancelled) setExisting(c)
-      } catch {
-        /* a failed lookup just shows the form; the insert is the source of truth */
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    })()
+    loadNotesWithDays({ from: Math.max(1, last - 6), to: last })
+      .then((n) => { if (!cancelled) setNotes(n) })
+      .catch(() => { if (!cancelled) setNotes([]) })
     return () => { cancelled = true }
-  }, [entryId])
+  }, [last])
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    setBusy(true)
-    setError('')
-    try {
-      const saved = await submitCheckin({
-        entryId,
-        date,
-        whatLanded,
-        whatDidnt,
-        consumedAs: played ? 'listen' : 'read',
-      })
-      await logEvent('submitted_checkin', entryId)
-      setExisting(saved)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save your check-in.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  if (loading) return null
+  if (notes === null) return null
 
   return (
-    <>
-      {/* Box 1: the check-in prompt / instruction, stands alone, always shown. */}
-      <section className="card checkin">
-        <h2>{heading}</h2>
-        {prompt && <p className="prompt">{prompt}</p>}
-      </section>
-
-      {/* Box 2: BETA-ONLY feedback for John (not private; not part of the real
-          post-camp experience, see BETA_FEEDBACK). */}
-      {BETA_FEEDBACK && (existing ? (
-        <section className="card checkin done">
-          <p className="eyebrow">Beta feedback</p>
-          <p className="muted">Thanks. Your notes are in, you can close this for today.</p>
-        </section>
+    <section className="card week-notes">
+      <h2>Your week</h2>
+      <p className="muted">Only you can see these.</p>
+      {notes.length === 0 ? (
+        <p className="week-notes-empty">No notes this week. That's okay. Tomorrow's a good day to start.</p>
       ) : (
-        <section className="card checkin">
-          <p className="eyebrow">Beta feedback</p>
-          <p className="muted feedback-note">Feedback on the beta itself, not today's reflection. It goes to John to help shape The Journey.</p>
-          <form onSubmit={submit} className="form">
-            <label htmlFor="landed">What worked about today's reading? <span className="optional">(optional)</span></label>
-            <textarea id="landed" rows={3} value={whatLanded}
-              onChange={(e) => setWhatLanded(e.target.value)}
-              placeholder="What was clear, hit home, or felt right?" />
-
-            <label htmlFor="didnt">What was confusing or fell flat? <span className="optional">(optional)</span></label>
-            <textarea id="didnt" rows={3} value={whatDidnt}
-              onChange={(e) => setWhatDidnt(e.target.value)}
-              placeholder="Anything unclear, clunky, or that missed?" />
-
-            <button type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send feedback'}</button>
-            {error && <p className="error">{error}</p>}
-          </form>
-        </section>
-      ))}
-    </>
+        <ul className="note-list">
+          {notes.map((n) => (
+            <li key={n.entryId} className="note-item">
+              <NoteContext n={n} />
+              <p className="note-body">{n.body}</p>
+            </li>
+          ))}
+        </ul>
+      )}
+      <button type="button" className="link see-all-notes" onClick={() => navigateTo('notes')}>See all your notes ›</button>
+    </section>
   )
 }
 
@@ -198,7 +327,7 @@ export function NotesCard({ entryId }: { entryId: string }) {
   return (
     <section className="card notes">
       <h2>Your notes</h2>
-      <p className="muted">Private to you. Capture anything you want to remember from the reading or the audio.</p>
+      <p className="muted">Private to you. You'll see them again on Day 7 and in My Notes.</p>
       <textarea
         className="notes-input"
         rows={5}
@@ -214,5 +343,38 @@ export function NotesCard({ entryId }: { entryId: string }) {
         {status === 'saved' && <span className="muted notes-saved">Saved</span>}
       </div>
     </section>
+  )
+}
+
+// ------------------------------------------------------------ the whole day
+// Reading, Carry this, Audio, With Dad, Share, (Day 7: your week), Notes.
+// interactive = the man's own view; false = the admin library's read-only view.
+// Every rebuild field is optional, so the original 49 days still render.
+export function DayContent({ entry, interactive, top }: { entry: EntryRow; interactive: boolean; top?: ReactNode }) {
+  return (
+    <>
+      <article className="card entry">
+        {top}
+        {(entry.week != null && entry.day != null) && (
+          <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
+        )}
+        <h1>{entry.title}</h1>
+        <EntryBody entry={entry} />
+        {entry.carry_line && <CarryThis line={entry.carry_line} />}
+        {entry.audio_url && <AudioPlayer entryId={entry.id} path={entry.audio_url} />}
+      </article>
+
+      {entry.with_dad_prompt ? (
+        <WithDadCard entryId={entry.id} prompt={entry.with_dad_prompt} minutes={entry.with_dad_minutes} interactive={interactive} />
+      ) : entry.reflection_prompt ? (
+        <PromptCard prompt={entry.reflection_prompt} />
+      ) : null}
+
+      {entry.share_prompt && <ShareCard entry={entry} interactive={interactive} />}
+
+      {interactive && entry.day === 7 && <WeekNotes entry={entry} />}
+
+      {interactive && <NotesCard entryId={entry.id} />}
+    </>
   )
 }

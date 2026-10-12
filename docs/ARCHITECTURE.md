@@ -28,10 +28,10 @@ All app tables live in `public`. Schema history is in `supabase/migrations/`
 | Table | What it holds | Ownership |
 |-------|---------------|-----------|
 | `profiles` | one row per man: `role`, `start_date`, `cohort`, `name` (preferred), `last_name`, `name_confirmed`, `email` | self + admin |
-| `entries` | the daily content: `sort_index` (absolute day 1..N), `week`, `day` (1-7), `title`, `body_text` (the read), `reflection_prompt` (do-this), `audio_url`, `format`, `phase`, `recap_line` (weekly-email heart line) | readable by any signed-in member |
-| `checkins` | one per man per day: `consumed_as` (read/listen), plus beta feedback `what_landed` / `what_didnt` | self + admin |
-| `notes` | a man's PRIVATE per-day journal | self ONLY (admins blocked) |
-| `events` | fire-and-forget engagement pings: `opened_app`, `opened_entry`, `played_audio`, `clicked_link`, `submitted_checkin` | self + admin |
+| `entries` | the daily content: `sort_index` (absolute day 1..N), `week`, `day` (1-7), `title`, `body_text` (the read), `audio_url`, `format`, `phase`, `recap_line` (weekly-email heart line). Rebuilt days add `carry_line`, `with_dad_prompt`, `with_dad_minutes`, `share_prompt`; original days use `reflection_prompt` (do-this) instead. See `docs/content-rebuild/README.md` | readable by any signed-in member |
+| `checkins` | one per man per day: `consumed_as` (read/listen), plus beta feedback `what_landed` / `what_didnt`. **Retired** (Oct 2026): the app no longer writes it; the admin "Beta feedback" tab reads it as an archive | self + admin |
+| `notes` | a man's PRIVATE per-day journal. Shown back to him on every Day 7 (that week) and in the Notes tab (all of them) | self ONLY (admins blocked) |
+| `events` | fire-and-forget engagement pings: `opened_app`, `opened_entry`, `played_audio`, `clicked_link`, `shared_to_group`, `started_with_dad` (`submitted_checkin` is historical) | self + admin |
 | `notification_prefs` | reminder on/off + time | self |
 | `push_subscriptions` | Web Push endpoints per device | self |
 | `weekly_emails` | dedupe log: which week digest a man has already been sent | service role |
@@ -99,6 +99,8 @@ All app tables live in `public`. Schema history is in `supabase/migrations/`
 - The email prints ALL SEVEN days of the finished week, each as
   `Day N, {title}. {recap_line}` plus a "Reread Day N" deep link. **`recap_line`
   is therefore per-day: every day needs one, or that day renders a blank line.**
+- It never includes his notes (they are private). It links to the week's last
+  day instead ("Read your week"), where the app shows him his own notes.
 - `?dryRun` returns who is due without sending; `?test=a@b.com` sends the Week 1
   sample to verify SMTP.
 

@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { type Entry as EntryRow } from '../lib/today'
 import { logEvent } from '../lib/events'
-import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
+import { DayContent } from './entryParts'
 
 // A list of days + a detail view of one day, with browser-history-aware back:
 // the device/browser Back button (and the in-app back link) unwind day -> list,
 // and list -> onExit() (e.g. back to today). When onExit is omitted the list is
 // the base screen (e.g. a nav tab), so only the day level uses history.
-//   feedback = true  -> the detail shows the check-in/feedback box (the man).
-//   feedback = false -> read-only (the admin library).
-export function DayBrowser({ title, loadEntries, feedback, onExit, initialDay }: {
+//   interactive = true  -> the man's own view: timer, share, notes, Day 7 notes.
+//   interactive = false -> read-only (the admin library).
+export function DayBrowser({ title, loadEntries, interactive, onExit, initialDay }: {
   title: string
   loadEntries: () => Promise<EntryRow[]>
-  feedback: boolean
+  interactive: boolean
   onExit?: () => void
   initialDay?: number // sort_index to open straight to (e.g. from an email link)
 }) {
@@ -61,7 +61,7 @@ export function DayBrowser({ title, loadEntries, feedback, onExit, initialDay }:
   }
   const back = () => window.history.back()
 
-  if (selected) return <DayDetail entry={selected} feedback={feedback} onBack={back} />
+  if (selected) return <DayDetail entry={selected} interactive={interactive} onBack={back} />
 
   return (
     <section className="card">
@@ -86,27 +86,14 @@ export function DayBrowser({ title, loadEntries, feedback, onExit, initialDay }:
   )
 }
 
-function DayDetail({ entry, feedback, onBack }: { entry: EntryRow; feedback: boolean; onBack: () => void }) {
-  const [played, setPlayed] = useState(false)
+function DayDetail({ entry, interactive, onBack }: { entry: EntryRow; interactive: boolean; onBack: () => void }) {
   useEffect(() => { logEvent('opened_entry', entry.id) }, [entry.id])
 
   return (
-    <>
-      <article className="card entry">
-        <button type="button" className="link back-link" onClick={onBack}>‹ Back</button>
-        {(entry.week != null && entry.day != null) && (
-          <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
-        )}
-        <h1>{entry.title}</h1>
-        <EntryBody entry={entry} />
-        {entry.audio_url && (
-          <AudioPlayer entryId={entry.id} path={entry.audio_url} onPlay={() => setPlayed(true)} />
-        )}
-      </article>
-      {feedback && <NotesCard entryId={entry.id} />}
-      {feedback && (
-        <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} heading="Check-In" />
-      )}
-    </>
+    <DayContent
+      entry={entry}
+      interactive={interactive}
+      top={<button type="button" className="link back-link" onClick={onBack}>‹ Back</button>}
+    />
   )
 }

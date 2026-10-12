@@ -13,6 +13,7 @@ work only, never expose them to the browser.
 |--------|------|-----|
 | `db-exec.mjs` | Runs a `.sql` file against the remote DB via the session pooler. The safe way to apply data changes and to validate `seed.sql` (wrap it in `begin; ... rollback;` first). | `node scripts/db-exec.mjs path/to.sql` |
 | `check-content.mjs` | Audits the `entries` table (which days exist, which fields are filled). | `node scripts/check-content.mjs` |
+| `build-week-sql.mjs` | Turns reviewed week drafts (`docs/content-rebuild/week-NN-*.html`) into the SQL that loads them into `entries`. Writes SQL only; apply with `db-exec`. See `docs/content-rebuild/README.md`. | `node scripts/build-week-sql.mjs <week.html> ... > out.sql` |
 
 Loading a week's reads/prompts/tags/heart lines is done with a short throwaway
 script that upserts into `entries` (see the Notion runbook). Canonical content
@@ -35,6 +36,7 @@ lives in `supabase/seed.sql`.
 | `check-progress.mjs` | Checks streak / progress derivation. |
 | `check-checkin.mjs` | Checks check-in read/write. |
 | `check-admin.mjs` | Exercises the admin dashboard data path. |
+| `check-notes.mjs` | The Day 7 / Notes-tab query: his notes only, filtered to the week, with day context; another man can't read them. |
 
 ## Notifications and email
 

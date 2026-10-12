@@ -6,8 +6,10 @@ import { Progress } from './screens/Progress'
 import { Admin } from './screens/Admin'
 import { Library } from './screens/Library'
 import { Settings } from './screens/Settings'
+import { MyNotes } from './screens/MyNotes'
 import { fetchMyProfile, saveName, type Profile } from './lib/profile'
 import { captureDeepLink, consumeDeepLink, isSettingsLink } from './lib/deeplink'
+import { NAVIGATE_EVENT, type NavTarget } from './lib/nav'
 import './App.css'
 
 function App() {
@@ -46,7 +48,7 @@ function App() {
   )
 }
 
-type View = 'today' | 'progress' | 'settings' | 'admin' | 'library'
+type View = 'today' | 'notes' | 'progress' | 'settings' | 'admin' | 'library'
 
 function Shell() {
   const [view, setView] = useState<View>('today')
@@ -73,6 +75,12 @@ function Shell() {
     return () => navigator.serviceWorker.removeEventListener('message', handler)
   }, [])
 
+  // In-app jumps between tabs (e.g. Day 7's "See all your notes").
+  useEffect(() => {
+    const handler = (e: Event) => setView((e as CustomEvent<NavTarget>).detail)
+    window.addEventListener(NAVIGATE_EVENT, handler)
+    return () => window.removeEventListener(NAVIGATE_EVENT, handler)
+  }, [])
   // Open straight to Settings from the email link: on mount (covers a fresh load
   // AND the post-login return, where the target was stashed before the redirect)
   // and on hashchange (tap while the app is already open).
@@ -104,6 +112,9 @@ function Shell() {
         <button type="button" className={view === 'today' ? 'on' : ''} onClick={() => setView('today')}>
           Today
         </button>
+        <button type="button" className={view === 'notes' ? 'on' : ''} onClick={() => setView('notes')}>
+          Notes
+        </button>
         <button type="button" className={view === 'progress' ? 'on' : ''} onClick={() => setView('progress')}>
           Progress
         </button>
@@ -123,6 +134,7 @@ function Shell() {
       </nav>
 
       {view === 'today' && <Today />}
+      {view === 'notes' && <MyNotes />}
       {view === 'progress' && <Progress />}
       {view === 'settings' && <Settings />}
       {view === 'admin' && isAdmin && <Admin />}

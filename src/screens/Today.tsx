@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchMyProfile, type Profile } from '../lib/profile'
-import { loadToday, loadReachedEntries, formatStartDate, type Entry as EntryRow, type TodayState } from '../lib/today'
+import { loadToday, loadReachedEntries, formatStartDate, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { clearBadge } from '../lib/push'
 import { consumeDeepLink, isHistoryLink, dayFromLink } from '../lib/deeplink'
-import { EntryBody, AudioPlayer, CheckInCard, NotesCard } from './entryParts'
+import { DayContent } from './entryParts'
 import { DayBrowser } from './DayBrowser'
 import { InstallLink } from './InstallBanner'
 
@@ -75,7 +75,7 @@ export function Today() {
       <DayBrowser
         title="Your days so far"
         loadEntries={() => loadReachedEntries(profile?.start_date ?? null)}
-        feedback
+        interactive
         initialDay={historyDay}
         onExit={() => setShowHistory(false)}
       />
@@ -110,7 +110,7 @@ export function Today() {
       )}
 
       {!error && state?.kind === 'entry' && (
-        <EntryView entry={state.entry} />
+        <DayContent entry={state.entry} interactive />
       )}
 
       {!error && hasPrevious && (
@@ -121,36 +121,6 @@ export function Today() {
 
       {/* Beta-only install nudge: while waiting to start, and during week one. */}
       {!error && (state?.kind === 'not_started' || (state?.kind === 'entry' && (state.entry.sort_index ?? 99) <= 7)) && <InstallLink />}
-    </>
-  )
-}
-
-function EntryView({ entry }: { entry: EntryRow }) {
-  const [played, setPlayed] = useState(false)
-
-  return (
-    <>
-      <article className="card entry">
-        {(entry.week != null && entry.day != null) && (
-          <p className="eyebrow">Week {entry.week} · Day {entry.day}</p>
-        )}
-        <h1>{entry.title}</h1>
-
-        <EntryBody entry={entry} />
-
-        {/* John's spoken commentary on the reading, after the text. */}
-        {entry.audio_url && (
-          <AudioPlayer
-            entryId={entry.id}
-            path={entry.audio_url}
-            onPlay={() => setPlayed(true)}
-          />
-        )}
-      </article>
-
-      <NotesCard entryId={entry.id} />
-
-      <CheckInCard entryId={entry.id} played={played} prompt={entry.reflection_prompt} />
     </>
   )
 }
