@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week 1 · Heart of a Man</title>
+<style>
+  @font-face { font-family: 'Oswald'; font-weight: 400; src: url('assets/oswald-400.woff2') format('woff2'); }
+  @font-face { font-family: 'Oswald'; font-weight: 600; src: url('assets/oswald-600.woff2') format('woff2'); }
+
+  :root {
+    --ox: #4a1f1f;
+    --ox-tint: #f5eeee;
+    --ink: #101418;
+    --ink-soft: #46515c;
+    --line: #c3cad1;
+    --label: 'Oswald', 'Arial Narrow', system-ui, sans-serif;
+    --body: Georgia, 'Times New Roman', serif;
+  }
+
+  @page {
+    size: Letter;
+    margin: 0.75in 0.9in 0.8in 0.9in;
+    @bottom-left {
+      content: "THE JOURNEY  ·  WEEK 1  ·  DRAFT FOR REVIEW";
+      font-family: 'Oswald', sans-serif; font-size: 8pt; letter-spacing: 0.12em; color: #46515c;
+    }
+    @bottom-right {
+      content: counter(page);
+      font-family: 'Oswald', sans-serif; font-size: 9pt; color: #4a1f1f;
+    }
+  }
+  @page cover { @bottom-left { content: none; } @bottom-right { content: none; } }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--body); font-size: 11.5pt; line-height: 1.6; }
+
+  .label, h1, h2, h3, .kicker {
+    font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ox);
+  }
+  p { margin: 0 0 0.7em; }
+
+  /* Cover */
+  .cover { page: cover; height: 9.3in; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+  .cover img { width: 3.4in; margin: 0 auto 0.6in; }
+  .cover .kicker { font-size: 12pt; color: var(--ink-soft); margin-bottom: 0.1in; }
+  .cover h1 { font-size: 38pt; line-height: 1.05; margin: 0 0 0.15in; }
+  .cover .sub { font-family: var(--label); font-weight: 400; font-size: 14pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); }
+  .cover .stamp { margin: 0.7in auto 0; display: inline-block; border: 1.5px solid var(--ox); padding: 0.08in 0.25in;
+    font-family: var(--label); font-weight: 600; letter-spacing: 0.16em; color: var(--ox); font-size: 10pt; }
+  .cover .date { margin-top: 0.15in; font-size: 10pt; color: var(--ink-soft); }
+
+  /* Overview */
+  .page { break-before: page; }
+  h2 { font-size: 20pt; margin: 0 0 0.12in; }
+  h3 { font-size: 10pt; margin: 0.2in 0 0.06in; }
+  .endstate { border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.14in 0.2in; font-size: 13pt; line-height: 1.5; font-style: italic; margin: 0.1in 0 0.2in; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 8.5pt; text-align: left; border-bottom: 1.5px solid var(--ox); padding: 0.05in 0.08in; }
+  td { border-bottom: 1px solid var(--line); padding: 0.045in 0.08in; vertical-align: top; }
+  td.handle { font-family: var(--label); font-weight: 600; letter-spacing: 0.04em; color: var(--ox); white-space: nowrap; }
+  .shape { display: grid; grid-template-columns: 1.15in 1fr; gap: 0.03in 0.15in; font-size: 10pt; line-height: 1.45; }
+  .shape .label { font-size: 9pt; padding-top: 0.02in; }
+
+  /* Day pages */
+  .day { break-before: page; }
+  .dayhead { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ox); padding-bottom: 0.06in; margin-bottom: 0.18in; }
+  .dayhead .kicker { font-size: 10pt; }
+  .dayhead .run { font-family: var(--label); font-size: 9pt; letter-spacing: 0.1em; color: var(--ink-soft); text-transform: uppercase; }
+  .day h2 { font-size: 26pt; margin: 0 0 0.12in; line-height: 1.1; }
+
+  .section { margin-top: 0.22in; }
+  .section > .label { font-size: 9.5pt; display: flex; align-items: center; gap: 0.1in; margin-bottom: 0.08in; }
+  .section > .label::after { content: ""; flex: 1; border-bottom: 1px solid var(--line); }
+  .section > .label .meta { font-weight: 400; color: var(--ink-soft); letter-spacing: 0.1em; }
+
+  .carry { break-inside: avoid; margin: 0.2in 0; border-left: 4px solid var(--ox); background: var(--ox-tint); padding: 0.1in 0.2in; }
+  .carry .label { font-size: 8.5pt; }
+  .carry .handle { font-family: var(--label); font-weight: 600; font-size: 18pt; letter-spacing: 0.04em; color: var(--ox); line-height: 1.2; }
+
+  .audio { border-left: 2px solid var(--line); padding-left: 0.2in; }
+  .audio p { margin-bottom: 0.55em; }
+  .audio .beat { font-weight: bold; }
+
+  .box { break-inside: avoid; border: 1px solid var(--line); padding: 0.12in 0.18in; margin-top: 0.1in; }
+  .box p:last-child { margin-bottom: 0; }
+
+  .notes { break-inside: avoid; margin-top: 0.3in; }
+  .notes .label { font-size: 9pt; margin-bottom: 0.05in; }
+  .notes .ln { height: 0.36in; border-bottom: 1px solid var(--line); }
+
+  .mock { break-inside: avoid; border: 1px dashed var(--ox); padding: 0.12in 0.18in; }
+  .mockrow { border-bottom: 1px solid var(--line); padding: 0.06in 0 0.1in; margin-bottom: 0.06in; }
+  .mockday { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ox); font-size: 9.5pt; }
+  .mockctx { font-size: 10pt; color: var(--ink-soft); }
+  .mockctx span { font-family: var(--label); text-transform: uppercase; letter-spacing: 0.08em; font-size: 8.5pt; }
+  .mocknote { margin-top: 0.05in; font-style: italic; }
+  .mockcap { font-size: 9.5pt; color: var(--ink-soft); margin: 0.06in 0 0; }
+
+  .email { border: 1px solid var(--line); padding: 0.2in 0.25in; font-family: system-ui, 'Segoe UI', Arial, sans-serif; font-size: 10.5pt; line-height: 1.5; }
+  .email .hdr { font-size: 9.5pt; color: var(--ink-soft); border-bottom: 1px solid var(--line); padding-bottom: 0.08in; margin-bottom: 0.14in; }
+  .email .hdr b { color: var(--ink); }
+  .email .btn { display: inline-block; background: var(--ox); color: #fff; padding: 0.06in 0.16in; border-radius: 6px; font-weight: 600; font-size: 10pt; }
+  .email .link { color: var(--ox); font-weight: 600; white-space: nowrap; }
+
+  ul.tight { margin: 0.05in 0 0.1in; padding-left: 0.22in; }
+  ul.tight li { margin-bottom: 0.06in; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Cover ═══ -->
+<section class="cover">
+  <img src="assets/manalive-logo.png" alt="ManAlive Expedition">
+  <div class="kicker">The Journey</div>
+  <h1>Week 1<br>Heart of a Man</h1>
+  <div class="sub">Back in the matrix</div>
+  <div><span class="stamp">DRAFT FOR REVIEW</span></div>
+  <div class="date">October 12, 2026</div>
+</section>
+
+<!-- ═══ Overview ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Week 1 overview</div>
+  <h2>What this week is for</h2>
+  <p>The first week home brings a man back to Thursday night, the Heart of a Man session, while the matrix is grabbing him back. By Sunday he should be able to say:</p>
+  <div class="endstate">Something real stirred in me. My desires are not a defect. My heart is worth fighting for, even back home. Jesus asked me a question, and I'm still answering.</div>
+
+  <h3>How every day works</h3>
+  <div class="shape">
+    <div class="label">Reading</div><div>About 150 words. A quick reminder of what happened at camp and where it shows up at home.</div>
+    <div class="label">Audio</div><div>About 2 minutes from John. Different from the reading: a handle to carry, one layer deeper, and a story.</div>
+    <div class="label">With Dad</div><div>One question, quiet time, then listen. The center of the day. Relationship, not knowledge.</div>
+    <div class="label">Share</div><div>Optional. A button that opens the alumni group with his thought ready to paste.</div>
+    <div class="label">Notes</div><div>Private. Nobody sees them but him. Every Day 7 shows him his notes from the week in one place.</div>
+    <div class="label">Weekly email</div><div>Sent Sunday evening. One heart line per day, so a man who missed days isn't behind.</div>
+  </div>
+
+  <h3>The week at a glance</h3>
+  <table>
+    <tr><th>Day</th><th>Title</th><th>Carry this</th><th>With Dad</th></tr>
+    <tr><td>1 · Mon</td><td>Back in the Matrix</td><td class="handle">Dad gets the first two minutes</td><td>2 min</td></tr>
+    <tr><td>2 · Tue</td><td>Something Stirred</td><td class="handle">Smoke means fire</td><td>2 min</td></tr>
+    <tr><td>3 · Wed</td><td>Whip or Well</td><td class="handle">Whip or well?</td><td>3 min</td></tr>
+    <tr><td>4 · Thu</td><td>Bored to Death</td><td class="handle">What's your trumpet?</td><td>3 min</td></tr>
+    <tr><td>5 · Fri</td><td>How's Your Heart?</td><td class="handle">How's your heart?</td><td>3 min</td></tr>
+    <tr><td>6 · Sat</td><td>Do You Want to Be Healed?</td><td class="handle">Look at me</td><td>5 min</td></tr>
+    <tr><td>7 · Sun</td><td>One Week Home</td><td class="handle">Faded isn't fake</td><td>3 min</td></tr>
+  </table>
+</section>
+
+<!-- ═══ Day 1 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 1 · Monday</span><span class="run">Audio about 1:55</span></div>
+  <h2>Back in the Matrix</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Thursday night you turned your phone off.</p>
+    <p>For three days nobody could reach you. And somewhere in the quiet, something happened in you. Maybe it was big. Maybe it was small enough you're not sure it counts.</p>
+    <p>It counts.</p>
+    <p>This morning the phone is back on. By lunch, the weekend might feel like it happened to somebody else. That doesn't mean it wasn't real. It means you're back in the matrix, and the matrix is loud.</p>
+    <p>This is where you keep it. A few minutes a day.</p>
+    <p>Every day there's a short reading and audio from me. They're not the same. The reading reminds you. The audio takes it further. Do both.</p>
+    <p>Then time with Dad. Not a lesson. A conversation.</p>
+    <p>You didn't do the weekend alone. Don't do this alone either. Join the alumni group below and tell the guys you're in.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Dad gets the first two minutes.</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I want to tell you how long my first weekend lasted.</p>
+      <p>Three days.</p>
+      <p>Something real happened in me at that first ManAlive weekend. And by Wednesday, the feeling was gone. Normal life just rolled right over it. And I remember thinking, maybe it wasn't real. Maybe that was just a weekend high.</p>
+      <p>It wasn't. But here's what I learned. Camp didn't make the noise go away. It turned it off long enough for you to hear. Now the noise is back, and nobody's going to turn it off for you. You have to choose the quiet now.</p>
+      <p>For me it starts with my phone. The first ten minutes of my day, that thing wants me. Games. The feed. Whatever somebody's throwing at me. Before my feet hit the floor, my whole system is ramped up, and I haven't said one word to Dad.</p>
+      <p>So here's what I want you to hang on to this week.</p>
+      <p class="beat">Dad gets the first two minutes.</p>
+      <p>Not an hour. Not some big quiet time. Two minutes. Before the phone, before anybody gets a piece of you. Say good morning. Ask Him one question. Listen.</p>
+      <p>And when my weekend faded, you know what pulled me back? Not discipline. A few guys from camp. We stayed in touch and did life together. When I drifted, they were there.</p>
+      <p>So get in the alumni group today and say hey. It doesn't have to be deep.</p>
+      <p>Alright. Phone face down. Dad gets the first two minutes. Starting now.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">2 minutes</span></div>
+    <div class="box"><p>Phone face down. Ask Him: <em>Father, what don't You want me to lose from this weekend?</em> Then be quiet and listen. If something comes, put it in your notes. If nothing comes, that's okay. You showed up.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Join the alumni group. Post your name and which camp you went to.</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 2 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 2 · Tuesday</span><span class="run">Audio about 1:50</span></div>
+  <h2>Something Stirred</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Remember how Thursday night started? Before anyone said a word, three trailers played. Braveheart. Saving Private Ryan. Open Range.</p>
+    <p>And something in you sat up.</p>
+    <p>Most men won't admit that. It feels a little silly to get stirred up by a movie trailer. But it wasn't the movies. It was you. Something in you wants to fight for something. To go somewhere. To matter.</p>
+    <p>A lot of good men get to where everything looks fine on paper. And underneath sits a question they never say out loud: <em>Is this it?</em></p>
+    <p>That question isn't ungrateful. It's a clue. Those desires aren't a defect. God put them there. The glory of God is a man fully alive, not a man who has managed his heart into silence.</p>
+    <p>This week, notice when it stirs again. A song in the truck. Your kid doing something brave. That's your heart, still alive.</p>
+    <p>And if nothing stirred this weekend, that's okay. Some hearts have been quiet a long time. That's exactly why you're here.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Smoke means fire.</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Let me tell you about a season when my life looked fine.</p>
+      <p>Good job. Good at it. Doing things with my wife. From the outside, you'd have said that guy has it together.</p>
+      <p>Underneath, I was living a double life. And it was about to blow up everything I had.</p>
+      <p>Here's why I tell you that. Most of us got taught that the stuff stirring in us is the problem. So we do what responsible men do. We manage it. Push it down. Get busy. Be a good guy.</p>
+      <p>But desire doesn't die when you shut it down. It goes underground. And if it can't come out alive and good, it comes out sideways. Into a screen. Into a bottle. Into something that's slowly killing you. That was me.</p>
+      <p>So when those trailers played Thursday and something in you sat up, don't brush that off.</p>
+      <p class="beat">Smoke means fire.</p>
+      <p>That catch in your chest is the smoke. And smoke means there's still a fire in there. Your heart isn't dead.</p>
+      <p class="beat">It's alive.</p>
+      <p>God didn't put that fire in you so you'd spend your life managing it. The glory of God is a man fully alive. Not a man who's good at looking fine.</p>
+      <p>So this week, when you catch the smoke, stop. That's your heart. Alive. Take it to Dad. Ask Him what He stirred in you.</p>
+      <p>Smoke means fire. Go ask Him about it.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">2 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what did You stir in me this weekend?</em> Then listen.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Which trailer got you?</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 3 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 3 · Wednesday</span><span class="run">Audio about 2:00</span></div>
+  <h2>Whip or Well</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Thursday night you watched William Wallace ride out in war paint. A few minutes later, Mr. Rogers.</p>
+    <p>Strange pair. On purpose.</p>
+    <p>Most of us were handed one of two pictures of a man: hard and loud, or nice and safe. Neither one is the whole thing. Masculinity isn't toxic. And the goal was never to become a nice guy.</p>
+    <p>Jesus made a whip and cleared the temple. Jesus sat down at a well with a woman everybody else avoided, and was tender with her. Same man. Strong both times.</p>
+    <p>So how do you know which one a moment needs? There's no rule for that. You pause long enough to get quiet, and you ask Dad.</p>
+    <p>That's the whole difference. Not knowing more about being a man. Knowing Him well enough to ask.</p>
+    <p>You'll miss it sometimes. Everybody does. Ask anyway.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Whip or well?</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I want to tell you what happens in me when I get caught off guard.</p>
+      <p>Somebody says something that stings. A client blindsides me. One of my kids mouths off. And instantly, I get defensive.</p>
+      <p>Now, I've gotten older. I don't always say it out loud anymore. When I do, it's bad. Mostly it just sits inside. I'm building my case in my head. And here's the crazy part. At the same time I'm defending myself, I'm condemning myself. How bad I did. How much I screwed it up. Both at once.</p>
+      <p>You know that feeling?</p>
+      <p>Here's what I've figured out. That's not the whip. And it's not the well. That's just me protecting me.</p>
+      <p>When we don't stop and ask, we don't choose strength or tenderness. We default. And the default is self-protection. Every time.</p>
+      <p>The whip comes from a man who knows what's worth fighting for. The well comes from a man secure enough to be gentle. Both come from the same place: a man connected to his Father.</p>
+      <p>So here's what I want you to carry today.</p>
+      <p class="beat">Whip or well?</p>
+      <p>When it happens, and it'll happen today, before you react, ask it. Dad, whip or well? You won't always get it right. I don't. Some days you'll only remember to ask after it's over. That's okay. Ask anyway. Even asking late is you turning toward Him instead of just protecting yourself.</p>
+      <p>That's the man you saw Thursday night. Not hard. Not nice. Strong, and listening.</p>
+      <p>Whip or well. Ask Him.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Think of one situation waiting for you today. Ask Him: <em>Dad, whip or well?</em> Then listen. If you're not sure what you heard, that's okay. Go in having asked.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>When you get caught off guard, where do you default?</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 4 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 4 · Thursday</span><span class="run">Audio about 2:10</span></div>
+  <h2>Bored to Death</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>One week ago tonight, you were sitting in that first session.</p>
+    <p>You heard three desires named. A battle to fight. An adventure to live. A passion for beauty.</p>
+    <p>Maybe one of them hit you hard. Maybe you weren't sure any of them fit you anymore. Both are normal.</p>
+    <p>Remember the pilot in Never Cry Wolf? The real gold isn't in the ground. It's in men sitting in their living rooms, bored to death.</p>
+    <p>Nobody decides to get bored to death. It happens slowly. You get responsible. You get busy. The things that made you come alive get managed down to a hobby, a screen, a game on Saturday.</p>
+    <p>These desires aren't a problem to manage. They're how God made you. We'll spend a whole week on each one later. Today, just notice which one still has a pulse.</p>
+    <p>It's in there. Bored isn't dead.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">What's your trumpet?</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>In high school I was a band geek. Total band geek. I played trumpet, and I was good. Played the solos. I loved it.</p>
+      <p>Then I decided I wasn't going to be a professional musician. Probably the right call. But here's what happened next. I played in a community band for a while. Then I didn't. Somebody asked me to play at their wedding, so I did. Then nothing.</p>
+      <p>And one day I'm looking at this trumpet case I hadn't opened in four or five years, and I think, why am I keeping this? So I sold it.</p>
+      <p>Nobody made me quit. I never decided to stop. It just faded, a little at a time. That's how it goes for most of us.</p>
+      <p>Now hear me. The trumpet wasn't the point. Selling it wasn't a sin. But it carried something. Something in me that came alive when I played. And when it went quiet, I didn't even notice what else went quiet with it.</p>
+      <p>So here's my question for you today.</p>
+      <p class="beat">What's your trumpet?</p>
+      <p>What used to make you come alive that slowly got put in a case and sold? It might be something you did. Something you dreamed about. Something you used to fight for.</p>
+      <p>Being bored doesn't mean the desire is gone. It's desire with nowhere to go.</p>
+      <p>You don't have to go buy a trumpet today. Just find it. Name it. And take it to Dad. Ask Him what He put in you that you've let go quiet.</p>
+      <p>It's not dead. It's waiting.</p>
+      <p>What's your trumpet?</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>Father, what have I let go quiet? What do You want to wake back up?</em> Whatever comes to mind first, even if it seems small, write it down.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>What's your trumpet?</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 5 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 5 · Friday</span><span class="run">Audio about 2:00</span></div>
+  <h2>How's Your Heart?</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>Thursday night, right before the ground rules, there was one line: <em>Your heart matters. It's central to everything God is doing in you.</em></p>
+    <p>Then the counsel. Phone off. No politics. No sports. Drop the religious act. Just be you.</p>
+    <p>Those weren't really rules. They were a way to protect your heart for three days so you could actually hear it.</p>
+    <p>You're home now, and everything is fighting for your heart again. The phone. The news. The scores. The pressure to look like you've got it together. None of it is evil. It just keeps you busy enough that you never stop and check.</p>
+    <p>The heart shows up in Scripture something like 800 times. Don't lose heart. Keep heart. That's not about feelings. It's about the center of you.</p>
+    <p>The first fight is for your own heart. And you can't fight for something you never check on.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">How's your heart?</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>Somebody asks me, how you doing? And I say, good. Or fine.</p>
+      <p>Most of the time that's not the whole truth. It's not a lie, exactly. Just not the whole thing.</p>
+      <p>Here's why I do it. If I open up what's really going on in my heart, I might get rejected. Or worse, the guy blows right past it. Oh, okay. Anyway. And I don't want to be ignored. What I want, honestly, is to be seen.</p>
+      <p>So I say good. They say great. I tell them the good stuff. And I skip everything I'm actually struggling with.</p>
+      <p>Sound familiar?</p>
+      <p>That's the Instagram life. Post the good pictures, keep the rest off camera. And after a while you get so good at it, you stop checking on your heart at all. Not even with yourself.</p>
+      <p>So my band of brothers does something every week. We don't ask, how are you doing? We ask, how's your heart?</p>
+      <p>It's a different question. It's a lot harder to say "fine" to.</p>
+      <p class="beat">That's what I want you to carry today. How's your heart?</p>
+      <p>Ask yourself. Hand on your chest if you have to. You don't need a big answer. Tired is an answer. Angry is an answer. "I don't know" is an answer.</p>
+      <p>And then let Dad ask you. Because He's not going to blow past it. He's not going to ignore you. He wants the real answer, not the good-or-fine version.</p>
+      <p>How's your heart? Tell Him.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Let Him ask you: <em>How's your heart?</em> Answer honestly. Then listen for what He says back.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>One piece of camp counsel you're keeping.</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 6 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 6 · Saturday</span><span class="run">Audio about 2:15</span></div>
+  <h2>Do You Want to Be Healed?</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>The last thing you saw Thursday night was a man lying by a pool.</p>
+    <p>He'd been there for years, waiting for a chance that never came. And Jesus walked up and asked him a question that sounds almost rude: <em>Do you want to be healed?</em></p>
+    <p>The man answered with everything around him. Nobody helps me. Somebody always gets there first.</p>
+    <p>And Jesus said, <em>Look at me. That's not what I asked.</em></p>
+    <p>He wasn't asking about who was in the way. He was asking about the man.</p>
+    <p>He didn't force anything. He invited. He still does.</p>
+    <p>It's been a week. Picture Him sitting down next to you again, wherever you are right now. Same question.</p>
+    <p>You don't have to have the right answer. You don't have to be finished. You don't even have to be sure what you'd want healed. You just have to let Him ask.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Look at me.</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I'll be honest with you. The first time I really heard that story, I thought Jesus was kind of a jerk.</p>
+      <p>Think about it. This man's been lying there for years. Years. And Jesus walks up and says, do you want to be healed? If somebody said that to me, I'd want to punch him. Of course I want to be healed. What kind of question is that?</p>
+      <p>But the more I sat with it, the more I saw what I'd missed. There's a tenderness in that conversation. Jesus wasn't mocking him. He was looking right at him. And he was asking about a lot more than his legs.</p>
+      <p>Do you want something more? Do you want to stand up? Do you want your life back?</p>
+      <p>And look at how the man answers. He talks about everybody else. Nobody helps me. Somebody always cuts in front. Every reason is outside of him.</p>
+      <p>That's what we do. Somebody asks about our heart, and we talk about our circumstances. Our boss. Our marriage. Our past. All true. All real. But not what He asked.</p>
+      <p class="beat">Look at me. That's not what I asked.</p>
+      <p>That's what I want you to hang on to today. Look at me.</p>
+      <p>Because Jesus isn't going to force His way into your life. He values you too much for that. He asks. He invites. And then He waits for you to look up.</p>
+      <p>So today, take a little longer. Five minutes. Picture Him sitting next to you. Let Him ask you, do you want to be healed? And when you start answering with everything around you, hear Him say it. Look at me.</p>
+      <p>Then answer Him. Not the right answer. Your answer.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">5 minutes</span></div>
+    <div class="box"><p>Picture Jesus sitting next to you. Let Him ask: <em>Do you want to be healed?</em> Answer Him honestly, then listen. Write down what comes. If what comes is quiet, that's okay too.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>One line about your first week home.</p></div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Day 7 ═══ -->
+<section class="day">
+  <div class="dayhead"><span class="kicker">Day 7 · Sunday</span><span class="run">Audio about 1:50</span></div>
+  <h2>One Week Home</h2>
+
+  <div class="section">
+    <div class="label">Reading</div>
+    <p>You made it a week.</p>
+    <p>Maybe you did every day. Maybe you missed a few. Maybe the weekend already feels far away. All of that is normal.</p>
+    <p>Here's what isn't true: that if the feeling faded, it wasn't real. Feelings fade. What God did doesn't.</p>
+    <p>Today, rest. Nothing new. Your notes from this week are right below. Read back through what you wrote. You might be surprised.</p>
+    <p>Then think of one man from your weekend. A guy from your table, your fire, your group. Send him a text. It doesn't have to be deep. <em>Hey, thinking about you. How's your heart?</em></p>
+    <p>Tomorrow starts something new. That's all I'll say about it.</p>
+    <p>You showed up this week. That counts.</p>
+  </div>
+
+  <div class="carry"><div class="label">Carry this</div><div class="handle">Faded isn't fake.</div></div>
+
+  <div class="section">
+    <div class="label">Audio script <span class="meta">John</span></div>
+    <div class="audio">
+      <p>I almost didn't go to my first boot camp.</p>
+      <p>My buddy Darrell invited me. And I fought it. I fought it and fought it. Came up with every reason I could think of. Too busy. Not my thing. Maybe next year.</p>
+      <p>Darrell wouldn't take no for an answer. He kept coming back. Lovingly, as a friend. And honestly, a little forcefully too. He just kept pushing, because he wanted me to find the freedom he'd found.</p>
+      <p>I went. And it changed my life.</p>
+      <p>Here's what I want you to see. What got me there wasn't my discipline. It was the love of a friend who wouldn't let go. And what's kept me in this for seventeen years isn't my discipline either. It's that same kind of love. My band of brothers. And a Father who never stopped waiting for me.</p>
+      <p class="beat">So if the feeling faded this week, hear me. Faded isn't fake.</p>
+      <p>Feelings come and go. What God did in you this weekend is still in you.</p>
+      <p>You don't have to white-knuckle this. You weren't built to.</p>
+      <p>So today, rest. And do one thing. Be somebody's Darrell. Text one guy from your weekend. Just say, hey, how's your heart?</p>
+      <p>You might be the reason he's still in this a year from now.</p>
+      <p>Faded isn't fake. Rest well. I'll see you tomorrow.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">With Dad <span class="meta">3 minutes</span></div>
+    <div class="box"><p>Ask Him: <em>What did You do this week that I missed?</em></p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Share</div>
+    <div class="box"><p>Text one guy from your weekend, then post that you did.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="label">Your week <span class="meta">In the app: his own notes, filled in</span></div>
+    <div class="mock">
+      <div class="mockrow">
+        <div class="mockday">Day 1 · Back in the Matrix</div>
+        <div class="mockctx"><span>Carry this:</span> Dad gets the first two minutes.</div>
+        <div class="mockctx"><span>With Dad:</span> Father, what don't You want me to lose from this weekend?</div>
+        <div class="mocknote">His note from Day 1 appears here, exactly as he wrote it.</div>
+      </div>
+      <div class="mockrow">
+        <div class="mockday">Day 4 · Bored to Death</div>
+        <div class="mockctx"><span>Carry this:</span> What's your trumpet?</div>
+        <div class="mockctx"><span>With Dad:</span> Father, what have I let go quiet? What do You want to wake back up?</div>
+        <div class="mocknote">His note from Day 4 appears here.</div>
+      </div>
+      <p class="mockcap">Only days he wrote something show up. If he wrote nothing all week: "No notes this week. That's okay. Tomorrow's a good day to start." Every Day 7 works this way, not just Week 1. Only he can see this.</p>
+    </div>
+  </div>
+
+  <div class="notes"><div class="label">Your notes on Day 7</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+<!-- ═══ Weekly email ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">Sunday evening, after Day 7</div>
+  <h2>The Week 1 email</h2>
+  <p>Goes out automatically to each man on his Day 7 evening, so nobody feels like he missed anything. The seven day lines are the only new writing; the rest is the template. His notes are never in the email. It sends him back to the app for those.</p>
+  <div class="email">
+    <div class="hdr"><b>From:</b> The Journey &lt;jpulley@manaliveexpedition.com&gt;<br><b>Subject:</b> Week one is in the books. You're caught up.</div>
+    <p>Mike,</p>
+    <p>One week home. Maybe you did every day. Maybe you missed a few. Either way, you're not behind, and there's nothing to apologize for. Here's the heart of the week, in case any of it slipped by.</p>
+    <p><b>Day 1, Back in the Matrix.</b> Camp turned the noise off long enough for you to hear. Now you get to choose the quiet. Dad gets the first two minutes. <span class="link">Reread Day 1 ›</span></p>
+    <p><b>Day 2, Something Stirred.</b> What stirred Thursday night wasn't the movies. It was your heart, and it's alive. Smoke means fire. <span class="link">Reread Day 2 ›</span></p>
+    <p><b>Day 3, Whip or Well.</b> Jesus was strong with a whip and strong at a well. You find out which one a moment needs by asking Him. <span class="link">Reread Day 3 ›</span></p>
+    <p><b>Day 4, Bored to Death.</b> The desires God put in you don't die. They get put in a case. What's your trumpet? <span class="link">Reread Day 4 ›</span></p>
+    <p><b>Day 5, How's Your Heart?</b> "Good" and "fine" aren't the real answer. Dad wants the real one. <span class="link">Reread Day 5 ›</span></p>
+    <p><b>Day 6, Do You Want to Be Healed?</b> Jesus asks about you, not about who's in your way. Look at me. <span class="link">Reread Day 6 ›</span></p>
+    <p><b>Day 7, One Week Home.</b> Feelings fade. What God did doesn't. Faded isn't fake. <span class="link">Reread Day 7 ›</span></p>
+    <p>Your notes from this week are waiting for you on Day 7. Only you can see them.</p>
+    <p><span class="btn">Read your week ›</span></p>
+    <p>That's the week. If you just read this, you're caught up. Tomorrow we start fresh.</p>
+    <p>Strength and Honor,<br>Pulley</p>
+  </div>
+  <p style="font-size:9.5pt;color:var(--ink-soft);margin-top:0.12in">The daily-reminder nudge that's in today's email can stay at the bottom. Left out here to keep the page readable.</p>
+</section>
+
+<!-- ═══ Open decisions ═══ -->
+<section class="page">
+  <div class="kicker" style="font-size:10pt">For your review</div>
+  <h2>Decisions made in this draft</h2>
+  <ul class="tight">
+    <li><strong>Day 6 uses the pool scene</strong> ("Do you want to be healed?"), the way you ran it in 2026. The spec lists three different questions (Why are you here? What are you looking for? What do you want from Me?). Confirm which the camps use now.</li>
+    <li><strong>"A passion for beauty"</strong> instead of "a beauty to rescue," so Week 1 doesn't contradict the Beauty session ("Jesus is her rescuer").</li>
+    <li><strong>No movie clips</strong> in the app. Readings name the camp moment instead.</li>
+    <li><strong>Day 2's "double life"</strong> stays one line. The full story waits for a later week.</li>
+    <li><strong>Every Day 7 shows his notes from the week</strong> with the day, the "Carry this" line, and the With Dad question. Only days he wrote show up.</li>
+    <li><strong>A My Notes tab</strong> holds every note he's written, grouped by week with the same context. He can go back and add to any day's note. Day 7 shows just that week and links to the full list.</li>
+    <li><strong>Notes never go in the email.</strong> The email links back to Day 7 instead, so the "only you can see them" promise holds.</li>
+  </ul>
+  <h3>Stories held for later weeks</h3>
+  <ul class="tight">
+    <li>Your brothers meeting your confession with gentleness instead of rules · Band of Brothers week</li>
+    <li>"I've been waiting for you to turn" · New Name week</li>
+    <li>Good Will Hunting, "It's not your fault" · Wound week</li>
+    <li>The full double-life story · Poser or Beauty week</li>
+  </ul>
+  <div class="notes"><div class="label">Overall notes on Week 1</div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+</section>
+
+</body>
+</html>
