@@ -12,9 +12,13 @@
 // It only WRITES SQL. Apply it with scripts/db-exec.mjs when it's time to go live.
 import { readFileSync } from 'node:fs'
 
-const files = process.argv.slice(2)
+// --only=1,2 limits the output to those days (e.g. to go live a day at a time
+// as the recordings come in).
+const onlyArg = process.argv.find((a) => a.startsWith('--only='))
+const only = onlyArg ? new Set(onlyArg.slice('--only='.length).split(',').map(Number)) : null
+const files = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 if (!files.length) {
-  console.error('Usage: node scripts/build-week-sql.mjs <week-html> [...] > out.sql')
+  console.error('Usage: node scripts/build-week-sql.mjs <week-html> [...] [--only=1,2] > out.sql')
   process.exit(1)
 }
 
@@ -59,6 +63,7 @@ for (const file of files) {
     const withDad = paragraphs(withDadBlock).join(' ')
     const share = paragraphs(section(d, 'Share')).join(' ')
     if (!sortIndex || !title || !reading) throw new Error(`${file}: could not parse a day (got sortIndex=${sortIndex}, title=${title})`)
+    if (only && !only.has(sortIndex)) continue
     days.push({ sortIndex, title, reading, carry, withDad, minutes, share })
   }
 }
