@@ -196,27 +196,23 @@ export function PromptCard({ prompt }: { prompt: string }) {
 }
 
 // ---------------------------------------------------------------- Share
-function shareText(entry: EntryRow, thought: string) {
-  const where = entry.week != null && entry.day != null ? `Week ${entry.week}, Day ${entry.day}` : `Day ${entry.sort_index}`
-  const head = `The Journey · ${where} · ${entry.title ?? ''}`.trim()
-  return thought.trim() ? `${head}\n\n${thought.trim()}` : head
-}
-
 // Facebook won't let an app write the post, so: copy his words, open the group,
 // he pastes. Both start inside the tap so the browser allows them.
 // Shown the same in the admin library as in a man's day, so John previews
 // exactly what the men get.
 export function ShareCard({ entry }: { entry: EntryRow }) {
   const [thought, setThought] = useState('')
-  const [status, setStatus] = useState<'idle' | 'copied' | 'manual'>('idle')
+  const [status, setStatus] = useState<'idle' | 'copied' | 'opened' | 'manual'>('idle')
   const prompt = entry.share_prompt ?? ''
 
+  // Copy only his own words; a man posts his message, not an app label.
   function share() {
-    const text = shareText(entry, thought)
-    const copy = navigator.clipboard?.writeText(text)
+    const text = thought.trim()
+    const copy = text ? navigator.clipboard?.writeText(text) : undefined
     window.open(ALUMNI_GROUP_URL, '_blank', 'noopener,noreferrer')
     logEvent('shared_to_group', entry.id)
-    if (copy) copy.then(() => setStatus('copied'), () => setStatus('manual'))
+    if (!text) setStatus('opened')
+    else if (copy) copy.then(() => setStatus('copied'), () => setStatus('manual'))
     else setStatus('manual')
   }
 
@@ -228,12 +224,13 @@ export function ShareCard({ entry }: { entry: EntryRow }) {
         onChange={(e) => { setThought(e.target.value); setStatus('idle') }}
         placeholder="Your thought (optional)" />
       <button type="button" className="share-btn" onClick={share}>Share in the group</button>
-      {status === 'idle' && <p className="muted share-note">We'll copy your words and open the alumni group. Paste them into a new post.</p>}
+      {status === 'idle' && <p className="muted share-note">We'll copy what you wrote and open the alumni group. Paste it into a new post.</p>}
       {status === 'copied' && <p className="muted share-note">Copied. Paste it into a new post in the group.</p>}
+      {status === 'opened' && <p className="muted share-note">The group is open. Write your post there.</p>}
       {status === 'manual' && (
         <div className="share-manual">
           <p className="muted share-note">Copy this, then paste it into a new post in the group:</p>
-          <textarea className="notes-input" rows={4} readOnly value={shareText(entry, thought)}
+          <textarea className="notes-input" rows={4} readOnly value={thought.trim()}
             onFocus={(e) => e.currentTarget.select()} />
         </div>
       )}
