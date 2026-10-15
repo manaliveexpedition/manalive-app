@@ -105,8 +105,8 @@ function playSoftTone(ctx: AudioContext) {
 
 // The center of the day: one question for the Father, then quiet. The timer is
 // optional and calm: a countdown, then a soft tone and a buzz. He can ignore it.
-export function WithDadCard({ entryId, prompt, minutes, interactive }: {
-  entryId: string; prompt: string; minutes: number | null; interactive: boolean
+export function WithDadCard({ entryId, prompt, minutes }: {
+  entryId: string; prompt: string; minutes: number | null
 }) {
   const mins = minutes && minutes > 0 ? minutes : DEFAULT_WITH_DAD_MINUTES
   const [endAt, setEndAt] = useState<number | null>(null)
@@ -163,7 +163,7 @@ export function WithDadCard({ entryId, prompt, minutes, interactive }: {
     <section className="card with-dad">
       <p className="eyebrow">With Dad · {mins} minute{mins === 1 ? '' : 's'}</p>
       <p className="with-dad-prompt">{richText(prompt)}</p>
-      {interactive && (
+      {(
         endAt !== null ? (
           <div className="timer running" role="timer" aria-live="off">
             <span className="timer-clock">{mmss(remaining)}</span>
@@ -204,7 +204,9 @@ function shareText(entry: EntryRow, thought: string) {
 
 // Facebook won't let an app write the post, so: copy his words, open the group,
 // he pastes. Both start inside the tap so the browser allows them.
-export function ShareCard({ entry, interactive }: { entry: EntryRow; interactive: boolean }) {
+// Shown the same in the admin library as in a man's day, so John previews
+// exactly what the men get.
+export function ShareCard({ entry }: { entry: EntryRow }) {
   const [thought, setThought] = useState('')
   const [status, setStatus] = useState<'idle' | 'copied' | 'manual'>('idle')
   const prompt = entry.share_prompt ?? ''
@@ -222,23 +224,24 @@ export function ShareCard({ entry, interactive }: { entry: EntryRow; interactive
     <section className="card share">
       <p className="eyebrow">Share with the guys</p>
       <p className="share-prompt">{richText(prompt)}</p>
-      {interactive && (
-        <>
-          <textarea className="notes-input" rows={3} value={thought}
-            onChange={(e) => { setThought(e.target.value); setStatus('idle') }}
-            placeholder="Your thought (optional)" />
-          <button type="button" className="share-btn" onClick={share}>Share in the group</button>
-          {status === 'idle' && <p className="muted share-note">We'll copy your words and open the alumni group. Paste them into a new post.</p>}
-          {status === 'copied' && <p className="muted share-note">Copied. Paste it into a new post in the group.</p>}
-          {status === 'manual' && (
-            <div className="share-manual">
-              <p className="muted share-note">Copy this, then paste it into a new post in the group:</p>
-              <textarea className="notes-input" rows={4} readOnly value={shareText(entry, thought)}
-                onFocus={(e) => e.currentTarget.select()} />
-            </div>
-          )}
-        </>
+      <textarea className="notes-input" rows={3} value={thought}
+        onChange={(e) => { setThought(e.target.value); setStatus('idle') }}
+        placeholder="Your thought (optional)" />
+      <button type="button" className="share-btn" onClick={share}>Share in the group</button>
+      {status === 'idle' && <p className="muted share-note">We'll copy your words and open the alumni group. Paste them into a new post.</p>}
+      {status === 'copied' && <p className="muted share-note">Copied. Paste it into a new post in the group.</p>}
+      {status === 'manual' && (
+        <div className="share-manual">
+          <p className="muted share-note">Copy this, then paste it into a new post in the group:</p>
+          <textarea className="notes-input" rows={4} readOnly value={shareText(entry, thought)}
+            onFocus={(e) => e.currentTarget.select()} />
+        </div>
       )}
+      {/* Joining or just looking doesn't need a post. */}
+      <a className="open-group" href={ALUMNI_GROUP_URL} target="_blank" rel="noopener noreferrer"
+         onClick={() => logEvent('clicked_link', entry.id)}>
+        Open the alumni group ›
+      </a>
     </section>
   )
 }
@@ -348,7 +351,8 @@ export function NotesCard({ entryId }: { entryId: string }) {
 
 // ------------------------------------------------------------ the whole day
 // Reading, Carry this, Audio, With Dad, Share, (Day 7: your week), Notes.
-// interactive = the man's own view; false = the admin library's read-only view.
+// interactive = the man's own view; false = the admin library, which shows the
+// day exactly as men see it (timer, share) minus the private notes.
 // Every rebuild field is optional, so the original 49 days still render.
 export function DayContent({ entry, interactive, top }: { entry: EntryRow; interactive: boolean; top?: ReactNode }) {
   return (
@@ -365,12 +369,12 @@ export function DayContent({ entry, interactive, top }: { entry: EntryRow; inter
       </article>
 
       {entry.with_dad_prompt ? (
-        <WithDadCard entryId={entry.id} prompt={entry.with_dad_prompt} minutes={entry.with_dad_minutes} interactive={interactive} />
+        <WithDadCard entryId={entry.id} prompt={entry.with_dad_prompt} minutes={entry.with_dad_minutes} />
       ) : entry.reflection_prompt ? (
         <PromptCard prompt={entry.reflection_prompt} />
       ) : null}
 
-      {entry.share_prompt && <ShareCard entry={entry} interactive={interactive} />}
+      {entry.share_prompt && <ShareCard entry={entry} />}
 
       {interactive && entry.day === 7 && <WeekNotes entry={entry} />}
 

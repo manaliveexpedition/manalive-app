@@ -37,3 +37,6 @@ audio-source/*
 *.m4a
 *.aac
 Temp Day Recording Folder/
+
+# Raw voice recordings (large WAVs; converted MP3s go to audio-source/)
+Journey v2 Recordings/
