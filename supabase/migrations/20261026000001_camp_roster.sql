@@ -2,9 +2,13 @@
 --
 -- After a camp, John loads the men who attended (name + registration email).
 -- Only those emails can create a NEW account, by Google or by email code;
--- existing accounts are untouched. Each roster row carries the camp's Day 1
--- (the Monday after camp), so a man who signs up Wednesday still lands on the
--- right day, with the days he missed waiting under "View previous days".
+-- existing accounts are untouched.
+--
+-- Start date: the Monday of the week he signs up (Central time), never earlier
+-- than the camp's Monday (roster start_date). The weeks run Monday to Sunday,
+-- so a man who signs up Wednesday lands on Day 3 with Days 1-2 waiting under
+-- "View previous days", and one who signs up the following Tuesday starts that
+-- week on Day 2 instead of being a week behind.
 --
 -- Not readable by members: no policies, no grants to anon/authenticated. Only
 -- the service role (loader script) and the SECURITY DEFINER trigger touch it.
@@ -43,6 +47,9 @@ declare
   last_nm  text := nullif(btrim(coalesce(meta->>'family_name', meta->>'last_name')), '');
   em       text := lower(btrim(coalesce(new.email, '')));
   r        public.camp_roster%rowtype;
+  today_ct date := (now() at time zone 'America/Chicago')::date;
+  -- Monday of this week (isodow: Mon=1 .. Sun=7).
+  this_monday date := today_ct - (extract(isodow from today_ct)::int - 1);
 begin
   select * into r from public.camp_roster where email = em;
 
@@ -57,7 +64,10 @@ begin
     coalesce(nullif(btrim(r.name), ''), first_nm),
     coalesce(nullif(btrim(r.last_name), ''), last_nm),
     r.cohort,
-    coalesce(r.start_date, public.next_monday((now() at time zone 'America/Chicago')::date))
+    case when r.email is not null
+      then greatest(r.start_date, this_monday)
+      else public.next_monday(today_ct)
+    end
   );
   return new;
 end;

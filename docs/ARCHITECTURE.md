@@ -77,8 +77,9 @@ All app tables live in `public`. Schema history is in `supabase/migrations/`
   it, verify a fresh signup still gets the upcoming Monday.
 - **Camp roster gate** (Oct 2026, `20261026000001_camp_roster.sql`): a NEW account
   is only created if its email is in `camp_roster` (loaded per camp with
-  `scripts/load-roster.mjs`). The roster row sets the man's `start_date` (the
-  camp's Day 1) and `cohort`, so a late signup still lands on the right day;
+  `scripts/load-roster.mjs`). His `start_date` is the Monday of the week he signs
+  up (Central), never earlier than the camp's Monday on the roster, so weeks stay
+  Monday-to-Sunday and a late signup is at most a few days in;
   Today shows a "you joined a few days in" note until he opens the days he
   missed. Refused signups surface as "Database error saving new user", which
   `lib/authError.ts` turns into "use the email you registered with". Existing
