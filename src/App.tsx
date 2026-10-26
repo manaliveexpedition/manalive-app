@@ -10,7 +10,7 @@ import { MyNotes } from './screens/MyNotes'
 import { fetchMyProfile, saveName, type Profile } from './lib/profile'
 import { captureDeepLink, consumeDeepLink, isSettingsLink } from './lib/deeplink'
 import { NAVIGATE_EVENT, type NavTarget } from './lib/nav'
-import { consumeAuthRedirectError, friendlyAuthError } from './lib/authError'
+import { consumeAuthRedirectError, friendlyAuthError, NOT_ON_ROSTER_MESSAGE, SUPPORT_EMAIL, SUPPORT_MAILTO } from './lib/authError'
 import './App.css'
 
 function App() {
@@ -277,7 +277,18 @@ function SignIn({ initialError }: { initialError?: string | null }) {
         </form>
       )}
 
-      {error && <p className="error">{error}</p>}
+      {error && (
+        <p className="error">
+          {error === NOT_ON_ROSTER_MESSAGE ? (
+            <>
+              We couldn't find that email on a camp roster. Sign in with the email you registered with for camp.
+              If that still doesn't work, email Pulley at{' '}
+              <a className="error-link" href={SUPPORT_MAILTO}>{SUPPORT_EMAIL}</a>
+              {' '}and he'll get you in.
+            </>
+          ) : error}
+        </p>
+      )}
     </div>
   )
 }

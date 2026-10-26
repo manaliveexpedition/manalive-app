@@ -5,6 +5,9 @@
 // "Database error saving new user", from the email-code request or, for
 // Google, as an error on the redirect back to the app.
 
+export const SUPPORT_EMAIL = 'jpulley@manaliveexpedition.com'
+export const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Journey sign-in help')}`
+
 export const NOT_ON_ROSTER_MESSAGE =
   "We couldn't find that email on a camp roster. Sign in with the email you registered with for camp. " +
   'If that still doesn\'t work, email Pulley at jpulley@manaliveexpedition.com and he\'ll get you in.'

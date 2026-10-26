@@ -189,6 +189,15 @@ button.link:hover:not(:disabled) {
   margin: 0;
 }
 
+/* Tap-to-email in the sign-in help message. */
+.error-link {
+  color: var(--cream);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
 /* --------------------------------------------------- signed-in app shell */
 .screen:has(.shell) {
   align-items: flex-start;
