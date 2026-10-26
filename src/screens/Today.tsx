@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { fetchMyProfile, type Profile } from '../lib/profile'
-import { loadToday, loadReachedEntries, loadMissedDays, formatStartDate, type TodayState } from '../lib/today'
+import { loadToday, loadReachedEntries, loadMissedDays, formatStartDate, localDateISO, type TodayState } from '../lib/today'
 import { logEvent } from '../lib/events'
 import { clearBadge } from '../lib/push'
 import { consumeDeepLink, isHistoryLink, dayFromLink } from '../lib/deeplink'
@@ -14,6 +14,25 @@ function missedLabel(days: number[]): string {
   const contiguous = days.every((d, i) => i === 0 || d === days[i - 1] + 1)
   if (!contiguous) return `${days.length} earlier days`
   return days.length === 2 ? `Days ${days[0]} and ${days[1]}` : `Days ${days[0]} to ${days.at(-1)}`
+}
+
+// Before Day 1. Say exactly when: "tomorrow" beats a date, and a date beats "soon".
+function WaitingToStart({ name, startDate }: { name: string | null; startDate: string | null }) {
+  const when = formatStartDate(startDate)
+  const today = new Date()
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1)
+  const isTomorrow = startDate === localDateISO(tomorrow)
+  const who = name ? `${name}, your` : 'Your'
+  return (
+    <section className="card calm">
+      <h1>{isTomorrow ? 'Your journey starts tomorrow' : when ? `Your journey starts ${when}` : 'Your journey starts soon'}</h1>
+      <p className="muted">
+        {isTomorrow
+          ? `${who} first daily will be here tomorrow morning. There's nothing you need to do tonight.`
+          : `${who} first daily will be here ${when ? `on ${when}` : 'when it begins'}. There's nothing you need to do yet.`}
+      </p>
+    </section>
+  )
 }
 
 export function Today() {
@@ -110,15 +129,7 @@ export function Today() {
       {!error && !state && <p className="muted">Loading today…</p>}
 
       {!error && state?.kind === 'not_started' && (
-        <section className="card calm">
-          <h1>Your journey starts soon</h1>
-          <p className="muted">
-            {profile?.name ? `${profile.name}, your` : 'Your'} first daily will be
-            here {formatStartDate(profile?.start_date ?? null)
-              ? `on ${formatStartDate(profile?.start_date ?? null)}`
-              : 'when it begins'}. There's nothing you need to do yet.
-          </p>
-        </section>
+        <WaitingToStart name={profile?.name ?? null} startDate={profile?.start_date ?? null} />
       )}
 
       {!error && state?.kind === 'caught_up' && (
