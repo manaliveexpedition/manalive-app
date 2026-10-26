@@ -10,7 +10,7 @@ export const NOT_ON_ROSTER_MESSAGE =
   'If that still doesn\'t work, email Pulley at jpulley@manaliveexpedition.com and he\'ll get you in.'
 
 export function friendlyAuthError(message: string): string {
-  return /database error saving new user|not_on_roster/i.test(message) ? NOT_ON_ROSTER_MESSAGE : message
+  return /database error (saving|creating) new user|not_on_roster/i.test(message) ? NOT_ON_ROSTER_MESSAGE : message
 }
 
 // After a failed Google sign-in, Supabase redirects back with the error in the
