@@ -12,6 +12,7 @@ work only, never expose them to the browser.
 | Script | Does | Run |
 |--------|------|-----|
 | `db-exec.mjs` | Runs a `.sql` file against the remote DB via the session pooler. The safe way to apply data changes and to validate `seed.sql` (wrap it in `begin; ... rollback;` first). | `node scripts/db-exec.mjs path/to.sql` |
+| `load-roster.mjs` | Loads a camp's men (any list with emails) into `camp_roster` so only they can sign up, starting on the camp's Day 1. `--dry` previews. | `node scripts/load-roster.mjs list.csv --start=2026-10-26 --cohort="TX Oct 2026"` |
 | `check-content.mjs` | Audits the `entries` table (which days exist, which fields are filled). | `node scripts/check-content.mjs` |
 | `build-week-sql.mjs` | Turns reviewed week drafts (`docs/content-rebuild/week-NN-*.html`) into the SQL that loads them into `entries`. Writes SQL only; apply with `db-exec`. See `docs/content-rebuild/README.md`. | `node scripts/build-week-sql.mjs <week.html> ... > out.sql` |
 

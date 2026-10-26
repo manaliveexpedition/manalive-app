@@ -10,11 +10,14 @@ import { MyNotes } from './screens/MyNotes'
 import { fetchMyProfile, saveName, type Profile } from './lib/profile'
 import { captureDeepLink, consumeDeepLink, isSettingsLink } from './lib/deeplink'
 import { NAVIGATE_EVENT, type NavTarget } from './lib/nav'
+import { consumeAuthRedirectError, friendlyAuthError } from './lib/authError'
 import './App.css'
 
 function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  // A Google sign-in the roster gate turned away comes back with an error in the URL.
+  const [redirectError] = useState(consumeAuthRedirectError)
 
   // Stash any email deep-link target NOW, before a Google sign-in redirect can
   // drop the #hash; the Shell/Today consume it after login.
@@ -43,7 +46,7 @@ function App() {
 
   return (
     <main className="screen">
-      {session ? <Shell /> : <SignIn />}
+      {session ? <Shell /> : <SignIn initialError={redirectError} />}
     </main>
   )
 }
@@ -143,12 +146,12 @@ function Shell() {
   )
 }
 
-function SignIn() {
+function SignIn({ initialError }: { initialError?: string | null }) {
   const [step, setStep] = useState<'request' | 'verify'>('request')
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(initialError ?? '')
   const [logoFailed, setLogoFailed] = useState(false)
 
   async function continueWithGoogle() {
@@ -160,7 +163,7 @@ function SignIn() {
     })
     // On success the browser redirects to Google; only reaches here on error.
     if (error) {
-      setError(error.message)
+      setError(friendlyAuthError(error.message))
       setBusy(false)
     }
   }
@@ -175,7 +178,7 @@ function SignIn() {
     })
     setBusy(false)
     if (error) {
-      setError(error.message)
+      setError(friendlyAuthError(error.message))
     } else {
       setStep('verify')
     }

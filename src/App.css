@@ -1067,6 +1067,22 @@ table.men td.nowrap {
 }
 
 /* ------------------------------------------- rebuilt daily shape (Oct 2026) */
+/* Late joiner: the days he missed are waiting. */
+.card.catch-up {
+  margin-bottom: 1.25rem;
+  border-left: 3px solid var(--oxblood);
+}
+
+.catch-up-text {
+  color: var(--cream);
+  line-height: 1.55;
+  margin: 0 0 0.9rem;
+}
+
+.catch-up button {
+  width: 100%;
+}
+
 /* Carry this: the one line he takes into his day. */
 .carry {
   margin: 1.25rem 0 0.25rem;

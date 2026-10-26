@@ -114,6 +114,30 @@ export async function loadReachedEntries(startDate: string | null, now: Date = n
   return (data as Entry[]) ?? []
 }
 
+// For a man who signed up AFTER his camp's Day 1 (the roster gives every man
+// from a camp the same start date): the earlier days he hasn't opened yet, as
+// sort_indexes in order. Empty for anyone who joined on time, or once he has
+// opened them all, so the "you joined a few days in" note disappears.
+export async function loadMissedDays(startDate: string | null, currentSortIndex: number): Promise<number[]> {
+  if (!startDate || currentSortIndex <= 1) return []
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
+  if (!user?.created_at) return []
+  if (localDateISO(new Date(user.created_at)) <= startDate) return []
+
+  const [{ data: earlier, error: e1 }, { data: opens, error: e2 }] = await Promise.all([
+    supabase.from('entries').select('id, sort_index').gte('sort_index', 1).lt('sort_index', currentSortIndex),
+    // His own opens only (RLS returns everyone's to an admin).
+    supabase.from('events').select('entry_id').eq('user_id', user.id).eq('event_type', 'opened_entry'),
+  ])
+  if (e1 || e2) return []
+  const opened = new Set((opens ?? []).map((o) => o.entry_id))
+  return (earlier ?? [])
+    .filter((e) => !opened.has(e.id))
+    .map((e) => e.sort_index as number)
+    .sort((a, b) => a - b)
+}
+
 // EVERY entry (no start_date gate), in journey order — for the admin-only
 // library. RLS already restricts the Admin tab to admins; entries are readable
 // by any signed-in member, so the gate is at the UI level.
