@@ -8,7 +8,8 @@
 -- than the camp's Monday (roster start_date). The weeks run Monday to Sunday,
 -- so a man who signs up Wednesday lands on Day 3 with Days 1-2 waiting under
 -- "View previous days", and one who signs up the following Tuesday starts that
--- week on Day 2 instead of being a week behind.
+-- week on Day 2 instead of being a week behind. A Sunday signup starts the
+-- next day (Monday) as Day 1.
 --
 -- Not readable by members: no policies, no grants to anon/authenticated. Only
 -- the service role (loader script) and the SECURITY DEFINER trigger touch it.
@@ -48,8 +49,11 @@ declare
   em       text := lower(btrim(coalesce(new.email, '')));
   r        public.camp_roster%rowtype;
   today_ct date := (now() at time zone 'America/Chicago')::date;
-  -- Monday of this week (isodow: Mon=1 .. Sun=7).
-  this_monday date := today_ct - (extract(isodow from today_ct)::int - 1);
+  -- Monday of this week (isodow: Mon=1 .. Sun=7). A Sunday signup starts fresh
+  -- the next morning instead of landing on Day 7 with six days missed.
+  this_monday date := case when extract(isodow from today_ct)::int = 7
+                        then today_ct + 1
+                        else today_ct - (extract(isodow from today_ct)::int - 1) end;
 begin
   select * into r from public.camp_roster where email = em;
 
